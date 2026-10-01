@@ -26,7 +26,7 @@ El acceso requiere autenticarse con una cuenta `@uabc.edu.mx` mediante Google. T
 
 ### Prevención de duplicados
 
-Al momento de registrar una incidencia, el sistema muestra reportes existentes similares (mismo campus, categoría y edificio, dentro de una ventana de tiempo reciente) para que el reportante confirme si es el mismo problema en vez de crear uno nuevo.
+Al momento de registrar una incidencia, el sistema muestra reportes abiertos similares (mismo campus, categoría y edificio) para que el reportante confirme si es el mismo problema en vez de crear uno nuevo.
 
 ### Mapa de incidencias por campus
 
@@ -42,7 +42,7 @@ Cada reporte recibe una prioridad calculada automáticamente a partir de varios 
 
 ### Notificaciones por correo
 
-Cuando se le asigna un reporte a un encargado, este recibe un correo con el enlace directo al reporte; y cuando el reporte se marca como resuelto, quien lo reportó recibe un correo confirmando que el problema fue solucionado.
+Cuando se le asigna un reporte a un encargado, este recibe un correo con el enlace directo al reporte; cuando el reporte se marca como resuelto, quien lo reportó recibe un correo confirmando que el problema fue solucionado; y cuando se acumulan reportes sin asignar o sin resolver, el personal responsable recibe una alerta.
 
 ---
 

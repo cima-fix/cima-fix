@@ -69,15 +69,15 @@ Cuando se le asigna un reporte a un encargado, este recibe un correo con el enla
 
 ## Equipo de desarrollo
 
-| Nombre                                                           |
-| ---------------------------------------------------------------- |
-| [Alcantar Martinez, Emir Alexander](https://github.com/ALXND3R)  |
-| [Zazueta Medrano, Aidan](https://github.com/AidanZZMD)           |
-| [Montano Valencia, Mike Armando](https://github.com/MikeArmando) |
-| [Moreno Calderon, Troy Leonardo](https://github.com/Troy2404)    |
-| [Perez Aguirre Mextli, Citlali](https://github.com/mxcitali)     |
-| [Jaime Mascareño, Carlos Alberto](https://github.com/TitaniumCJ) |
-| [Meza Espinoza, Kevin Andre](https://github.com/kmeza1402)       |
+| Nombre                                                           | Rol / área                                   |
+| ---------------------------------------------------------------- | -------------------------------------------- |
+| [Alcantar Martinez, Emir Alexander](https://github.com/ALXND3R)  | Desarrollador Backend                        |
+| [Zazueta Medrano, Aidan](https://github.com/AidanZZMD)           | Desarrollador Backend                        |
+| [Montano Valencia, Mike Armando](https://github.com/MikeArmando) | Líder de proyecto y responsable del SRS      |
+| [Moreno Calderon, Troy Leonardo](https://github.com/Troy2404)    | Arquitecto de software y responsable del SDD |
+| [Perez Aguirre Mextli, Citlali](https://github.com/mxcitali)     | Diseñadora UI/UX y Desarrolladora Frontend   |
+| [Jaime Mascareño, Carlos Alberto](https://github.com/TitaniumCJ) | QA / Pruebas                                 |
+| [Meza Espinoza, Kevin Andre](https://github.com/kmeza1402)       | Desarrollador Frontend                       |
 
 ---
 

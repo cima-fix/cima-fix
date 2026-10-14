@@ -51,6 +51,7 @@ Cuando se le asigna un reporte a un encargado, este recibe un correo con el enla
 | Documento                                                            | Contenido                                                                                                                                                            |
 | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`cima-fix-research`](https://github.com/cima-fix/cima-fix-research) | **Investigación de campo** — entrevistas con administración, soporte técnico, docentes, estudiantes, y la evidencia detrás de las decisiones de alcance y prioridad. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)                                 | **Guía de contribución** — desarrollo local, convención de commits, ramas y pull requests.                                                                           |
 
 ---
 

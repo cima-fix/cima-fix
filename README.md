@@ -48,11 +48,12 @@ Cuando se le asigna un reporte a un encargado, este recibe un correo con el enla
 
 ## Documentación técnica
 
-| Documento                                                            | Contenido                                                                                                                                                            |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`cima-fix-research`](https://github.com/cima-fix/cima-fix-research) | **Investigación de campo** — entrevistas con administración, soporte técnico, docentes, estudiantes, y la evidencia detrás de las decisiones de alcance y prioridad. |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md)                                 | **Guía de contribución** — desarrollo local, convención de commits, ramas y pull requests.                                                                           |
-| [`repository-config.md`](docs/repository-config.md)                  | **Ajustes del repositorio** — configuración de GitHub: Actions, ruleset de `main` y ajustes generales.                                                               |
+| Documento                                                            | Contenido                                                                                                                                                                      |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`cima-fix-research`](https://github.com/cima-fix/cima-fix-research) | **Investigación de campo** — entrevistas con administración, soporte técnico, docentes, estudiantes, y la evidencia detrás de las decisiones de alcance y prioridad.           |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)                                 | **Guía de contribución** — desarrollo local, convención de commits, ramas y pull requests.                                                                                     |
+| [`repository-config.md`](docs/repository-config.md)                  | **Ajustes del repositorio** — configuración de GitHub: Actions, ruleset de `main` y ajustes generales.                                                                         |
+| [`cimafix_srs.md`](docs/cimafix_srs.md)                              | **Especificación de Requisitos de Software (SRS)** — requisitos funcionales y no funcionales de Cima Fix: qué debe hacer el sistema, independientemente de cómo se implemente. |
 
 ---
 

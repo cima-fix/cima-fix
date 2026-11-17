@@ -45,6 +45,7 @@
 - [5. Vista de composición: módulos](#5-vista-de-composici%C3%B3n-m%C3%B3dulos)
   - [5.1 Módulos funcionales](#51-m%C3%B3dulos-funcionales)
   - [5.2 Estructura del repositorio](#52-estructura-del-repositorio)
+  - [5.3 Convenciones de código](#53-convenciones-de-c%C3%B3digo)
 - [6. Vista de información: modelo de datos](#6-vista-de-informaci%C3%B3n-modelo-de-datos)
   - [6.1 Diagrama entidad-relación](#61-diagrama-entidad-relaci%C3%B3n)
   - [6.2 Tablas](#62-tablas)
@@ -94,6 +95,7 @@
 - [18. Riesgos y cuestiones abiertas](#18-riesgos-y-cuestiones-abiertas)
   - [18.1 Riesgos técnicos](#181-riesgos-t%C3%A9cnicos)
   - [18.2 Cuestiones abiertas para el equipo](#182-cuestiones-abiertas-para-el-equipo)
+  - [18.3 Fuentes de las cifras de servicios externos](#183-fuentes-de-las-cifras-de-servicios-externos)
 - [19. Trazabilidad SRS → diseño](#19-trazabilidad-srs-%E2%86%92-dise%C3%B1o)
   - [19.1 Requisitos funcionales](#191-requisitos-funcionales)
   - [19.2 Reglas de negocio](#192-reglas-de-negocio)
@@ -184,10 +186,25 @@ Los requisitos que más condicionan la forma del sistema, más allá de cada fun
 
 ### 2.3 Restricciones de diseño
 
-- **Stack fijado** en el README: Node.js + Hono (TypeScript), PostgreSQL en Neon + Drizzle ORM, Google Identity Services, React + Vite + Tailwind CSS, Leaflet + react-leaflet, Cloudinary, Resend y Upstash Redis. Este documento no agrega frameworks fuera de esa lista; las bibliotecas auxiliares que sí agrega (Zod, `google-auth-library`) se justifican donde aparecen.
+- **Stack fijado** en el README: Node.js + Hono (TypeScript), PostgreSQL en Neon + Drizzle ORM, Google Identity Services, React + Vite + Tailwind CSS, Leaflet + react-leaflet, Cloudinary, Resend y Upstash Redis. Este documento no cambia ninguna de esas piezas ni agrega otro framework. Sí agrega las bibliotecas auxiliares y herramientas de desarrollo de la tabla siguiente; ninguna sustituye a una pieza del stack.
 - **Identidad mínima**: el único dato personal que se registra es el correo institucional (RF-ACCESO-13).
 - **Sin alta de campus desde la aplicación**: activar un campus y designar a su primer admin lo hace el equipo de desarrollo (SRS 1.2), con un script del repositorio (15.4).
 - **Idioma**: textos de interfaz y correos en español (RNF-USABILIDAD-03); código, commits y comentarios en inglés (CONTRIBUTING).
+
+**Bibliotecas y herramientas que agrega este documento**
+
+| Pieza                                              | Tipo                      | Para qué                                                                                                                           | Dónde se justifica |
+| -------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| Zod + `@hono/zod-validator`                        | Dependencia (SPA y API)   | Esquemas de validación compartidos entre cliente y servidor.                                                                       | DD-13              |
+| `google-auth-library`                              | Dependencia (API)         | Verificar en el servidor el ID token que entrega GIS.                                                                              | DD-05, 11          |
+| `@upstash/ratelimit`                               | Dependencia (API)         | Cliente del limitador genérico sobre Upstash Redis, que ya está en el stack.                                                       | DD-11, 11          |
+| `@vercel/functions`                                | Dependencia (API)         | `waitUntil`, para enviar correos después de responder.                                                                             | DD-10, 14.2        |
+| `clsx` + `tailwind-merge` (vía `cn()`)             | Dependencia (SPA)         | Combinar clases de Tailwind de forma determinista en los componentes compartidos, igual que en `cima-fix-research` (blueprint §3). | 5.3                |
+| `hono/client`, `hono/csrf`, `hono/secure-headers`  | Parte de Hono             | Cliente tipado, protección CSRF y cabeceras de seguridad. No son dependencias nuevas.                                              | DD-18, 11          |
+| `drizzle-kit`                                      | Herramienta de desarrollo | Generar y aplicar migraciones.                                                                                                     | 6.4, 15.3          |
+| ESLint (flat config) + Prettier                    | Herramienta de desarrollo | Lint y formato compartidos, igual que en `cima-fix-research`.                                                                      | 5.3, 15.3          |
+| Vitest, PGlite, Playwright, `@axe-core/playwright` | Herramienta de pruebas    | Pruebas unitarias, de integración, end-to-end y de accesibilidad. No se despliegan.                                                | 16                 |
+| k6                                                 | Herramienta de pruebas    | Pruebas de carga. No se instala como dependencia del proyecto.                                                                     | 16                 |
 
 ### 2.4 Supuestos de diseño
 
@@ -326,7 +343,7 @@ flowchart LR
 | DD-06 | Los roles se guardan por par (campus, cuenta), solo para Encargado y Admin; la ausencia de fila significa Reportante. Asignar un rol a un correo que nunca ha iniciado sesión crea la cuenta por adelantado.                     | Un rol global por cuenta (Definición del Proyecto §12.8): el SRS permite roles distintos en campus distintos (RF-ACCESO-04). Guardar también la fila "Reportante": crecería con cuentas × campus sin aportar nada.                                                                  | RF-ACCESO-03…08, RN-01                                                 |
 | DD-07 | La prioridad se **almacena** en el reporte y se recalcula solo en los eventos que la cambian (confirmación de duplicado, cambio de gravedad), y únicamente mientras el reporte está abierto.                                     | Calcularla al vuelo en cada consulta (Definición del Proyecto §12.5): el SRS la congela al cerrar el reporte (RF-PRIORIDAD-06), lo que exige guardarla de todos modos; además, almacenarla permite indexar el orden de la consulta (RNF-RENDIMIENTO-04).                            | RF-PRIORIDAD-01…06, RF-GESTION-14                                      |
 | DD-08 | Las transacciones que cambian el número de reportes Nuevos o En revisión de un campus, o sus roles, toman primero un bloqueo de la fila del campus (`SELECT … FOR UPDATE`).                                                      | Sin bloqueo: dos registros simultáneos podrían "ver" el mismo conteo previo y ninguno detectar que se alcanzó el umbral, o dos admins retirarse a la vez dejando el campus sin admin. El costo (serializar escrituras de un mismo campus) es despreciable para el volumen esperado. | RN-07, RF-ACCESO-10, RF-NOTIFICACION-16…17                             |
-| DD-09 | Las fotos se suben **desde el navegador directo a Cloudinary** con una firma emitida por la API, y solo después de decidir sobre los posibles duplicados. La API verifica la firma de cada subida antes de registrar el reporte. | Subir las fotos a través de la API: el límite de cuerpo de una función de Vercel (≈4.5 MB) es menor que 3 fotos de 10 MB. Subirlas antes de revisar duplicados: si se confirma un duplicado, las fotos quedarían huérfanas.                                                         | RF-REPORTE-03, 04, 09, 16; RF-DUPLICADO-03                             |
+| DD-09 | Las fotos se suben **desde el navegador directo a Cloudinary** con una firma emitida por la API, y solo después de decidir sobre los posibles duplicados. La API verifica la firma de cada subida antes de registrar el reporte. | Subir las fotos a través de la API: el límite de cuerpo de una función de Vercel (4.5 MB, 18.3) es menor que 3 fotos de 10 MB. Subirlas antes de revisar duplicados: si se confirma un duplicado, las fotos quedarían huérfanas.                                                    | RF-REPORTE-03, 04, 09, 16; RF-DUPLICADO-03                             |
 | DD-10 | Los correos se arman después de confirmar la transacción y se envían en segundo plano (`waitUntil`), un correo por destinatario, sin reintentos.                                                                                 | Enviar dentro de la transacción: una caída de Resend haría fallar la acción (contradice RNF-DISPONIBILIDAD-05). Cola con reintentos: contradice RNF-DISPONIBILIDAD-06 y agrega infraestructura.                                                                                     | RNF-DISPONIBILIDAD-05…06, RNF-RENDIMIENTO-05, RF-NOTIFICACION-20       |
 | DD-11 | El límite de 10 reportes por hora (RNF-SEGURIDAD-03) se calcula contando en la base de datos los reportes registrados por la cuenta en los últimos 60 minutos. Upstash se usa solo para un limitador genérico anti-abuso.        | Implementar RNF-SEGURIDAD-03 con contadores en Redis: contaría intentos, no reportes efectivamente registrados, y podría desincronizarse de la base de datos si una transacción falla después de incrementar el contador.                                                           | RNF-SEGURIDAD-03                                                       |
 | DD-12 | Mapa con Leaflet en `CRS.Simple`, con el plano del campus como capa de imagen; la posición de cada edificio se guarda en coordenadas del plano. El mapa no se actualiza solo.                                                    | Coordenadas GPS y _polling_ cada 30–60 s (Definición del Proyecto §12.2, §12.7): el SRS define la posición sobre el plano (RF-CATALOGO-13) y prohíbe actualizar el mapa abierto (RF-MAPA-20).                                                                                       | RF-MAPA-01…20, RF-CATALOGO-13, 19                                      |
@@ -386,12 +403,13 @@ cima-fix/
 │   │           ├── service.ts
 │   │           └── repository.ts
 │   └── client/
-│       ├── main.tsx
+│       ├── main.tsx           # importa ./index.css
+│       ├── index.css          # @import "tailwindcss"; + bloque @theme con los tokens de Figma (13.1)
 │       ├── router.tsx
 │       ├── api.ts             # cliente tipado (DD-18)
 │       ├── components/        # ui/ (Button, Field, Dialog, ReportCard…) y layout/
 │       ├── features/          # una carpeta por módulo funcional, con sus pantallas
-│       └── lib/               # formateo de fechas (DD-17), manejo de errores de API
+│       └── lib/               # cn.ts (5.3), formateo de fechas (DD-17), manejo de errores de API
 ├── drizzle/                   # migraciones SQL generadas por drizzle-kit (versionadas)
 ├── scripts/                   # alta de campus y datos de desarrollo (15.4)
 ├── tests/                     # pruebas de integración y end-to-end (sección 16)
@@ -409,6 +427,19 @@ Reglas de dependencia, que se pueden comprobar con ESLint (`no-restricted-import
 - `shared/` no importa de `server/` ni de `client/`.
 - `client/` no importa de `server/`, salvo el **tipo** de la app Hono que usa el cliente tipado (`import type`).
 - Dentro de `server/modules/`, un módulo usa a otro solo a través de su `service.ts`, nunca de su `repository.ts`.
+
+### 5.3 Convenciones de código
+
+Se adoptan las convenciones que el equipo ya usa en `cima-fix-research` (blueprint §3, §5 y §6), para que nadie tenga que aprender dos formas de trabajar:
+
+- **TypeScript en modo estricto** (`"strict": true`) en SPA, API y `shared`.
+- **Nombres**: componentes de React en `PascalCase.tsx`; funciones y variables en `camelCase`; carpetas en `kebab-case`; tablas y columnas de la base de datos en `snake_case`, en inglés (6.2).
+- **Lint y formato**: ESLint con _flat config_ (`eslint.config.js`) y Prettier, con una sola configuración para todo el repositorio. El paso de lint del CI (15.3) los ejecuta.
+- **Versión de Node fijada** en `.nvmrc` y en `engines` de `package.json`, con `engine-strict=true` en `.npmrc` (CONTRIBUTING, "Requisitos previos").
+- **React Router**: se instala el paquete `react-router` en su versión mayor vigente, no `react-router-dom` (blueprint §3).
+- **Clases de Tailwind**: los componentes de `client/components/ui/` exponen `className` y la combinan con sus propias clases mediante `cn()` (`client/lib/cn.ts`, sobre `clsx` + `tailwind-merge`), nunca concatenando cadenas.
+- **Componentes compartidos**: un botón, campo, diálogo o tarjeta se toma de `client/components/ui/`; no se reimplementa dentro de una pantalla.
+- **Commits, ramas y PR**: según CONTRIBUTING; el _scope_ es el módulo de 5.1.
 
 ---
 
@@ -1106,7 +1137,8 @@ El nombre visible se guarda recortado y con espacios colapsados; la clave se gua
 ### 10.10 Fotografías (RF-REPORTE-03, 04, 09, 15, 16)
 
 - **Validación en la SPA** antes de subir: hasta 3 archivos, cada uno ≤ 10 MB y con tipo `image/jpeg`, `image/png`, `image/webp` o `image/heic` (con respaldo por extensión `.heic`, porque algunos navegadores no informan el tipo). Un archivo rechazado muestra el motivo (RNF-USABILIDAD-05).
-- **Firma**: la API firma parámetros con `folder` del entorno, `allowed_formats=jpg,png,webp,heic` y una marca de tiempo; Cloudinary rechaza cualquier subida que no cumpla.
+- **Resolución**: además de los 10 MB, el plan gratuito de Cloudinary rechaza imágenes de más de 25 megapíxeles (R-05). Antes de subir, la SPA lee las dimensiones de cada foto JPEG, PNG o WebP (`createImageBitmap`) y, si pasa de 25 MP, la reduce en el navegador a ese límite y la vuelve a codificar como JPEG. Un HEIC no se puede decodificar en la mayoría de los navegadores; si superara el límite, Cloudinary lo rechaza y la SPA lo trata como falla de almacenamiento (RF-REPORTE-16), con un aviso que indica el motivo.
+- **Firma**: la API firma parámetros con `folder` del entorno, `allowed_formats=jpg,png,webp,heic` y una marca de tiempo; Cloudinary rechaza cualquier subida que no cumpla. Cloudinary acepta HEIC tanto para subida como para entrega.
 - **Verificación al registrar**: por cada foto, la API recalcula la firma de la respuesta de Cloudinary (`public_id` + `version`) con el secreto de la cuenta. Esto no requiere llamar a Cloudinary, y garantiza que la foto se subió con una firma emitida por Cima Fix.
 - **Entrega**: las URLs que se devuelven usan la transformación `f_auto,q_auto` (y un ancho máximo para miniaturas). Cloudinary convierte HEIC a un formato que cada navegador puede mostrar, lo que cumple RF-REPORTE-15 sin conversión propia.
 - **Fotos huérfanas** (subidas cuya petición de registro falló después): se limpian con un _cron_ diario de Vercel que borra las imágenes del folder con más de 24 h y sin fila en `report_photos`. Es mantenimiento, no un requisito; su ausencia no afecta ninguna función.
@@ -1144,7 +1176,7 @@ Cada servicio externo vive detrás de un adaptador en `src/server/integrations/`
 | Upstash        | El limitador genérico.                           | Todo.                                                                       | Falla abierta (11).                                                                                                                                                                                                                 | —                                       |
 | Neon           | Todo.                                            | La SPA (archivos estáticos) carga y muestra un error genérico.              | No hay modo degradado: es la fuente de verdad. Ver R-04 (sección 18).                                                                                                                                                               | —                                       |
 
-**Respaldo y recuperación**: el SRS lo deja pendiente (3.4.4). El diseño se apoya en la restauración a un punto en el tiempo que ofrece Neon dentro de la ventana de su plan; la ventana exacta y el procedimiento quedan como cuestión abierta (Q-03, sección 18).
+**Respaldo y recuperación**: el SRS lo deja pendiente (3.4.4). En el plan gratuito, Neon conserva un historial de 6 horas (con tope de 1 GB) desde el cual se puede crear una rama con el estado de la base en un momento anterior. Una pérdida de datos que se detecte después de esas 6 horas no se puede recuperar. No se propone un respaldo propio en GitHub Actions porque el repositorio es público y los respaldos contendrían correos de personas. Si ese plazo basta o hace falta otra medida queda como cuestión abierta (Q-03, sección 18).
 
 ---
 
@@ -1152,7 +1184,8 @@ Cada servicio externo vive detrás de un adaptador en `src/server/integrations/`
 
 ### 13.1 Principios
 
-- **Mobile-first**: cada pantalla se diseña primero para 360 px de ancho, sin desplazamiento horizontal; las variantes de escritorio se agregan con _breakpoints_ de Tailwind (RNF-USABILIDAD-01).
+- **Mobile-first**: cada pantalla se diseña primero para 360 px de ancho, sin desplazamiento horizontal; las variantes de escritorio se agregan con _breakpoints_ de Tailwind (RNF-USABILIDAD-01). El diseño en Figma también se valida primero en tamaño de celular (Definición del Proyecto §12.9).
+- **Figma es la fuente de verdad del diseño visual**, como en `cima-fix-research` (blueprint §7). Las pantallas y los valores de tipografía, color y espaciado se deciden en el archivo de Figma del equipo, a cargo de la diseñadora UI/UX. El código es una copia sincronizada de esos valores: viven como _tokens_ en el bloque `@theme` de `src/client/index.css` (Tailwind CSS v4) y ningún componente usa un color, tamaño o espaciado que no esté declarado ahí. Si una pantalla necesita un valor nuevo, se agrega primero en Figma y después en `@theme`, nunca al revés. Al nombrar un _token_ se aplica la misma regla del blueprint §7: su sufijo no puede repetirse entre `--color-*` y `--text-*` ni coincidir con un prefijo de utilidad de Tailwind, porque Tailwind deja de generar una de las dos clases.
 - **Sin estado global de servidor**: cada pantalla obtiene sus datos con los _loaders_ de React Router y los cambia con sus _actions_. No se agrega una biblioteca de caché que vuelva a pedir datos sola, porque RF-MAPA-20 exige que el mapa no se actualice mientras está abierto.
 - **Mismo texto, misma regla**: los mensajes de error que muestra la SPA son los `message` de la API (7.1) o los de los esquemas compartidos (DD-13), para que validación del cliente y del servidor digan lo mismo.
 - **Fechas**: un único formateador `formatDateTime()` con `Intl.DateTimeFormat("es-MX", { timeZone: "America/Tijuana" })` (DD-17, RNF-USABILIDAD-04).
@@ -1235,11 +1268,11 @@ Las alertas y los correos de gestión se generan solo con datos del campus del e
 
 ### 15.1 Entornos
 
-| Entorno    | SPA y API                                        | Base de datos                              | Correo                                                  | Uso                               |
-| ---------- | ------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------- | --------------------------------- |
-| Local      | `vite` + `@hono/node-server` con proxy de `/api` | Rama `dev` de Neon (o PGlite para pruebas) | Adaptador de consola: imprime el correo en la terminal  | Desarrollo diario (`npm run dev`) |
-| Preview    | Despliegue de Vercel por cada PR                 | Rama `dev` de Neon                         | Resend con lista de destinatarios restringida al equipo | Revisión de PRs y pruebas de QA   |
-| Producción | Despliegue de Vercel desde `main`                | Rama `main` de Neon                        | Resend con dominio verificado                           | Uso real en el Campus Sauzal      |
+| Entorno    | SPA y API                                        | Base de datos                              | Correo                                                                                                        | Uso                               |
+| ---------- | ------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Local      | `vite` + `@hono/node-server` con proxy de `/api` | Rama `dev` de Neon (o PGlite para pruebas) | Adaptador de consola: imprime el correo en la terminal                                                        | Desarrollo diario (`npm run dev`) |
+| Preview    | Despliegue de Vercel por cada PR                 | Rama `dev` de Neon                         | Adaptador de consola por defecto; Resend solo para probar correos a mano, con destinatarios del equipo (R-06) | Revisión de PRs y pruebas de QA   |
+| Producción | Despliegue de Vercel desde `main`                | Rama `main` de Neon                        | Resend con dominio verificado                                                                                 | Uso real en el Campus Sauzal      |
 
 ### 15.2 Variables de entorno
 
@@ -1320,13 +1353,14 @@ La Definición del Proyecto (septiembre de 2026) y el prototipo de Arquitectura 
 
 ### 18.1 Riesgos técnicos
 
-| ID   | Riesgo                                                                                                                                                  | Mitigación                                                                                                                                    |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| R-01 | Resend solo permite enviar a direcciones arbitrarias desde un **dominio verificado**; sin uno, los correos de 3.3.8 no llegan a nadie fuera del equipo. | Conseguir un dominio (o subdominio) para Cima Fix y verificarlo antes de la primera prueba con usuarios reales.                               |
-| R-02 | La pantalla de consentimiento de Google en modo "Testing" limita el inicio de sesión a cuentas de prueba registradas.                                   | Publicar la app de OAuth en modo producción; con los alcances básicos (`openid`, `email`) no requiere verificación de Google.                 |
-| R-03 | Los límites de los planes gratuitos (Vercel, Neon, Cloudinary, Resend) cambian con el tiempo.                                                           | Revisar los límites vigentes al iniciar la implementación y al desplegar; el diseño no depende de una característica de pago.                 |
-| R-04 | Neon en plan gratuito suspende la base de datos tras inactividad: la primera petición después de un rato tarda más.                                     | Aceptable para el volumen esperado; se mide en las pruebas de RNF-RENDIMIENTO-01 (que exige el percentil 95, no el máximo).                   |
-| R-05 | El límite de tamaño por imagen del plan gratuito de Cloudinary podría ser distinto de los 10 MB de RF-REPORTE-04.                                       | Confirmar el límite vigente; si es menor, se reporta al responsable del SRS antes de implementar (no se ajusta el requisito desde el diseño). |
+| ID   | Riesgo                                                                                                                                                                                                                                                                                                                 | Mitigación                                                                                                                                                                                                                                 |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R-01 | Resend solo permite enviar a direcciones arbitrarias desde un **dominio verificado**; sin uno, los correos de 3.3.8 no llegan a nadie fuera del equipo.                                                                                                                                                                | Conseguir un dominio (o subdominio) para Cima Fix y verificarlo antes de la primera prueba con usuarios reales.                                                                                                                            |
+| R-02 | La pantalla de consentimiento de Google en modo "Testing" limita el inicio de sesión a cuentas de prueba registradas.                                                                                                                                                                                                  | Publicar la app de OAuth en modo producción; con los alcances básicos (`openid`, `email`) no requiere verificación de Google.                                                                                                              |
+| R-03 | Los límites de los planes gratuitos (Vercel, Neon, Cloudinary, Resend) cambian con el tiempo. Las cifras de este documento se verificaron el 16 de noviembre de 2026 en la documentación oficial (18.3).                                                                                                               | Volver a revisarlas al iniciar la implementación y al desplegar; el diseño no depende de una característica de pago.                                                                                                                       |
+| R-04 | Neon en plan gratuito suspende la base de datos tras 5 minutos sin actividad, y en ese plan no se puede desactivar: la primera petición después tarda más.                                                                                                                                                             | Aceptable para el volumen esperado; se mide en las pruebas de RNF-RENDIMIENTO-01 (que exige el percentil 95, no el máximo).                                                                                                                |
+| R-05 | El plan gratuito de Cloudinary limita cada imagen a 10 MB, igual que RF-REPORTE-04, pero también a **25 megapíxeles**, límite que el SRS no contempla. Algunos celulares toman fotos de 48 MP o más.                                                                                                                   | La SPA reduce en el navegador las fotos JPEG, PNG o WebP de más de 25 MP antes de subirlas (10.10). Un HEIC de más de 25 MP sería rechazado; se informa al responsable del SRS por si quiere reflejar el límite como requisito.            |
+| R-06 | El plan gratuito de Resend permite 3,000 correos al mes y **100 al día**. Un día con mucha actividad (varias resoluciones con muchos confirmantes, alertas a todo el personal) podría agotar el límite diario; los correos restantes se perderían, igual que cualquier correo fallido (riesgo aceptado del SRS 3.4.4). | Para el volumen de un campus se espera muy por debajo del límite. Los entornos local y _preview_ usan el adaptador de consola (15.1) para no gastar la cuota de producción. Si el uso real se acerca al límite, se evalúa un plan de pago. |
 
 ### 18.2 Cuestiones abiertas para el equipo
 
@@ -1334,8 +1368,23 @@ La Definición del Proyecto (septiembre de 2026) y el prototipo de Arquitectura 
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | Q-01 | ¿Se mantiene Upstash solo como limitador genérico (DD-11), o se retira del stack para tener un servicio externo menos?                                                                                                            | Equipo de backend                          |
 | Q-02 | Dominio público de Cima Fix (afecta R-01, los enlaces de los espacios y los correos). Que el enlace impreso muestre un dominio reconocible también ayuda con la desconfianza hacia los QR que encontró la investigación de campo. | Líder de proyecto                          |
-| Q-03 | Ventana de recuperación de Neon y procedimiento de restauración, para cerrar el pendiente de respaldo del SRS 3.4.4.                                                                                                              | Líder de proyecto y arquitecto             |
+| Q-03 | ¿Bastan las 6 horas de historial de Neon en el plan gratuito (12) para cerrar el pendiente de respaldo del SRS 3.4.4, o hace falta otra medida?                                                                                   | Líder de proyecto y arquitecto             |
 | Q-04 | Imagen del plano del Campus Sauzal (fuente, resolución y permiso para usarla).                                                                                                                                                    | Líder de proyecto (contacto con el campus) |
+| Q-05 | Enlace al archivo de Figma de la app Cima Fix, para referenciarlo desde este documento y desde el README como fuente de verdad del diseño visual (13.1).                                                                          | Diseñadora UI/UX                           |
+
+### 18.3 Fuentes de las cifras de servicios externos
+
+Consultadas el 16 de noviembre de 2026:
+
+| Cifra                                                                                                                  | Fuente                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Cuerpo de petición de una función de Vercel: máximo 4.5 MB (DD-09)                                                     | [Vercel Functions Limits](https://vercel.com/docs/functions/limitations)                                     |
+| Drizzle con Neon: el driver HTTP no da soporte a transacciones interactivas; para ellas se usa el de WebSocket (DD-03) | [Drizzle: Connect Neon](https://orm.drizzle.team/docs/connect-neon)                                          |
+| Cloudinary gratuito: 10 MB y 25 MP por imagen (10.10, R-05)                                                            | [Cloudinary Pricing](https://cloudinary.com/documentation/pricing)                                           |
+| Cloudinary: HEIC aceptado para subida y entrega (10.10)                                                                | [Cloudinary: formatos soportados](https://cloudinary.com/documentation/formats_supported_for_transformation) |
+| Resend: hasta 100 correos por llamada de lote (14.2)                                                                   | [Resend: Send Batch Emails](https://resend.com/docs/api-reference/emails/send-batch-emails)                  |
+| Resend gratuito: 3,000 correos al mes y 100 al día (R-06)                                                              | [Resend Pricing](https://resend.com/pricing)                                                                 |
+| Neon gratuito: suspensión tras 5 minutos e historial de 6 horas (12, R-04)                                             | [Neon Pricing](https://neon.com/pricing)                                                                     |
 
 ---
 

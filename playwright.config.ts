@@ -1,0 +1,33 @@
+import { defineConfig, devices } from '@playwright/test'
+
+const PORT = 5174
+
+// End-to-end tests (SDD 16): 360 px and desktop viewports, against the dev server.
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? 'github' : 'list',
+  use: {
+    baseURL: `http://localhost:${PORT}`,
+    locale: 'es-MX',
+    timezoneId: 'America/Tijuana',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    {
+      name: 'mobile-360',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 780 }, hasTouch: true },
+    },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
+  ],
+  webServer: {
+    command: `npm run dev -- --port ${PORT} --strictPort`,
+    url: `http://localhost:${PORT}`,
+    reuseExistingServer: !process.env.CI,
+  },
+})

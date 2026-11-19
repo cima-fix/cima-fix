@@ -1,75 +1,87 @@
-# React + TypeScript + Vite
+# Cima Fix
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Cima Fix es un sistema para registrar y dar seguimiento a reportes de incidencias de mantenimiento e infraestructura en el Campus Sauzal de la Universidad Autónoma de Baja California (UABC), Ensenada. Permite a estudiantes y docentes reportar un problema en minutos y consultar su estado en cualquier momento: registro centralizado, prevención de duplicados y notificación directa al personal responsable. No sustituye al personal de mantenimiento ni decide por ellos qué atender; su valor está en darle a la comunidad del campus un canal confiable para reportar, y al personal encargado, trazabilidad real de los reportes.
 
-Currently, two official plugins are available:
+> **Estado:** en desarrollo.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## El problema
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Actualmente, el mecanismo de reporte en el Campus Sauzal es un código QR que dirige a un formulario de Google: una vía de un solo sentido, sin registro consultable y sin manera de saber si un problema ya fue reportado o si alguien ya lo está atendiendo.
 
-## Expanding the ESLint configuration
+Una encuesta inicial y una ronda de entrevistas con la comunidad del campus —administración, soporte técnico, docentes y estudiantes— apuntan a la misma causa: la desconfianza no nace del formulario, nace del silencio después de enviarlo. Un docente entrevistado describió sentir frustración y desconfianza al no saber nunca si su reporte fue atendido; una estudiante contó que los profesores llegaban a repetir el mismo reporte varias veces solo para "meter presión", ante la falta de visibilidad sobre su estado.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Del lado de quien atiende los reportes, el panorama tampoco es mejor: hoy se administran a mano sobre una hoja de cálculo, donde cada reporte y cada cambio de estado se registra manualmente uno por uno. Cima Fix no solo le da visibilidad a quien reporta — también le quita esa carga administrativa a quien atiende.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Cima Fix resuelve esto con:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Registro y consulta centralizada
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+En lugar de un formulario que desaparece en una bandeja de entrada, cada incidencia queda en un registro persistente y consultable por cualquier miembro de la comunidad del campus.
 
-```
+### Verificación institucional
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+El acceso requiere autenticarse con una cuenta `@uabc.edu.mx` mediante Google. Toda persona que reporta o atiende una incidencia pertenece verificadamente a la comunidad universitaria.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prevención de duplicados
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Al momento de registrar una incidencia, el sistema muestra reportes abiertos similares (mismo campus, categoría y edificio) para que el reportante confirme si es el mismo problema en vez de crear uno nuevo.
 
-```
+### Mapa de incidencias por campus
+
+Un mapa del campus muestra los reportes abiertos por edificio, con un indicador visual por edificio — una forma rápida de ver dónde se concentran los problemas.
+
+### Seguimiento de estado transparente
+
+El encargado puede actualizar el estado del reporte directamente dentro del sistema, evitando que un reporte quede indefinidamente con estado desconocido.
+
+### Prioridad automática
+
+Cada reporte recibe una prioridad calculada automáticamente a partir de varios factores — sin que el encargado tenga que asignarla a mano.
+
+### Notificaciones por correo
+
+Cuando se le asigna un reporte a un encargado, este recibe un correo con el enlace directo al reporte; cuando el reporte se marca como resuelto, quien lo reportó recibe un correo confirmando que el problema fue solucionado; y cuando se acumulan reportes sin asignar o sin resolver, el personal responsable recibe una alerta.
+
+---
+
+## Documentación técnica
+
+| Documento                                                            | Contenido                                                                                                                                                                      |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`cima-fix-research`](https://github.com/cima-fix/cima-fix-research) | **Investigación de campo** — entrevistas con administración, soporte técnico, docentes, estudiantes, y la evidencia detrás de las decisiones de alcance y prioridad.           |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)                                 | **Guía de contribución** — desarrollo local, convención de commits, ramas y pull requests.                                                                                     |
+| [`repository-config.md`](docs/repository-config.md)                  | **Ajustes del repositorio** — configuración de GitHub: Actions, ruleset de `main` y ajustes generales.                                                                         |
+| [`cimafix_srs.md`](docs/cimafix_srs.md)                              | **Especificación de Requisitos de Software (SRS)** — requisitos funcionales y no funcionales de Cima Fix: qué debe hacer el sistema, independientemente de cómo se implemente. |
+
+---
+
+## Stack técnico
+
+- **Backend:** Node.js + Hono (TypeScript)
+- **Base de datos:** PostgreSQL (Neon) + Drizzle ORM
+- **Autenticación:** Google Identity Services (OAuth 2.0 / OIDC), restringida al dominio institucional
+- **Mapa:** Leaflet + react-leaflet
+- **Almacenamiento de imágenes:** Cloudinary
+- **Notificaciones:** correo transaccional (Resend)
+- **Rate limiting:** middleware para Hono con estado en Redis (Upstash)
+- **Frontend:** React + Vite (TypeScript), Tailwind CSS
+
+---
+
+## Equipo de desarrollo
+
+| Nombre                                                           | Rol / área                                   |
+| ---------------------------------------------------------------- | -------------------------------------------- |
+| [Alcantar Martinez, Emir Alexander](https://github.com/ALXND3R)  | Desarrollador Backend                        |
+| [Zazueta Medrano, Aidan](https://github.com/AidanZZMD)           | Desarrollador Backend                        |
+| [Montano Valencia, Mike Armando](https://github.com/MikeArmando) | Líder de proyecto y responsable del SRS      |
+| [Moreno Calderon, Troy Leonardo](https://github.com/Troy2404)    | Arquitecto de software y responsable del SDD |
+| [Perez Aguirre Mextli, Citlali](https://github.com/mxcitali)     | Diseñadora UI/UX y Desarrolladora Frontend   |
+| [Jaime Mascareño, Carlos Alberto](https://github.com/TitaniumCJ) | QA / Pruebas                                 |
+| [Meza Espinoza, Kevin Andre](https://github.com/kmeza1402)       | Desarrollador Frontend                       |
+
+---
+
+<sub>Proyecto desarrollado por el equipo de Cima Fix como parte del curso «Tecnologías Emergentes para el Desarrollo de Soluciones» en la Universidad Autónoma de Baja California (UABC), con aplicación real en el Campus Sauzal, Ensenada.</sub>

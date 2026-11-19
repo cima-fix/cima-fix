@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Figma is the source of truth: only copy values that
+  already exist there, never invent a new one in code first.
+*/
+@theme {
+  --color-neutral-white: #FFFFFF;
+  --color-neutral-border: #CFCFCF;
+
+  --color-green: #00723F;
+  --color-green-light: #50B848;
+  --color-green-dark: #024731;
+
+  --color-gold: #DD971A;
+  --color-yellow: #FEBE10;
+  --color-gold-dark: #B08208;
+
+  --color-blue: #20419A;
+}

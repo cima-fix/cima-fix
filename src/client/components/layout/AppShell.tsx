@@ -1,15 +1,11 @@
 import { Outlet } from 'react-router'
 
-// Shared frame for every screen: green top bar + the active screen below.
+// Mobile-first frame shared by every screen (SDD 13.1): full width on a phone,
+// a centered phone-sized column on wider screens.
 export function AppShell() {
   return (
-    <div className="flex min-h-dvh flex-col bg-neutral-white">
-      <header className="bg-green px-4 py-3 text-neutral-white">
-        <p className="text-lg font-semibold">Cima Fix</p>
-      </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 p-4">
-        <Outlet />
-      </main>
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-neutral-white sm:border-x sm:border-neutral-border">
+      <Outlet />
     </div>
   )
 }

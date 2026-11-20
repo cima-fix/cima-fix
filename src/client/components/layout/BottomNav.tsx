@@ -12,7 +12,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Secciones"
-      className="sticky bottom-0 z-10 mt-auto flex border-t border-neutral-border bg-neutral-white"
+      className="flex shrink-0 border-t border-neutral-border bg-neutral-white"
     >
       {items.map(({ to, label, Icon }) => (
         <NavLink

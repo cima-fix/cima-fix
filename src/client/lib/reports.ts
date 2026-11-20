@@ -42,6 +42,24 @@ export function isOpen(report: Report) {
 
 const LEVELS: Priority[] = ['low', 'medium', 'high']
 
+// RF-GESTION-14 (SDD 10.5): open first, then higher priority, then oldest, then id.
+// Same order for the list, the possible duplicates (RF-DUPLICADO-07) and the map list (RF-MAPA-18).
+export function compareReports(a: Report, b: Report) {
+  return (
+    Number(isOpen(b)) - Number(isOpen(a)) ||
+    LEVELS.indexOf(b.priority) - LEVELS.indexOf(a.priority) ||
+    a.createdAt.localeCompare(b.createdAt) ||
+    a.id.localeCompare(b.id)
+  )
+}
+
+export const MAX_DESCRIPTION = 1000
+
+// SDD 10.8: trimmed, counted as code points (`[...text].length`), like varchar(1000).
+export function descriptionLength(text: string) {
+  return [...text.trim()].length
+}
+
 // RF-PRIORIDAD-02: category severity raised one level per 3 confirmations, capped at high.
 export function computePriority(severity: Priority, confirmations: number): Priority {
   const level = LEVELS.indexOf(severity) + Math.floor(confirmations / 3)

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from '../../lib/cn'
 import { FileIcon, PlusIcon } from '../../components/ui/icons'
 
@@ -35,6 +35,8 @@ export function PhotoPicker({ photos, onChange }: PhotoPickerProps) {
   const hintId = `${inputId}-hint`
   const errorId = `${inputId}-error`
   const latest = useRef(photos)
+  // RNF-USABILIDAD-05: say why extra files were not added (RF-REPORTE-03).
+  const [skipped, setSkipped] = useState<string>()
 
   useEffect(() => {
     latest.current = photos
@@ -46,16 +48,24 @@ export function PhotoPicker({ photos, onChange }: PhotoPickerProps) {
     [],
   )
 
-  const errors = photos.flatMap((p) => (p.error ? [p.error] : []))
+  const errors = [...photos.flatMap((p) => (p.error ? [p.error] : [])), ...(skipped ? [skipped] : [])]
 
   function add(files: FileList | null) {
     if (!files) return
     const room = MAX_PHOTOS - photos.length
-    onChange([...photos, ...Array.from(files).slice(0, room).map(toPhoto)])
+    const chosen = Array.from(files)
+    const left = chosen.slice(room)
+    setSkipped(
+      left.length > 0
+        ? `Solo se pueden adjuntar ${MAX_PHOTOS} fotos. No se agregó: ${left.map((f) => f.name).join(', ')}.`
+        : undefined,
+    )
+    onChange([...photos, ...chosen.slice(0, room).map(toPhoto)])
   }
 
   function remove(photo: Photo) {
     if (photo.url) URL.revokeObjectURL(photo.url)
+    setSkipped(undefined)
     onChange(photos.filter((p) => p.key !== photo.key))
   }
 

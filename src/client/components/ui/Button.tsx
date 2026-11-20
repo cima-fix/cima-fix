@@ -40,6 +40,12 @@ export function Button({
   return <button type={type} className={classes({ variant, size, className })} {...props} />
 }
 
+// Looks like the disabled button (Boton/deshabilitado) but is plain text: for a
+// state the person cannot act on, such as "Ya lo confirmaste".
+export function ButtonNote({ className, children }: { className?: string; children: string }) {
+  return <p className={classes({ variant: 'muted', className })}>{children}</p>
+}
+
 export function ButtonLink({ variant, size, className, ...props }: LinkProps & StyleProps) {
   return <Link className={classes({ variant, size, className })} {...props} />
 }

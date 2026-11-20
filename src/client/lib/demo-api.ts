@@ -1,4 +1,4 @@
-import { computePriority, isOpen, type Priority, type Report } from './reports'
+import { compareReports, computePriority, isOpen, type Priority, type Report } from './reports'
 
 /*
   In-memory stand-in for the Hono API (SDD 7) so the screens can be built
@@ -8,7 +8,12 @@ import { computePriority, isOpen, type Priority, type Report } from './reports'
 
 export const CURRENT_USER = 'tu.cuenta@uabc.edu.mx'
 
-export type ApiErrorCode = 'SPACE_UNAVAILABLE' | 'RATE_LIMITED' | 'NOT_FOUND'
+export type ApiErrorCode =
+  | 'SPACE_UNAVAILABLE'
+  | 'RATE_LIMITED'
+  | 'NOT_FOUND'
+  | 'OWN_REPORT'
+  | 'ALREADY_CONFIRMED'
 
 export class ApiError extends Error {
   readonly code: ApiErrorCode
@@ -118,6 +123,23 @@ const reports: Report[] = [
     reportedByMe: true,
     photoCount: 0,
   },
+  {
+    // Open report of the current account: shows up as a possible duplicate without
+    // the confirm button (RF-DUPLICADO-05).
+    id: 'r-6',
+    campus: 'Campus Sauzal',
+    building: 'Edificio 5',
+    space: 'Salón 112',
+    category: 'Iluminación',
+    description: 'El apagador de la entrada no funciona.',
+    status: 'new',
+    priority: 'medium',
+    confirmations: 0,
+    createdAt: '2026-11-17T17:00:00Z',
+    reporterEmail: CURRENT_USER,
+    reportedByMe: true,
+    photoCount: 0,
+  },
 ]
 
 // Fake latency so loading states are visible during development.
@@ -130,7 +152,7 @@ export async function getCatalog() {
 
 export async function listReports() {
   await delay()
-  return [...reports].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return [...reports].sort(compareReports)
 }
 
 export async function getReport(id: string) {
@@ -149,16 +171,19 @@ export type ReportDraft = {
   photoCount: number
 }
 
-// RN-05: open reports of the same campus, category and building.
+// RN-05: open reports of the same campus, category and building, in the
+// RF-GESTION-14 order (RF-DUPLICADO-07).
 export async function findSimilarReports(draft: ReportDraft) {
   await delay()
-  return reports.filter(
-    (r) =>
-      isOpen(r) &&
-      r.campus === draft.campus &&
-      r.category === draft.category &&
-      r.building === draft.building,
-  )
+  return reports
+    .filter(
+      (r) =>
+        isOpen(r) &&
+        r.campus === draft.campus &&
+        r.category === draft.category &&
+        r.building === draft.building,
+    )
+    .sort(compareReports)
 }
 
 const RATE_LIMIT_PER_HOUR = 10
@@ -203,6 +228,13 @@ function update(id: string, change: (report: Report) => void) {
 export async function confirmReport(id: string) {
   await delay()
   return update(id, (r) => {
+    // RF-DUPLICADO-05: not your own report, and only once per account.
+    if (r.reportedByMe) {
+      throw new ApiError('OWN_REPORT', 'No puedes confirmar un reporte que tú registraste.')
+    }
+    if (r.confirmedByMe) {
+      throw new ApiError('ALREADY_CONFIRMED', 'Ya confirmaste este reporte.')
+    }
     r.confirmations += 1
     r.confirmedByMe = true
     const severity = catalog.categories.find((c) => c.name === r.category)?.severity ?? 'low'
@@ -253,14 +285,24 @@ export function mapLevel(openReports: number): MapLevel {
   return 'low'
 }
 
-// Plan positions and counts mirror the Figma mock-up until the API exists.
+// Position of each building on the placeholder plan, as in the Figma mock-up.
+const PLAN_POSITIONS: Record<string, { x: number; y: number }> = {
+  'Edificio 5': { x: 74, y: 72 },
+  'Edificio 2': { x: 58, y: 24 },
+  Biblioteca: { x: 22, y: 24 },
+}
+
+// RF-MAPA-08: the count is the number of open reports of the building;
+// Resueltos and Cancelados are not counted.
 export async function getCampusMap() {
   await delay()
-  const buildings = [
-    { name: 'Edificio 5', openReports: 7, x: 74, y: 72 },
-    { name: 'Edificio 2', openReports: 4, x: 58, y: 24 },
-    { name: 'Biblioteca', openReports: 2, x: 22, y: 24 },
-    { name: 'Cafetería', openReports: 0, x: 34, y: 70 },
-  ]
-  return buildings.map((b) => ({ ...b, level: mapLevel(b.openReports) }) satisfies MapBuilding)
+  return catalog.buildings.map((b) => {
+    const openReports = reports.filter((r) => r.building === b.name && isOpen(r)).length
+    return {
+      name: b.name,
+      openReports,
+      level: mapLevel(openReports),
+      ...(PLAN_POSITIONS[b.name] ?? { x: 50, y: 50 }),
+    } satisfies MapBuilding
+  })
 }

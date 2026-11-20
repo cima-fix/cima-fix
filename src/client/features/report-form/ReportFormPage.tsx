@@ -12,12 +12,10 @@ import {
   type ReportDraft,
 } from '../../lib/demo-api'
 import { formatNumber } from '../../lib/format'
-import type { Report } from '../../lib/reports'
+import { descriptionLength, MAX_DESCRIPTION, type Report } from '../../lib/reports'
 import { DuplicatesStep } from './DuplicatesStep'
 import { PhotoPicker, type Photo } from './PhotoPicker'
 import { SubmittedStep } from './SubmittedStep'
-
-const MAX_DESCRIPTION = 1000
 
 type Values = Omit<ReportDraft, 'photoCount'>
 type Errors = Partial<Record<keyof Values, string>>
@@ -27,7 +25,7 @@ function validate(values: Values): Errors {
   if (!values.building) errors.building = 'Elige un edificio para continuar.'
   if (!values.space) errors.space = 'Elige un espacio para continuar.'
   if (!values.category) errors.category = 'Elige una categoría para continuar.'
-  const length = values.description.trim().length
+  const length = descriptionLength(values.description)
   if (length === 0) errors.description = 'Cuéntanos qué pasa para continuar.'
   else if (length > MAX_DESCRIPTION) {
     errors.description = `Pasaste el límite: ${formatNumber(length)} de ${formatNumber(MAX_DESCRIPTION)} caracteres.`
@@ -135,7 +133,7 @@ export function ReportFormPage() {
     return <SubmittedStep report={step.report} onNewReport={startOver} />
   }
 
-  const descriptionLength = values.description.trim().length
+  const length = descriptionLength(values.description)
 
   return (
     <>
@@ -209,7 +207,7 @@ export function ReportFormPage() {
           hint={
             errors.description
               ? undefined
-              : `${formatNumber(descriptionLength)} / ${formatNumber(MAX_DESCRIPTION)}`
+              : `${formatNumber(length)} / ${formatNumber(MAX_DESCRIPTION)}`
           }
           hintAlign="end"
         >

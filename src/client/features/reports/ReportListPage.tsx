@@ -1,6 +1,5 @@
 import { useFetcher, useLoaderData, useSearchParams } from 'react-router'
-import { BottomNav } from '../../components/layout/BottomNav'
-import { ScreenHeader } from '../../components/layout/ScreenHeader'
+import { NavScreen } from '../../components/layout/NavScreen'
 import { Button, ButtonLink } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Field'
 import { ReportCard } from '../../components/ui/ReportCard'
@@ -9,9 +8,18 @@ import { CURRENT_USER } from '../../lib/demo-api'
 import { isOpen, STATUS_LABEL, type Report, type ReportStatus } from '../../lib/reports'
 import type { reportListLoader } from './data'
 
+// Estado filter: every status plus "Abiertos" (Nuevo + En revisión), used by the map
+// to list only the open reports of a building (RF-MAPA-16).
+type StatusFilter = ReportStatus | 'open'
+const STATUS_FILTER_LABEL: Record<StatusFilter, string> = { open: 'Abiertos', ...STATUS_LABEL }
 const STATUS_BY_LABEL = Object.fromEntries(
-  Object.entries(STATUS_LABEL).map(([status, label]) => [label, status]),
-) as Record<string, ReportStatus>
+  Object.entries(STATUS_FILTER_LABEL).map(([status, label]) => [label, status]),
+) as Record<string, StatusFilter>
+
+function matchesStatus(report: Report, status: string) {
+  if (!status) return true
+  return status === 'open' ? isOpen(report) : report.status === status
+}
 
 // Filter state lives in the URL so it survives reloads and can be linked (e.g. from the map).
 const FILTERS = {
@@ -111,7 +119,7 @@ export function ReportListPage() {
     (r) =>
       (!building || r.building === building) &&
       (!category || r.category === category) &&
-      (!status || r.status === status) &&
+      matchesStatus(r, status) &&
       (!assigned || r.assignee === CURRENT_USER) &&
       (!mine || r.reportedByMe || r.confirmedByMe),
   )
@@ -119,8 +127,7 @@ export function ReportListPage() {
   const closed = visible.filter((r) => !isOpen(r))
 
   return (
-    <>
-      <ScreenHeader title={`Reportes · ${campus}`} />
+    <NavScreen title={`Reportes · ${campus}`}>
       <div className="flex flex-col gap-3 px-4 py-3.5">
         <div className="grid grid-cols-2 gap-2" role="group" aria-label="Filtros">
           {/* Only one active campus for now; it becomes a real filter with the second one. */}
@@ -129,8 +136,8 @@ export function ReportListPage() {
             size="sm"
             aria-label="Estado"
             placeholder="Estado: todos"
-            options={Object.values(STATUS_LABEL)}
-            value={status ? STATUS_LABEL[status as ReportStatus] : ''}
+            options={Object.values(STATUS_FILTER_LABEL)}
+            value={STATUS_FILTER_LABEL[status as StatusFilter] ?? ''}
             onChange={(e) => setFilter(FILTERS.status, STATUS_BY_LABEL[e.target.value] ?? '')}
           />
           <Select
@@ -167,7 +174,6 @@ export function ReportListPage() {
           </p>
         )}
       </div>
-      <BottomNav />
-    </>
+    </NavScreen>
   )
 }

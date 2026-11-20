@@ -1,6 +1,5 @@
 import { Link, useLoaderData } from 'react-router'
-import { BottomNav } from '../../components/layout/BottomNav'
-import { ScreenHeader } from '../../components/layout/ScreenHeader'
+import { NavScreen } from '../../components/layout/NavScreen'
 import { LevelBadge } from '../../components/ui/Badge'
 import { cn } from '../../lib/cn'
 import { MAP_THRESHOLDS, type MapBuilding, type MapLevel } from '../../lib/demo-api'
@@ -17,8 +16,9 @@ const markerStyle: Record<MapLevel, string> = {
   high: 'size-9 bg-gold border-[3px] border-neutral-text',
 }
 
+// RF-MAPA-16: the open reports of the building.
 function buildingHref(name: string) {
-  return `/reportes?edificio=${encodeURIComponent(name)}`
+  return `/reportes?${new URLSearchParams({ edificio: name, estado: 'open' })}`
 }
 
 function Marker({ building }: { building: MapBuilding }) {
@@ -27,22 +27,18 @@ function Marker({ building }: { building: MapBuilding }) {
       className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-control border border-neutral-border bg-neutral-white p-3"
       style={{ left: `${building.x}%`, top: `${building.y}%` }}
     >
-      {building.openReports > 0 ? (
-        // Mouse shortcut only: keyboard and screen reader users get the list below.
-        <Link
-          to={buildingHref(building.name)}
-          tabIndex={-1}
-          aria-label={`${building.name}: ${plural(building.openReports, 'reporte abierto', 'reportes abiertos')}, nivel ${LEVEL_LABEL[building.level]}`}
-          className={cn(
-            'flex items-center justify-center rounded-full text-xs font-medium text-neutral-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green',
-            markerStyle[building.level],
-          )}
-        >
-          {building.openReports}
-        </Link>
-      ) : (
-        <span className="size-7" aria-hidden="true" />
-      )}
+      {/* Mouse shortcut only: keyboard and screen reader users get the list below. */}
+      <Link
+        to={buildingHref(building.name)}
+        tabIndex={-1}
+        aria-label={`${building.name}: ${plural(building.openReports, 'reporte abierto', 'reportes abiertos')}, nivel ${LEVEL_LABEL[building.level]}`}
+        className={cn(
+          'flex items-center justify-center rounded-full text-xs font-medium text-neutral-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green',
+          markerStyle[building.level],
+        )}
+      >
+        {building.openReports}
+      </Link>
     </div>
   )
 }
@@ -56,14 +52,14 @@ export function MapPage() {
     .sort((a, b) => b.openReports - a.openReports)
 
   return (
-    <>
-      <ScreenHeader title={`Mapa · ${campus}`} />
+    <NavScreen title={`Mapa · ${campus}`}>
       <div className="flex flex-col gap-3 px-4 py-3.5">
         <div
           aria-hidden="true"
           className="relative aspect-4/3 overflow-hidden rounded-card border border-neutral-border bg-green-surface"
         >
-          {buildings.map((b) => (
+          {/* RF-MAPA-07: no indicator for a building without open reports. */}
+          {withReports.map((b) => (
             <Marker key={b.name} building={b} />
           ))}
         </div>
@@ -109,7 +105,6 @@ export function MapPage() {
           )}
         </section>
       </div>
-      <BottomNav />
-    </>
+    </NavScreen>
   )
 }

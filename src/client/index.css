@@ -1,20 +1,68 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
 /*
   Design tokens. Figma is the source of truth: only copy values that
   already exist there, never invent a new one in code first.
+  The comment after each token is its Figma variable (or raw value).
 */
 @theme {
-  --color-neutral-white: #FFFFFF;
-  --color-neutral-border: #CFCFCF;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
-  --color-green: #00723F;
-  --color-green-light: #50B848;
-  --color-green-dark: #024731;
+  /* Neutrals */
+  --color-neutral-white: #FFFFFF; /* neutral/blanco */
+  --color-neutral-black: #000000; /* neutral/negro */
+  --color-neutral-border: #CFCFCF; /* neutral/borde */
+  --color-neutral-field-border: #767676; /* neutral/borde-campo */
+  --color-neutral-disabled: #EEEEEE; /* neutral/deshabilitado */
+  --color-neutral-surface: #F7F7F7; /* closed report card */
+  --color-neutral-text: #111111; /* neutral/texto */
+  --color-neutral-text-secondary: #333333; /* neutral/texto-2 */
+  --color-neutral-text-muted: #595959; /* neutral/texto-3 */
 
-  --color-gold: #DD971A;
-  --color-yellow: #FEBE10;
-  --color-gold-dark: #B08208;
+  /* UABC brand */
+  --color-green: #00723F; /* color/uabc/verde */
+  --color-green-light: #50B848; /* priority Baja */
+  --color-green-dark: #024731; /* color/uabc/verde-oscuro */
+  --color-green-surface: #E4F2EA; /* Resuelto chip, selected option */
 
-  --color-blue: #20419A;
+  --color-gold: #DD971A; /* prioridad/alta */
+  --color-yellow: #FEBE10; /* prioridad/media */
+  --color-gold-dark: #B08208; /* borde/revision */
+
+  --color-blue: #20419A; /* estado/nuevo */
+
+  /* Status */
+  --color-status-new-bg: #E5E9F5; /* estado/nuevo-bg */
+  --color-status-review-bg: #FDF1D8; /* estado/revision-bg */
+  --color-status-error: #B3261E; /* estado/error */
+
+  /* Type scale (Figma sizes that Tailwind does not ship) */
+  --text-caption: 11px;
+  --text-caption--line-height: 1.25;
+  --text-xs: 12px;
+  --text-xs--line-height: 1.25;
+  --text-body: 13px;
+  --text-body--line-height: 1.25;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.25;
+  --text-control: 15px;
+  --text-control--line-height: 1.25;
+  --text-base: 16px;
+  --text-base--line-height: 1.25;
+  --text-heading: 17px;
+  --text-heading--line-height: 1.25;
+
+  /* Radii */
+  --radius-chip: 6px;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-pill: 16px;
+  --radius-screen: 24px;
+}
+
+@layer base {
+  body {
+    @apply bg-neutral-white font-sans text-neutral-text antialiased;
+  }
 }

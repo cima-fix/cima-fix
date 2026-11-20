@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = 5174
 
 // End-to-end tests (SDD 16): 360 px and desktop viewports, against the dev server.
+// Desktop also runs in Firefox and WebKit (Safari engine) for RNF-USABILIDAD-02.
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -23,6 +24,14 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
+    {
+      name: 'desktop-firefox',
+      use: { ...devices['Desktop Firefox'], viewport: { width: 1280, height: 800 } },
+    },
+    {
+      name: 'desktop-webkit',
+      use: { ...devices['Desktop Safari'], viewport: { width: 1280, height: 800 } },
     },
   ],
   webServer: {

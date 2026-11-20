@@ -21,15 +21,23 @@ test.describe('campus map (/mapa)', () => {
     ])
   })
 
-  test('RF-MAPA-15: lists buildings with open reports and opens the filtered list', async ({
+  test('RF-MAPA-07: a building without open reports has no indicator', async ({ page }) => {
+    // Biblioteca only has a Resuelto report.
+    await expect(page.locator('a[href*="edificio=Biblioteca"]')).toHaveCount(0)
+    // Edificio 2: plan indicator + text alternative row.
+    await expect(page.locator('a[href*="edificio=Edificio+2"]')).toHaveCount(2)
+  })
+
+  test('RF-MAPA-08/16: the count matches the open reports listed for the building', async ({
     page,
   }) => {
-    const rows = page.getByRole('heading', { name: 'Edificios con reportes abiertos' })
-    await expect(rows).toBeVisible()
+    await page.getByRole('link', { name: /Edificio 5\s*4 reportes\s*Medio/ }).click()
 
-    await page.getByRole('link', { name: /Edificio 5\s*7 reportes\s*Alto/ }).click()
-    await expect(page).toHaveURL(/\/reportes\?edificio=Edificio(\+|%20)5/)
-    await expect(page.getByLabel('Edificio')).toHaveValue('Edificio 5')
+    await expect(page).toHaveURL(/edificio=Edificio\+5/)
+    await expect(page.getByLabel('Estado')).toHaveValue('Abiertos')
+    await expect(page.getByRole('heading', { name: 'Abiertos · 4' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Cerrados' })).toHaveCount(0)
+    await expect(page.getByRole('article')).toHaveCount(4)
   })
 
   test('the bottom nav marks the current section', async ({ page }) => {

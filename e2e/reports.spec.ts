@@ -9,12 +9,26 @@ test.describe('report list (/reportes)', () => {
     await expectNoHorizontalScroll(page)
   })
 
+  test('RF-GESTION-14: open first, then higher priority, then oldest', async ({ page }) => {
+    await page.goto('/reportes')
+    const titles = page.getByRole('article').getByRole('heading', { level: 3 })
+
+    await expect(titles).toHaveText([
+      'Edificio 5 · Salón 112', // Alta, 10 nov
+      'Edificio 5 · Salón 204', // Alta, 16 nov
+      'Edificio 2 · Laboratorio 3', // Media, 12 nov
+      'Edificio 5 · Salón 204', // Media, 13 nov
+      'Edificio 5 · Salón 112', // Media, 17 nov
+      'Biblioteca · Planta baja', // Resuelto
+    ])
+  })
+
   test('filters by building and keeps the filter in the URL', async ({ page }) => {
     await page.goto('/reportes')
     await page.getByLabel('Edificio').selectOption('Biblioteca')
 
     await expect(page).toHaveURL(/edificio=Biblioteca/)
-    await expect(page.getByRole('heading', { name: 'Abiertos · 0' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /^Abiertos/ })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Biblioteca · Planta baja' })).toBeVisible()
     await expect(page.getByRole('link', { name: /Edificio 5/ })).toHaveCount(0)
   })
@@ -69,6 +83,15 @@ test.describe('assign and resolve (/reportes/:id)', () => {
     // RF-GESTION-02: a resolved report shows its resolution date.
     await expect(page.getByRole('term').filter({ hasText: /^Resuelto$/ })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Marcar como resuelto' })).toHaveCount(0)
+  })
+
+  test('"Resolver" on a list card resolves the report', async ({ page }) => {
+    await page.goto('/reportes')
+    const card = page.getByRole('article').filter({ hasText: 'Laboratorio 3' })
+    await card.getByRole('button', { name: 'Resolver' }).click()
+
+    await expect(card.getByText('Resuelto', { exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Abiertos · 4' })).toBeVisible()
   })
 
   test('an unknown report shows a not-found message', async ({ page }) => {

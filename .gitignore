@@ -29,6 +29,6 @@ playwright-report
 
 .env
 .env.*
-!.env.example*.tsbuildinfo
+!.env.example
 *.tsbuildinfo
 

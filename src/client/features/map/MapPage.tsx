@@ -53,10 +53,11 @@ export function MapPage() {
 
   return (
     <NavScreen title={`Mapa · ${campus}`}>
-      <div className="flex flex-col gap-3 px-4 py-3.5">
+      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-3">
         <div
           aria-hidden="true"
-          className="relative aspect-4/3 overflow-hidden rounded-card border border-neutral-border bg-green-surface"
+          className="relative aspect-4/3 overflow-hidden rounded-card border border-neutral-border bg-green-surface lg:aspect-auto lg:h-[calc(100dvh-11rem)] lg:min-h-96"
         >
           {/* RF-MAPA-07: no indicator for a building without open reports. */}
           {withReports.map((b) => (
@@ -77,6 +78,7 @@ export function MapPage() {
             <LevelBadge level="high">Alto: {MAP_THRESHOLDS.high} o más</LevelBadge>
           </li>
         </ul>
+        </div>
 
         {/* Text alternative to the map (RF-MAPA-15). */}
         <section className="flex flex-col gap-2">

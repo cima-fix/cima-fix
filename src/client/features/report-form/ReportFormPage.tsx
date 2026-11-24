@@ -138,13 +138,15 @@ export function ReportFormPage() {
   return (
     <>
       <ScreenHeader title="Nuevo reporte" backTo="/" />
-      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3 px-4 py-3.5">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:grid lg:w-full lg:max-w-5xl lg:grid-cols-2 lg:items-start lg:gap-x-10 lg:gap-y-4 lg:rounded-card lg:border lg:border-neutral-border lg:p-8">
         {banner?.tone === 'warning' && (
-          <Notice tone="warning" className="text-body">
+          <Notice tone="warning" className="text-body lg:col-span-2">
             {banner.text}
           </Notice>
         )}
 
+        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-x-4">
         <Field label="Campus" error={errors.campus}>
           {(c) => (
             <Select
@@ -200,6 +202,7 @@ export function ReportFormPage() {
             />
           )}
         </Field>
+        </div>
 
         <Field
           label="Descripción"
@@ -218,13 +221,22 @@ export function ReportFormPage() {
               invalid={c.invalid}
               placeholder="Cuéntanos qué pasa"
               rows={3}
+              className="lg:min-h-48"
               value={values.description}
               onChange={(e) => set('description', e.target.value)}
             />
           )}
         </Field>
 
+        </div>
+
+        <div className="flex flex-col gap-3">
         <PhotoPicker photos={photos} onChange={setPhotos} />
+
+        <div className="hidden rounded-control bg-green-surface p-3 text-body text-green-dark lg:block">
+          Antes de enviar revisaremos si ya existe un reporte parecido, para que lo confirmes en
+          vez de duplicarlo.
+        </div>
 
         {banner?.tone === 'error' && (
           <Notice tone="error" className="text-body">
@@ -235,6 +247,7 @@ export function ReportFormPage() {
         <Button type="submit" disabled={busy} className="mt-1">
           {busy ? 'Enviando…' : 'Enviar reporte'}
         </Button>
+        </div>
       </form>
     </>
   )

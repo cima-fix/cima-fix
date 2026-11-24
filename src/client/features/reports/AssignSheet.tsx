@@ -31,7 +31,7 @@ export function AssignSheet() {
       ref={dialog}
       aria-labelledby="assign-title"
       onClose={close}
-      className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-screen bg-neutral-white p-0 text-neutral-text backdrop:bg-neutral-black/50"
+      className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-screen bg-neutral-white lg:my-auto lg:rounded-card p-0 text-neutral-text backdrop:bg-neutral-black/50"
     >
       <Form method="post" className="flex flex-col gap-3 px-4 pt-5 pb-6">
         <input type="hidden" name="intent" value="assign" />

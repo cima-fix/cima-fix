@@ -44,12 +44,13 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
         backLabel="Volver al formulario"
       />
 
-      <div className="flex flex-col gap-3 px-4 py-3.5">
+      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:w-full lg:max-w-5xl lg:rounded-card lg:border lg:border-neutral-border lg:p-8">
         <p className="text-body text-neutral-text-secondary">
           Hay reportes abiertos parecidos en el {building}. Si es el tuyo, confírmalo en vez de
           crear otro.
         </p>
 
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
         {similar.map((report) => (
           <ReportCard key={report.id} report={report}>
             {/* RF-DUPLICADO-05 (SDD 8.2): no confirm button on your own report or on one
@@ -69,6 +70,7 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
             )}
           </ReportCard>
         ))}
+        </div>
 
         {error && (
           <Notice tone="error" className="text-body">
@@ -76,7 +78,7 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
           </Notice>
         )}
 
-        <Button disabled={busy || confirming !== undefined} onClick={onContinue} className="mt-1">
+        <Button disabled={busy || confirming !== undefined} onClick={onContinue} className="mt-1 lg:w-auto lg:self-end lg:px-10">
           {busy ? 'Enviando…' : 'Ninguno es mi problema, continuar'}
         </Button>
       </div>

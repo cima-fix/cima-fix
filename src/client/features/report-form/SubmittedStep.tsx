@@ -20,7 +20,7 @@ export function SubmittedStep({ report, onNewReport }: SubmittedStepProps) {
   return (
     <>
       <ScreenHeader title="Reporte enviado" />
-      <div className="flex flex-col gap-3 px-4 py-6">
+      <div className="flex flex-col gap-3 px-4 py-6 lg:mx-auto lg:my-10 lg:w-full lg:max-w-xl lg:rounded-card lg:border lg:border-neutral-border lg:p-8">
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="flex size-12 items-center justify-center rounded-full bg-green text-neutral-white">
             <CheckIcon className="size-6" strokeWidth={2.5} />

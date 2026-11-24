@@ -66,3 +66,21 @@
     @apply bg-neutral-white font-sans text-neutral-text antialiased;
   }
 }
+
+/* Desktop (lg and up, 1024px+): everything one step bigger, so the screens are
+   proportional on a monitor. rem-based sizes and spacing follow the root font size;
+   the px text sizes of the theme are raised by hand. */
+@media (min-width: 1024px) {
+  html {
+    font-size: 112.5%;
+  }
+  :root {
+    --text-caption: 12px;
+    --text-xs: 13px;
+    --text-body: 15px;
+    --text-sm: 16px;
+    --text-control: 17px;
+    --text-base: 18px;
+    --text-heading: 20px;
+  }
+}

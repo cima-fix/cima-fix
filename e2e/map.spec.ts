@@ -40,8 +40,10 @@ test.describe('campus map (/mapa)', () => {
     await expect(page.getByRole('article')).toHaveCount(4)
   })
 
-  test('the bottom nav marks the current section', async ({ page }) => {
-    const nav = page.getByRole('navigation', { name: 'Secciones' })
+  test('the nav marks the current section', async ({ page }) => {
+    // Bottom nav on phones, side menu from lg (1024px) up.
+    const desktop = (page.viewportSize()?.width ?? 0) >= 1024
+    const nav = page.getByRole('navigation', { name: desktop ? 'Principal' : 'Secciones' })
     await expect(nav.getByRole('link', { name: 'Mapa' })).toHaveAttribute('aria-current', 'page')
     await nav.getByRole('link', { name: 'Reportes' }).click()
     await expect(page).toHaveURL(/\/reportes$/)

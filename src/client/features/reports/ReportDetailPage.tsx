@@ -30,9 +30,10 @@ export function ReportDetailPage() {
   return (
     <>
       <ScreenHeader title="Reporte" backTo="/reportes" />
-      <div className="flex flex-col gap-3 px-4 py-3.5">
+      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:grid lg:w-full lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-3">
         {report.photoCount > 0 && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
             {Array.from({ length: report.photoCount }, (_, i) => (
               <div
                 key={i}
@@ -69,7 +70,10 @@ export function ReportDetailPage() {
           <Row label="Reportó" value={report.reporterEmail} />
           <Row label="Asignado a" value={assigneeText} />
         </dl>
+        </div>
 
+        {/* Actions: on desktop they become a side panel that stays in view. */}
+        <div className="flex flex-col gap-3 lg:sticky lg:top-24 lg:rounded-card lg:border lg:border-neutral-border lg:p-4">
         <Notice tone="info">La prioridad se calcula sola y no se puede editar.</Notice>
 
         {isOpen(report) && (
@@ -104,6 +108,7 @@ export function ReportDetailPage() {
             </Button>
           </Form>
         )}
+        </div>
       </div>
       <Outlet />
     </>

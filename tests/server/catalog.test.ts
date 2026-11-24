@@ -113,7 +113,7 @@ describe('catalog', () => {
 
     it('RF-CATALOGO-08: rejects a repeated name ignoring case, accents and spaces, even if deactivated', async () => {
       const { campus, api } = await campusWithAdmin()
-      const building = await makeBuilding({ campusId: campus.id, name: 'Edificio Ñandú', nameKey: 'edificio nandu', isActive: false })
+      const building = await makeBuilding({ campusId: campus.id, name: 'Edificio Ñandú', nameKey: 'edificio ñandu', isActive: false })
       await makeCategory({ campusId: campus.id, name: 'Eléctrico', nameKey: 'electrico' })
       await makeSpace({ buildingId: building.id, name: 'Aula 1', nameKey: 'aula 1' })
 
@@ -126,6 +126,13 @@ describe('catalog', () => {
         expect(res.status).toBe(409)
         expect(await res.json()).toMatchObject({ error: { code: 'NAME_TAKEN', field: 'name' } })
       }
+    })
+
+    it('RF-CATALOGO-08: "ñ" is a letter of its own, so "Peña" and "Pena" are different names', async () => {
+      const { campus, api } = await campusWithAdmin()
+      expect((await api.post(`/api/campuses/${campus.id}/buildings`, { name: 'Edificio Peña' })).status).toBe(201)
+      expect((await api.post(`/api/campuses/${campus.id}/buildings`, { name: 'Edificio Pena' })).status).toBe(201)
+      expect((await api.post(`/api/campuses/${campus.id}/buildings`, { name: 'EDIFICIO PEÑA' })).status).toBe(409)
     })
 
     it('RF-CATALOGO-08: the same name is allowed in another scope', async () => {

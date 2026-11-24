@@ -53,7 +53,7 @@ export type ReportView = {
 }
 
 export type ReportViewContext = {
-  photos: PhotoStorage
+  photos: Pick<PhotoStorage, 'urls'>
   // True when the report is shown as a possible duplicate of the draft being registered: only
   // then can it be confirmed (RF-DUPLICADO-03, 06).
   asPossibleDuplicate?: boolean

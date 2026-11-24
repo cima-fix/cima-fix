@@ -11,7 +11,7 @@ import {
 import { deleteOrphanPhotos, ORPHAN_AGE_MS } from '../../src/server/modules/reports/orphan-photos.ts'
 import { asViewer } from '../helpers/as-viewer.ts'
 import { useTestDb } from '../helpers/db.ts'
-import { makeReport } from '../helpers/factories.ts'
+import { makeCampus, makeReport } from '../helpers/factories.ts'
 
 const NOW = new Date('2026-11-24T10:00:00Z')
 const old = new Date(NOW.getTime() - ORPHAN_AGE_MS - 1)
@@ -58,6 +58,16 @@ describe('orphan photos', () => {
       { publicId: 'f/kept', createdAt: old },
       { publicId: 'f/orphan', createdAt: old },
       { publicId: 'f/uploading', createdAt: recent },
+    ])
+    expect(await deleteOrphanPhotos(NOW)).toEqual({ deleted: 1 })
+    expect(deleted).toEqual([['f/orphan']])
+  })
+
+  it('never deletes the plan of a campus, even in the same folder', async () => {
+    const campus = await makeCampus({ floorPlanPublicId: 'f/plan' })
+    const deleted = fakeStorage([
+      { publicId: campus.floorPlanPublicId, createdAt: old },
+      { publicId: 'f/orphan', createdAt: old },
     ])
     expect(await deleteOrphanPhotos(NOW)).toEqual({ deleted: 1 })
     expect(deleted).toEqual([['f/orphan']])

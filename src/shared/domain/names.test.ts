@@ -25,9 +25,15 @@ describe('nameKey', () => {
     expect(nameKey('Café')).toBe(nameKey('Café'))
   })
 
-  // SDD 10.8 removes every combining mark, including the tilde of "ñ".
-  it('treats "ñ" as "n", as SDD 10.8 defines', () => {
-    expect(nameKey('Año')).toBe(nameKey('Ano'))
+  it('keeps "ñ" as a letter of its own', () => {
+    expect(nameKey('Peña')).not.toBe(nameKey('Pena'))
+    expect(nameKey('PEÑA')).toBe('peña')
+    // Decomposed "n" + combining tilde is the same "ñ".
+    expect(nameKey('Pen\u0303a')).toBe(nameKey('Peña'))
+  })
+
+  it('still removes other accents next to an "ñ"', () => {
+    expect(nameKey('Ñandú')).toBe('ñandu')
   })
 })
 

@@ -84,6 +84,13 @@ describe('isAuthentic', () => {
     expect(storage.isAuthentic({ ...photo, publicId: 'cima-fix/local/other', signature })).toBe(false)
     expect(storage.isAuthentic({ ...photo, version: photo.version + 1, signature })).toBe(false)
   })
+
+  it('rejects a photo of another environment, even with a valid signature', () => {
+    for (const publicId of ['cima-fix/preview/ab12cd34', 'cima-fix/localx/ab12cd34', 'ab12cd34']) {
+      const signature = responseSignature(publicId, photo.version)
+      expect(storage.isAuthentic({ publicId, version: photo.version, signature }), publicId).toBe(false)
+    }
+  })
 })
 
 describe('urls', () => {

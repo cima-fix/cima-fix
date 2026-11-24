@@ -4,16 +4,17 @@ import { checkReportBody, createReportBody } from '../../../shared/schemas/repor
 import { getPhotoStorage } from '../../integrations/cloudinary.ts'
 import { AppError, errorBody } from '../../middleware/errors.ts'
 import { validate } from '../../middleware/validate.ts'
+import { sessionRequired } from '../../middleware/session-required.ts'
 import { requireViewer } from '../../middleware/viewer.ts'
 import type { AppEnv } from '../../types.ts'
 import { checkDraft, registerReport } from './registration.ts'
 
 // Registration endpoints (SDD 7.2, Reportes y duplicados, and 8.2). Paths are relative to /api.
 export const reportRoutes = new Hono<AppEnv>()
-  .post('/reports/check', validate('json', checkReportBody), async (c) => {
+  .post('/reports/check', sessionRequired, validate('json', checkReportBody), async (c) => {
     return c.json(await checkDraft(requireViewer(c), c.req.valid('json')))
   })
-  .post('/photos/upload-signature', (c) => {
+  .post('/photos/upload-signature', sessionRequired, (c) => {
     requireViewer(c)
     let storage
     try {
@@ -28,7 +29,7 @@ export const reportRoutes = new Hono<AppEnv>()
     }
     return c.json(storage.signUpload(new Date()))
   })
-  .post('/reports', validate('json', createReportBody), async (c) => {
+  .post('/reports', sessionRequired, validate('json', createReportBody), async (c) => {
     const result = await registerReport(requireViewer(c), c.req.valid('json'))
     switch (result.kind) {
       case 'registered':

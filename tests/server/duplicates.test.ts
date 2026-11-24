@@ -50,6 +50,12 @@ describe('duplicate confirmations', () => {
     expect(await stored(report.id)).toMatchObject({ confirmationCount: 3, priority: 2 })
   })
 
+  it('RF-PRIORIDAD-02: the priority never goes above high', async () => {
+    const { report, draft } = await possibleDuplicate({ severity: 2, confirmationCount: 5 })
+    await asViewer(await makeViewer()).post(`/api/reports/${report.id}/confirmations`, draft)
+    expect(await stored(report.id)).toMatchObject({ confirmationCount: 6, priority: 3 })
+  })
+
   it('RF-DUPLICADO-05: rejects confirming an own report', async () => {
     const { report, draft } = await possibleDuplicate()
     const author = { accountId: report.reporterId, email: 'x@uabc.edu.mx', roles: new Map() }

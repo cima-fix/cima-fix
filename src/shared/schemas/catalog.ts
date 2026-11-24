@@ -64,6 +64,13 @@ export const updateCategoryBody = requireSomeField(
 // /api/campuses/:id/buildings/:bid/open-reports.
 export const campusBuildingParams = z.strictObject({ id, bid: id })
 
+// GET /api/spaces/link/:code (RF-REPORTE-05, 10). Letter case is ignored, in case the code is
+// typed from a printed label. A code that matches no space is not an error: it gets the "not
+// available" notice (SDD 10.9).
+export const linkCodeParam = z.strictObject({
+  code: z.string().transform((code) => code.toUpperCase()),
+})
+
 export type CreateBuildingBody = z.infer<typeof createBuildingBody>
 export type UpdateBuildingBody = z.infer<typeof updateBuildingBody>
 export type CreateSpaceBody = z.infer<typeof createSpaceBody>

@@ -4,18 +4,17 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: migrate
   cancel-in-progress: false
 
 jobs:
-  migrate:
+  migrate-dev:
+    name: migrate-dev
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-      matrix:
-        target: [dev, main] # dev primero: si falla, producción no se toca
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +25,36 @@ jobs:
 
       - run: npm ci
 
-      - name: Apply migrations (${{ matrix.target }})
-        run: npm run db:migrate
+      - name: Apply migrations to dev
         env:
-          DATABASE_URL_UNPOOLED: ${{ matrix.target == 'main' && secrets.DATABASE_URL_UNPOOLED_MAIN || secrets.DATABASE_URL_UNPOOLED_DEV }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED_DEV }}
+        run: |
+          if [ -z "$DATABASE_URL_UNPOOLED" ]; then
+            echo "::error::Secret DATABASE_URL_UNPOOLED_DEV is missing or empty"
+            exit 1
+          fi
+          npm run db:migrate
+
+  migrate-main:
+    name: migrate-main
+    needs: migrate-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply migrations to main
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED_MAIN }}
+        run: |
+          if [ -z "$DATABASE_URL_UNPOOLED" ]; then
+            echo "::error::Secret DATABASE_URL_UNPOOLED_MAIN is missing or empty"
+            exit 1
+          fi
+          npm run db:migrate

@@ -44,6 +44,10 @@ export type ReportView = {
   resolvedAt: string | null
   reporterEmail?: string
   assigneeEmail?: string | null
+  // Whether the viewer registered or confirmed the report, so that the SPA can show it without
+  // knowing the reporter email (SDD 8.2).
+  reportedByMe: boolean
+  confirmedByMe: boolean
   allowedActions: ReportAction[]
 }
 
@@ -52,8 +56,9 @@ export type ReportViewContext = {
   // True when the report is shown as a possible duplicate of the draft being registered: only
   // then can it be confirmed (RF-DUPLICADO-03, 06).
   asPossibleDuplicate?: boolean
-  // Whether the viewer already confirmed this report (RF-DUPLICADO-05).
-  confirmedByViewer?: boolean
+  // Whether the viewer already confirmed this report (RF-DUPLICADO-05). Required, so that a
+  // query that does not load it cannot report it as false by mistake.
+  confirmedByViewer: boolean
 }
 
 // Actions the SPA may offer. They only decide which buttons are shown; every action checks its
@@ -61,7 +66,7 @@ export type ReportViewContext = {
 export function allowedActions(
   report: ReportRecord,
   viewer: ReportViewer,
-  context: Pick<ReportViewContext, 'asPossibleDuplicate' | 'confirmedByViewer'> = {},
+  context: Pick<ReportViewContext, 'asPossibleDuplicate' | 'confirmedByViewer'>,
 ): ReportAction[] {
   const campusId = report.campus.id
   const ownReport = report.reporter.id === viewer.accountId
@@ -98,7 +103,7 @@ export function allowedActions(
     context.asPossibleDuplicate === true &&
     isOpen(report.status) &&
     !ownReport &&
-    context.confirmedByViewer !== true
+    !context.confirmedByViewer
   ) {
     actions.push('confirm')
   }
@@ -126,6 +131,8 @@ export function toReportView(
     confirmationCount: report.confirmationCount,
     createdAt: report.createdAt.toISOString(),
     resolvedAt: report.resolvedAt?.toISOString() ?? null,
+    reportedByMe: report.reporter.id === viewer.accountId,
+    confirmedByMe: context.confirmedByViewer,
     allowedActions: allowedActions(report, viewer, context),
   }
 

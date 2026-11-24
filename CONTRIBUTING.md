@@ -39,7 +39,10 @@ La aplicación queda disponible en la URL que indique la terminal.
    - `DATABASE_URL_UNPOOLED`: cadena **directa** de `dev` (sin `-pooler`). Solo se usa para migrar.
    - `APP_BASE_URL=http://localhost:5173`
 4. Si hay migraciones pendientes: `npm run db:migrate`
-5. `npm run dev` y abre http://localhost:5173
+5. Levanta la API en una terminal: `npm run dev:server` (escucha en `localhost:8787`)
+6. Levanta el cliente en otra terminal: `npm run dev` y abre http://localhost:5173
+
+Vite manda `/api` a `localhost:8787`: si solo corres `npm run dev`, la app abre pero todas las llamadas a la API fallan.
 
 Las pruebas (`npm test`) no necesitan base de datos externa: usan PGlite.
 

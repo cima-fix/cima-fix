@@ -7,6 +7,7 @@ import { jsonOnly } from './middleware/json-only.ts'
 import { anonymousSession } from './middleware/viewer.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { reportRoutes } from './modules/reports/routes.ts'
+import { duplicateRoutes } from './modules/duplicates/routes.ts'
 import type { AppEnv } from './types.ts'
 
 export type AppOptions = {
@@ -33,6 +34,7 @@ export function createApp(options: AppOptions = {}) {
   // .route('/', accessRoutes)
   api.route('/', catalogRoutes)
   api.route('/', reportRoutes)
+  api.route('/', duplicateRoutes)
   options.extend?.(api)
 
   const app = new Hono<AppEnv>().route('/api', api)

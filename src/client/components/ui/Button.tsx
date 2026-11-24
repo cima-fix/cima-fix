@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from 'react'
 import { Link, type LinkProps } from 'react-router'
 import { cn } from '../../lib/cn'
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'muted'
+type Variant = 'primary' | 'secondary' | 'outline' | 'danger' | 'muted'
 type Size = 'md' | 'sm'
 
 const base =
@@ -16,6 +16,9 @@ const variants: Record<Variant, string> = {
   secondary:
     'border-[1.5px] border-green bg-neutral-white text-green-dark hover:bg-green-surface',
   outline: 'border border-neutral-text bg-neutral-white text-neutral-text hover:bg-neutral-surface',
+  // Destructive action (cancel a report), uses the estado/error color.
+  danger:
+    'border-[1.5px] border-status-error bg-neutral-white text-status-error hover:bg-neutral-surface',
   muted: 'border border-neutral-border bg-neutral-disabled text-neutral-text-muted',
 }
 

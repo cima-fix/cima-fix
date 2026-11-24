@@ -7,7 +7,7 @@ import { ScreenHeader } from './ScreenHeader'
 export function NavScreen({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex h-dvh flex-col">
-      <ScreenHeader title={title} />
+      <ScreenHeader title={title} backTo="/" backLabel="Volver al inicio" />
       <main className="flex-1 overflow-y-auto">{children}</main>
       <BottomNav />
     </div>

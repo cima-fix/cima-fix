@@ -87,6 +87,11 @@ describe('toMapView', () => {
     expect(toMapView(campusWith([]), photos).noPositionedBuildings).toBe(true)
   })
 
+  it('RF-MAPA-11: an inactive building with a position does not count', () => {
+    const record = campusWith([building('a', { position: null }), building('b', { isActive: false })])
+    expect(toMapView(record, photos).noPositionedBuildings).toBe(true)
+  })
+
   it('RF-MAPA-11: does not warn when some building has a position, even without open reports', () => {
     const record = campusWith([building('a', { position: null }), building('b', { openCount: 0 })])
     expect(toMapView(record, photos).noPositionedBuildings).toBe(false)

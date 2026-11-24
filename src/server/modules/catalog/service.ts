@@ -236,7 +236,7 @@ export async function updateBuilding(
       changes.positionY = body.position?.y ?? null
     }
     // RF-CATALOGO-21, checked with the campus locked so no report is registered in between.
-    if (body.isActive === false && found.isActive && (await hasOpenReports(tx, reports.buildingId, buildingId))) {
+    if (body.isActive === false && (await hasOpenReports(tx, reports.buildingId, buildingId))) {
       throw new AppError(409, 'HAS_OPEN_REPORTS', 'No se puede desactivar un edificio con reportes abiertos.')
     }
     return translateRepeatedName('Ya existe un edificio con ese nombre en este campus.', async () => {
@@ -313,7 +313,7 @@ export async function updateCategory(
   requireAdmin(viewer, found.campusId)
 
   return withCampusLock(found.campusId, async ({ tx }) => {
-    if (body.isActive === false && found.isActive && (await hasOpenReports(tx, reports.categoryId, categoryId))) {
+    if (body.isActive === false && (await hasOpenReports(tx, reports.categoryId, categoryId))) {
       throw new AppError(409, 'HAS_OPEN_REPORTS', 'No se puede desactivar una categoría con reportes abiertos.')
     }
     const changes: Partial<typeof categories.$inferInsert> = {}

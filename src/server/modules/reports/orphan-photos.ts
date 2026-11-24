@@ -4,7 +4,7 @@ import { inArray } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 
 import { getDb } from '../../db/client.ts'
-import { reportPhotos } from '../../db/schema.ts'
+import { campuses, reportPhotos } from '../../db/schema.ts'
 import { getPhotoStorage } from '../../integrations/cloudinary.ts'
 import { AppError } from '../../middleware/errors.ts'
 import type { AppEnv } from '../../types.ts'
@@ -30,11 +30,18 @@ export async function deleteOrphanPhotos(now: Date): Promise<{ deleted: number }
     const old = page.uploads.filter((upload) => upload.createdAt.getTime() < cutoff).map((upload) => upload.publicId)
     if (old.length === 0) continue
 
-    const kept = await getDb()
-      .select({ publicId: reportPhotos.publicId })
-      .from(reportPhotos)
-      .where(inArray(reportPhotos.publicId, old))
-    const inUse = new Set(kept.map((row) => row.publicId))
+    // The plans of the campuses are kept too, in case they share the folder.
+    const [photos, plans] = await Promise.all([
+      getDb()
+        .select({ publicId: reportPhotos.publicId })
+        .from(reportPhotos)
+        .where(inArray(reportPhotos.publicId, old)),
+      getDb()
+        .select({ publicId: campuses.floorPlanPublicId })
+        .from(campuses)
+        .where(inArray(campuses.floorPlanPublicId, old)),
+    ])
+    const inUse = new Set([...photos, ...plans].map((row) => row.publicId))
     const orphans = old.filter((publicId) => !inUse.has(publicId))
 
     for (let start = 0; start < orphans.length; start += DELETE_BATCH_SIZE) {

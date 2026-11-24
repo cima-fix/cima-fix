@@ -117,6 +117,10 @@ export async function registerReport(viewer: Viewer, body: CreateReportBody): Pr
     }
   })
 
+  // Also checked before the lock, so a campus that does not exist gets the same answer as any
+  // other selection that is not offered, instead of the 404 of the lock.
+  await requireOffered(getDb(), body)
+
   const outcome = await withCampusLock(body.campusId, async ({ tx, emit }) => {
     const [existing] = await tx
       .select({ reporterId: reports.reporterId })

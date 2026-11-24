@@ -1,3 +1,5 @@
+import { timingSafeEqual } from 'node:crypto'
+
 import { v2 as cloudinary } from 'cloudinary'
 
 import { PHOTO_FORMATS } from '../../shared/domain/limits.ts'
@@ -98,10 +100,14 @@ export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
 
     // SDD 10.10: Cloudinary signs its upload response with the account secret over the public id
     // and the version. A matching signature proves that the photo was uploaded to this account,
-    // which only accepts uploads signed by this API.
+    // which only accepts uploads signed by this API. The environments share the account, so the
+    // photo must also be in the folder of this one: a photo of another environment would be
+    // deleted by that environment's orphan photo task.
     isAuthentic(photo) {
-      const expected = sign({ public_id: photo.publicId, version: photo.version })
-      return photo.signature === expected
+      if (!photo.publicId.startsWith(`${config.folder}/`)) return false
+      const expected = Buffer.from(sign({ public_id: photo.publicId, version: photo.version }))
+      const received = Buffer.from(photo.signature)
+      return received.length === expected.length && timingSafeEqual(received, expected)
     },
 
     urls(photo) {

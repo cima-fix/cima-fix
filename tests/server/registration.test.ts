@@ -295,6 +295,14 @@ describe('report registration', () => {
       expect(res.status).toBe(422)
     })
 
+    it('RF-REPORTE-12: a campus that does not exist is a selection that is not offered', async () => {
+      const { selection } = await catalog()
+      const body = submission({ ...selection, campusId: '00000000-0000-4000-8000-000000000000' })
+      const res = await asViewer(await makeViewer()).post('/api/reports', body)
+      expect(res.status).toBe(422)
+      expect(await res.json()).toMatchObject({ error: { code: 'SELECTION_NOT_OFFERED' } })
+    })
+
     it('RNF-SEGURIDAD-03: the eleventh report within an hour is rejected; older ones do not count', async () => {
       const { selection } = await catalog()
       const viewer: Viewer = await makeViewer()

@@ -28,6 +28,10 @@ import { toReportView, type ReportRecord, type ReportView, type ReportViewer } f
 // SDD 7.1
 export const PAGE_SIZE = 20
 
+// The photo storage is only needed to build the URL of a photo, so a report without photos is
+// shown even where Cloudinary is not configured (SDD 12).
+const photoUrls = { urls: (photo: { publicId: string }) => getPhotoStorage().urls(photo) }
+
 const reporter = alias(accounts, 'reporter')
 const assignee = alias(accounts, 'assignee')
 
@@ -191,12 +195,11 @@ export async function listReports(
   const page = rows.slice(0, PAGE_SIZE)
   const last = page.at(-1)
   const records = await toRecords(db, page)
-  const photos = getPhotoStorage()
 
   return {
     reports: records.map((record, index) =>
       toReportView(record, viewer, {
-        photos,
+        photos: photoUrls,
         asPossibleDuplicate: options.asPossibleDuplicates,
         confirmedByViewer: page[index]?.confirmedByViewer === true,
       }),
@@ -239,7 +242,7 @@ export async function getReport(
   const [record] = await toRecords(db, [row])
   if (!record) throw unavailable()
   return toReportView(record, viewer, {
-    photos: getPhotoStorage(),
+    photos: photoUrls,
     confirmedByViewer: row.confirmedByViewer === true,
   })
 }
@@ -265,10 +268,9 @@ export async function listPossibleDuplicates(
     )
     .orderBy(...ORDER)
   const records = await toRecords(db, rows)
-  const photos = getPhotoStorage()
   return records.map((record, index) =>
     toReportView(record, viewer, {
-      photos,
+      photos: photoUrls,
       asPossibleDuplicate: true,
       confirmedByViewer: rows[index]?.confirmedByViewer === true,
     }),

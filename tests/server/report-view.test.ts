@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { RESOLVED_VISIBILITY_MS } from '../../src/shared/domain/visibility.ts'
 import { compareReports } from '../../src/shared/domain/ordering.ts'
@@ -177,6 +177,20 @@ describe('report view', () => {
     const viewer = await makeViewer()
     const error = await rejection(listReports(viewer, { now: NOW, cursor: 'not-a-cursor' }))
     expect(error).toMatchObject({ status: 400, code: 'INVALID_CURSOR' })
+  })
+
+  it('SDD 12: reports without photos are shown even where Cloudinary is not configured', async () => {
+    const data = await campusWithReports()
+    vi.stubEnv('CLOUDINARY_CLOUD_NAME', '')
+    setPhotoStorage(undefined)
+    try {
+      const someone = await makeViewer()
+      expect((await listReports(someone, { now: NOW })).reports).toHaveLength(3)
+      expect((await getReport(someone, data.open.id, { now: NOW })).photos).toEqual([])
+    } finally {
+      vi.unstubAllEnvs()
+      setPhotoStorage(photos)
+    }
   })
 
   it('RF-GESTION-18: returns the detail of a report the account can see', async () => {

@@ -32,7 +32,8 @@ export type MapView = {
   thresholds: MapThresholds | null
   legend: LegendEntry[] | null
   indicators: MapIndicator[]
-  // RF-MAPA-11: no building of the campus has a position.
+  // RF-MAPA-11: no active building of the campus has a position. Inactive buildings never appear
+  // on the map, so their position does not count.
   noPositionedBuildings: boolean
 }
 
@@ -59,6 +60,8 @@ export function toMapView(record: CampusMapRecord, photos: PhotoStorage): MapVie
     thresholds: record.thresholds,
     legend: mapLegend(record.thresholds), // RF-MAPA-10
     indicators,
-    noPositionedBuildings: record.buildings.every((building) => building.position === null),
+    noPositionedBuildings: record.buildings.every(
+      (building) => !building.isActive || building.position === null,
+    ),
   }
 }

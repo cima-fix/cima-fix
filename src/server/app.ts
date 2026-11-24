@@ -2,10 +2,10 @@ import { Hono } from 'hono'
 import type { MiddlewareHandler } from 'hono'
 import { csrf } from 'hono/csrf'
 import { secureHeaders } from 'hono/secure-headers'
-import { errorHandler, notFoundHandler } from './middleware/errors'
-import { jsonOnly } from './middleware/json-only'
-import { anonymousSession } from './middleware/viewer'
-import type { AppEnv } from './types'
+import { errorHandler, notFoundHandler } from './middleware/errors.ts'
+import { jsonOnly } from './middleware/json-only.ts'
+import { anonymousSession } from './middleware/viewer.ts'
+import type { AppEnv } from './types.ts'
 
 export type AppOptions = {
   /** Session middleware. Production default: phase 3 replaces `anonymousSession`. Tests pass `asViewer()`. */

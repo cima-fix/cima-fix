@@ -4,7 +4,7 @@ import { getDb } from '../../src/server/db/client.ts'
 import { setEventDispatcher, withCampusLock } from '../../src/server/db/campus-lock.ts'
 import { accounts } from '../../src/server/db/schema.ts'
 import { AppError } from '../../src/server/middleware/errors.ts'
-import type { DomainEvent } from '../../src/shared/types/events'
+import type { DomainEvent } from '../../src/shared/types/events.ts'
 import { useTestDb } from '../helpers/db.ts'
 import { makeCampus } from '../helpers/factories.ts'
 

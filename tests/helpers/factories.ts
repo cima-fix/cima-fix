@@ -9,8 +9,8 @@ import {
   reports,
   spaces,
 } from '../../src/server/db/schema.ts'
-import type { StaffRole } from '../../src/shared/types/common'
-import type { Viewer } from '../../src/shared/types/viewer'
+import type { StaffRole } from '../../src/shared/types/common.ts'
+import type { Viewer } from '../../src/shared/types/viewer.ts'
 
 let counter = 0
 const next = () => ++counter

@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   // Unit tests live next to the code; integration tests live in tests/; e2e/ belongs to Playwright.
   test: {
-    include: ['tests/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
     // The server tests start an in-process PostgreSQL (PGlite) and apply the migrations.
     testTimeout: 30_000,
     hookTimeout: 60_000,

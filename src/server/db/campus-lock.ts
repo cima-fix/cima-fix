@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm'
-import type { DomainEvent } from '../../shared/types/events'
-import { AppError } from '../middleware/errors'
-import { getDb, type Tx } from './client'
-import { campuses } from './schema'
+import type { DomainEvent } from '../../shared/types/events.ts'
+import { AppError } from '../middleware/errors.ts'
+import { getDb, type Tx } from './client.ts'
+import { campuses } from './schema.ts'
 
 export type CampusLockContext = {
   tx: Tx

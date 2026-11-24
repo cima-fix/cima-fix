@@ -82,11 +82,13 @@ function Section({ title, reports }: { title: string; reports: Report[] }) {
       <h2 className="text-caption font-medium tracking-wide text-neutral-text-secondary uppercase">
         {title}
       </h2>
-      {reports.map((report) => (
-        <ReportCard key={report.id} report={report} variant="list" href={`/reportes/${report.id}`}>
-          {isOpen(report) && <ReportActions report={report} />}
-        </ReportCard>
-      ))}
+      <div className="flex flex-col gap-2.5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
+        {reports.map((report) => (
+          <ReportCard key={report.id} report={report} variant="list" href={`/reportes/${report.id}`}>
+            {isOpen(report) && <ReportActions report={report} />}
+          </ReportCard>
+        ))}
+      </div>
     </section>
   )
 }
@@ -128,8 +130,12 @@ export function ReportListPage() {
 
   return (
     <NavScreen title={`Reportes · ${campus}`}>
-      <div className="flex flex-col gap-3 px-4 py-3.5">
-        <div className="grid grid-cols-2 gap-2" role="group" aria-label="Filtros">
+      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-8 lg:py-6">
+        <aside className="flex flex-col gap-3 lg:sticky lg:top-24 lg:rounded-card lg:border lg:border-neutral-border lg:p-4">
+        <h2 className="hidden text-caption font-medium tracking-wide text-neutral-text-secondary uppercase lg:block">
+          Filtros
+        </h2>
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1" role="group" aria-label="Filtros">
           {/* Only one active campus for now; it becomes a real filter with the second one. */}
           <Select size="sm" aria-label="Campus" options={catalog.campuses} defaultValue={campus} />
           <Select
@@ -165,7 +171,9 @@ export function ReportListPage() {
             Los que reporté o confirmé
           </FilterTag>
         </div>
+        </aside>
 
+        <div className="flex flex-col gap-3 lg:gap-6">
         <Section title={`Abiertos · ${open.length}`} reports={open} />
         <Section title="Cerrados" reports={closed} />
         {visible.length === 0 && (
@@ -173,6 +181,7 @@ export function ReportListPage() {
             No hay reportes con estos filtros.
           </p>
         )}
+        </div>
       </div>
     </NavScreen>
   )

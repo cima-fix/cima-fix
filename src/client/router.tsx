@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
       </p>
     ),
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, loader: reportListLoader, element: <HomePage /> },
       { path: 'reportar', loader: getCatalog, element: <ReportFormPage /> },
       { path: 'reportes', loader: reportListLoader, element: <ReportListPage /> },
       {

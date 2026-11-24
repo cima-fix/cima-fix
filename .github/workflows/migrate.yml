@@ -1,0 +1,32 @@
+name: Migrate
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        target: [dev, main] # dev primero: si falla, producción no se toca
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply migrations (${{ matrix.target }})
+        run: npm run db:migrate
+        env:
+          DATABASE_URL_UNPOOLED: ${{ matrix.target == 'main' && secrets.DATABASE_URL_UNPOOLED_MAIN || secrets.DATABASE_URL_UNPOOLED_DEV }}

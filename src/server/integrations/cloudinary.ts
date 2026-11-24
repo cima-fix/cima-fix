@@ -38,7 +38,20 @@ export type PhotoStorage = {
   // the latest one, which is the only one, since photos are never replaced.
   urls(photo: { publicId: string; version?: number }): PhotoUrls
   floorPlanUrl(publicId: string): string
+  // Admin API, used only by the orphan photo task (SDD 10.10). Unlike the methods above, these
+  // call Cloudinary.
+  listUploads(cursor?: string): Promise<UploadPage>
+  deleteUploads(publicIds: string[]): Promise<void>
 }
+
+// One page of the photos uploaded to the folder of the environment.
+export type UploadPage = {
+  uploads: { publicId: string; createdAt: Date }[]
+  nextCursor: string | undefined
+}
+
+// Most photos the Admin API lists in one page.
+const LIST_PAGE_SIZE = 500
 
 // Cloudinary only accepts the formats of RF-REPORTE-09; the format is part of the signature, so
 // the browser cannot change it.
@@ -49,6 +62,13 @@ const ALLOWED_FORMATS = PHOTO_FORMATS.join(',')
 const THUMBNAIL_WIDTH = 400
 
 export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
+  // Passed on each Admin API call instead of configuring the SDK globally.
+  const credentials = {
+    cloud_name: config.cloudName,
+    api_key: config.apiKey,
+    api_secret: config.apiSecret,
+  }
+
   const sign = (params: Record<string, string | number>) =>
     cloudinary.utils.api_sign_request(params, config.apiSecret)
 
@@ -97,6 +117,28 @@ export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
     // version and the SDK uses Cloudinary's placeholder.
     floorPlanUrl(publicId) {
       return deliveryUrl(publicId, undefined, [{ fetch_format: 'auto', quality: 'auto' }])
+    },
+
+    async listUploads(cursor) {
+      const page = (await cloudinary.api.resources({
+        ...credentials,
+        resource_type: 'image',
+        type: 'upload',
+        prefix: `${config.folder}/`,
+        max_results: LIST_PAGE_SIZE,
+        next_cursor: cursor,
+      })) as { resources: { public_id: string; created_at: string }[]; next_cursor?: string }
+      return {
+        uploads: page.resources.map((resource) => ({
+          publicId: resource.public_id,
+          createdAt: new Date(resource.created_at),
+        })),
+        nextCursor: page.next_cursor,
+      }
+    },
+
+    async deleteUploads(publicIds) {
+      await cloudinary.api.delete_resources(publicIds, { ...credentials, resource_type: 'image', type: 'upload' })
     },
   }
 }

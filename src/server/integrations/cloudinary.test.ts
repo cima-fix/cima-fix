@@ -97,3 +97,11 @@ describe('urls', () => {
     )
   })
 })
+
+describe('floorPlanUrl', () => {
+  it('RNF-RENDIMIENTO-02: delivers the campus plan in the format and quality of each browser', () => {
+    expect(storage.floorPlanUrl('cima-fix/plans/sauzal')).toBe(
+      'https://res.cloudinary.com/cima-fix-test/image/upload/f_auto,q_auto/v1/cima-fix/plans/sauzal',
+    )
+  })
+})

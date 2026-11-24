@@ -35,6 +35,7 @@ export type PhotoStorage = {
   signUpload(now: Date): UploadParameters
   isAuthentic(photo: UploadedPhotoProof): boolean
   urls(photo: { publicId: string; version: number }): PhotoUrls
+  floorPlanUrl(publicId: string): string
 }
 
 // Cloudinary only accepts the formats of RF-REPORTE-09; the format is part of the signature, so
@@ -49,7 +50,7 @@ export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
   const sign = (params: Record<string, string | number>) =>
     cloudinary.utils.api_sign_request(params, config.apiSecret)
 
-  const deliveryUrl = (publicId: string, version: number, transformation: object[]) =>
+  const deliveryUrl = (publicId: string, version: number | undefined, transformation: object[]) =>
     cloudinary.url(publicId, {
       cloud_name: config.cloudName,
       secure: true,
@@ -88,6 +89,12 @@ export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
           { width: THUMBNAIL_WIDTH, crop: 'limit', fetch_format: 'auto', quality: 'auto' },
         ]),
       }
+    },
+
+    // Plan of a campus (RF-MAPA-01). Only its public id is stored (SDD 6.2), so the URL has no
+    // version and the SDK uses Cloudinary's placeholder.
+    floorPlanUrl(publicId) {
+      return deliveryUrl(publicId, undefined, [{ fetch_format: 'auto', quality: 'auto' }])
     },
   }
 }

@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql } from 'drizzle-orm'
 import {
   boolean,
   check,
@@ -15,203 +15,281 @@ import {
   unique,
   uuid,
   varchar,
-} from "drizzle-orm/pg-core";
+} from 'drizzle-orm/pg-core'
 
 // Data model: SDD 6.2. Dates are stored in UTC (DD-17).
 
-export const campusRole = pgEnum("campus_role", ["staff", "admin"]);
-export const reportStatus = pgEnum("report_status", ["new", "in_review", "resolved", "cancelled"]);
+export const campusRole = pgEnum('campus_role', ['staff', 'admin'])
+export const reportStatus = pgEnum('report_status', [
+  'new',
+  'in_review',
+  'resolved',
+  'cancelled',
+])
 
-const timestamptz = (name: string) => timestamp(name, { withTimezone: true });
+const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
 
 export const campuses = pgTable(
-  "campuses",
+  'campuses',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    slug: text("slug").notNull().unique(),
-    name: text("name").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
-    floorPlanPublicId: text("floor_plan_public_id").notNull(),
-    floorPlanWidth: integer("floor_plan_width").notNull(),
-    floorPlanHeight: integer("floor_plan_height").notNull(),
-    alertThresholdNew: integer("alert_threshold_new"),
-    alertThresholdInReview: integer("alert_threshold_in_review"),
-    mapThresholdMedium: integer("map_threshold_medium"),
-    mapThresholdHigh: integer("map_threshold_high"),
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull().unique(),
+    name: text('name').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    floorPlanPublicId: text('floor_plan_public_id').notNull(),
+    floorPlanWidth: integer('floor_plan_width').notNull(),
+    floorPlanHeight: integer('floor_plan_height').notNull(),
+    alertThresholdNew: integer('alert_threshold_new'),
+    alertThresholdInReview: integer('alert_threshold_in_review'),
+    mapThresholdMedium: integer('map_threshold_medium'),
+    mapThresholdHigh: integer('map_threshold_high'),
   },
   (t) => [
-    check("campuses_floor_plan_size", sql`${t.floorPlanWidth} > 0 AND ${t.floorPlanHeight} > 0`),
-    check("campuses_alert_threshold_new_min", sql`${t.alertThresholdNew} >= 1`),
-    check("campuses_alert_threshold_in_review_min", sql`${t.alertThresholdInReview} >= 1`),
-    check("campuses_map_thresholds_order", sql`${t.mapThresholdMedium} >= 2 AND ${t.mapThresholdHigh} > ${t.mapThresholdMedium}`),
-    check("campuses_map_thresholds_pair", sql`(${t.mapThresholdMedium} IS NULL) = (${t.mapThresholdHigh} IS NULL)`),
+    check(
+      'campuses_floor_plan_size',
+      sql`${t.floorPlanWidth} > 0 AND ${t.floorPlanHeight} > 0`,
+    ),
+    check('campuses_alert_threshold_new_min', sql`${t.alertThresholdNew} >= 1`),
+    check(
+      'campuses_alert_threshold_in_review_min',
+      sql`${t.alertThresholdInReview} >= 1`,
+    ),
+    check(
+      'campuses_map_thresholds_order',
+      sql`${t.mapThresholdMedium} >= 2 AND ${t.mapThresholdHigh} > ${t.mapThresholdMedium}`,
+    ),
+    check(
+      'campuses_map_thresholds_pair',
+      sql`(${t.mapThresholdMedium} IS NULL) = (${t.mapThresholdHigh} IS NULL)`,
+    ),
   ],
-);
+)
 
 export const accounts = pgTable(
-  "accounts",
+  'accounts',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    email: text("email").notNull().unique(),
-    createdAt: timestamptz("created_at").notNull().defaultNow(),
-    firstLoginAt: timestamptz("first_login_at"),
-    lastLoginAt: timestamptz("last_login_at"),
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: text('email').notNull().unique(),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    firstLoginAt: timestamptz('first_login_at'),
+    lastLoginAt: timestamptz('last_login_at'),
   },
-  (t) => [check("accounts_email_lowercase", sql`${t.email} = lower(${t.email})`)],
-);
+  (t) => [
+    check('accounts_email_lowercase', sql`${t.email} = lower(${t.email})`),
+  ],
+)
 
 export const campusRoles = pgTable(
-  "campus_roles",
+  'campus_roles',
   {
-    campusId: uuid("campus_id").notNull().references(() => campuses.id),
-    accountId: uuid("account_id").notNull().references(() => accounts.id),
-    role: campusRole("role").notNull(),
-    assignedBy: uuid("assigned_by").references(() => accounts.id),
-    assignedAt: timestamptz("assigned_at").notNull().defaultNow(),
+    campusId: uuid('campus_id')
+      .notNull()
+      .references(() => campuses.id),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => accounts.id),
+    role: campusRole('role').notNull(),
+    assignedBy: uuid('assigned_by').references(() => accounts.id),
+    assignedAt: timestamptz('assigned_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.campusId, t.accountId] })],
-);
+)
 
 export const sessions = pgTable(
-  "sessions",
+  'sessions',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    tokenHash: text("token_hash").notNull().unique(),
-    accountId: uuid("account_id").notNull().references(() => accounts.id),
-    createdAt: timestamptz("created_at").notNull().defaultNow(),
-    expiresAt: timestamptz("expires_at").notNull(),
+    id: uuid('id').primaryKey().defaultRandom(),
+    tokenHash: text('token_hash').notNull().unique(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => accounts.id),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    expiresAt: timestamptz('expires_at').notNull(),
   },
-  (t) => [index("sessions_account_idx").on(t.accountId)],
-);
+  (t) => [index('sessions_account_idx').on(t.accountId)],
+)
 
 export const buildings = pgTable(
-  "buildings",
+  'buildings',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    campusId: uuid("campus_id").notNull().references(() => campuses.id),
-    name: text("name").notNull(),
-    nameKey: text("name_key").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
-    positionX: real("position_x"),
-    positionY: real("position_y"),
+    id: uuid('id').primaryKey().defaultRandom(),
+    campusId: uuid('campus_id')
+      .notNull()
+      .references(() => campuses.id),
+    name: text('name').notNull(),
+    nameKey: text('name_key').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    positionX: real('position_x'),
+    positionY: real('position_y'),
   },
   (t) => [
-    unique("buildings_id_campus_unique").on(t.id, t.campusId), // target of reports' composite FK
-    unique("buildings_campus_name_key_unique").on(t.campusId, t.nameKey),
-    check("buildings_name_length", sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`),
-    check("buildings_position_pair", sql`(${t.positionX} IS NULL) = (${t.positionY} IS NULL)`),
-    check("buildings_position_min", sql`${t.positionX} >= 0 AND ${t.positionY} >= 0`),
+    unique('buildings_id_campus_unique').on(t.id, t.campusId), // target of reports' composite FK
+    unique('buildings_campus_name_key_unique').on(t.campusId, t.nameKey),
+    check(
+      'buildings_name_length',
+      sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`,
+    ),
+    check(
+      'buildings_position_pair',
+      sql`(${t.positionX} IS NULL) = (${t.positionY} IS NULL)`,
+    ),
+    check(
+      'buildings_position_min',
+      sql`${t.positionX} >= 0 AND ${t.positionY} >= 0`,
+    ),
     // Upper bound (plan width/height) lives in another table: the catalog service validates it.
   ],
-);
+)
 
 export const spaces = pgTable(
-  "spaces",
+  'spaces',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    buildingId: uuid("building_id").notNull().references(() => buildings.id),
-    name: text("name").notNull(),
-    nameKey: text("name_key").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
-    linkCode: text("link_code").notNull().unique(), // 10 random chars, generated by the catalog service
+    id: uuid('id').primaryKey().defaultRandom(),
+    buildingId: uuid('building_id')
+      .notNull()
+      .references(() => buildings.id),
+    name: text('name').notNull(),
+    nameKey: text('name_key').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    linkCode: text('link_code').notNull().unique(), // 10 random chars, generated by the catalog service
   },
   (t) => [
-    unique("spaces_building_name_key_unique").on(t.buildingId, t.nameKey),
-    check("spaces_name_length", sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`),
+    unique('spaces_building_name_key_unique').on(t.buildingId, t.nameKey),
+    check(
+      'spaces_name_length',
+      sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`,
+    ),
   ],
-);
+)
 
 export const categories = pgTable(
-  "categories",
+  'categories',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    campusId: uuid("campus_id").notNull().references(() => campuses.id),
-    name: text("name").notNull(),
-    nameKey: text("name_key").notNull(),
-    severity: smallint("severity").notNull(), // 1 = low, 2 = medium, 3 = high
-    isActive: boolean("is_active").notNull().default(true),
+    id: uuid('id').primaryKey().defaultRandom(),
+    campusId: uuid('campus_id')
+      .notNull()
+      .references(() => campuses.id),
+    name: text('name').notNull(),
+    nameKey: text('name_key').notNull(),
+    severity: smallint('severity').notNull(), // 1 = low, 2 = medium, 3 = high
+    isActive: boolean('is_active').notNull().default(true),
   },
   (t) => [
-    unique("categories_id_campus_unique").on(t.id, t.campusId), // target of reports' composite FK
-    unique("categories_campus_name_key_unique").on(t.campusId, t.nameKey),
-    check("categories_name_length", sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`),
-    check("categories_severity_range", sql`${t.severity} BETWEEN 1 AND 3`),
+    unique('categories_id_campus_unique').on(t.id, t.campusId), // target of reports' composite FK
+    unique('categories_campus_name_key_unique').on(t.campusId, t.nameKey),
+    check(
+      'categories_name_length',
+      sql`char_length(trim(${t.name})) BETWEEN 1 AND 100`,
+    ),
+    check('categories_severity_range', sql`${t.severity} BETWEEN 1 AND 3`),
   ],
-);
+)
 
 export const reports = pgTable(
-  "reports",
+  'reports',
   {
-    id: uuid("id").primaryKey().defaultRandom(), // generated by the client on the real flow
-    campusId: uuid("campus_id").notNull().references(() => campuses.id),
-    buildingId: uuid("building_id").notNull(),
-    spaceId: uuid("space_id").notNull().references(() => spaces.id),
-    categoryId: uuid("category_id").notNull(),
-    description: varchar("description", { length: 1000 }).notNull(),
-    status: reportStatus("status").notNull().default("new"),
-    isOpen: boolean("is_open").generatedAlwaysAs(sql`status IN ('new', 'in_review')`),
-    priority: smallint("priority").notNull(), // 1 = low, 2 = medium, 3 = high (DD-07)
-    confirmationCount: integer("confirmation_count").notNull().default(0),
-    reporterId: uuid("reporter_id").notNull().references(() => accounts.id),
-    assigneeId: uuid("assignee_id").references(() => accounts.id),
-    createdAt: timestamptz("created_at").notNull().defaultNow(),
-    resolvedAt: timestamptz("resolved_at"),
-    cancelledAt: timestamptz("cancelled_at"),
+    id: uuid('id').primaryKey().defaultRandom(), // generated by the client on the real flow
+    campusId: uuid('campus_id')
+      .notNull()
+      .references(() => campuses.id),
+    buildingId: uuid('building_id').notNull(),
+    spaceId: uuid('space_id')
+      .notNull()
+      .references(() => spaces.id),
+    categoryId: uuid('category_id').notNull(),
+    description: varchar('description', { length: 1000 }).notNull(),
+    status: reportStatus('status').notNull().default('new'),
+    isOpen: boolean('is_open').generatedAlwaysAs(
+      sql`status IN ('new', 'in_review')`,
+    ),
+    priority: smallint('priority').notNull(), // 1 = low, 2 = medium, 3 = high (DD-07)
+    confirmationCount: integer('confirmation_count').notNull().default(0),
+    reporterId: uuid('reporter_id')
+      .notNull()
+      .references(() => accounts.id),
+    assigneeId: uuid('assignee_id').references(() => accounts.id),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    resolvedAt: timestamptz('resolved_at'),
+    cancelledAt: timestamptz('cancelled_at'),
   },
   (t) => [
     // The database guarantees building and category belong to the report's campus (RF-REPORTE-13).
     foreignKey({
-      name: "reports_building_campus_fk",
+      name: 'reports_building_campus_fk',
       columns: [t.buildingId, t.campusId],
       foreignColumns: [buildings.id, buildings.campusId],
     }),
     foreignKey({
-      name: "reports_category_campus_fk",
+      name: 'reports_category_campus_fk',
       columns: [t.categoryId, t.campusId],
       foreignColumns: [categories.id, categories.campusId],
     }),
-    check("reports_description_not_blank", sql`length(trim(${t.description})) > 0`),
-    check("reports_priority_range", sql`${t.priority} BETWEEN 1 AND 3`),
-    check("reports_confirmation_count_min", sql`${t.confirmationCount} >= 0`),
-    check("reports_in_review_has_assignee", sql`${t.status} <> 'in_review' OR ${t.assigneeId} IS NOT NULL`),
-    index("reports_order_idx").on(t.isOpen.desc(), t.priority.desc(), t.createdAt.asc()),
-    index("reports_duplicates_idx").on(t.campusId, t.categoryId, t.buildingId).where(sql`is_open`),
-    index("reports_map_idx").on(t.campusId, t.buildingId).where(sql`is_open`),
-    index("reports_thresholds_idx").on(t.campusId, t.status).where(sql`is_open`),
-    index("reports_reporter_idx").on(t.reporterId, t.createdAt),
-    index("reports_assignee_idx").on(t.assigneeId).where(sql`is_open`),
+    check(
+      'reports_description_not_blank',
+      sql`length(trim(${t.description})) > 0`,
+    ),
+    check('reports_priority_range', sql`${t.priority} BETWEEN 1 AND 3`),
+    check('reports_confirmation_count_min', sql`${t.confirmationCount} >= 0`),
+    check(
+      'reports_in_review_has_assignee',
+      sql`${t.status} <> 'in_review' OR ${t.assigneeId} IS NOT NULL`,
+    ),
+    index('reports_order_idx').on(
+      t.isOpen.desc(),
+      t.priority.desc(),
+      t.createdAt.asc(),
+    ),
+    index('reports_duplicates_idx')
+      .on(t.campusId, t.categoryId, t.buildingId)
+      .where(sql`is_open`),
+    index('reports_map_idx')
+      .on(t.campusId, t.buildingId)
+      .where(sql`is_open`),
+    index('reports_thresholds_idx')
+      .on(t.campusId, t.status)
+      .where(sql`is_open`),
+    index('reports_reporter_idx').on(t.reporterId, t.createdAt),
+    index('reports_assignee_idx')
+      .on(t.assigneeId)
+      .where(sql`is_open`),
   ],
-);
+)
 
 export const reportPhotos = pgTable(
-  "report_photos",
+  'report_photos',
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    reportId: uuid("report_id").notNull().references(() => reports.id),
-    publicId: text("public_id").notNull(),
-    format: text("format").notNull(),
-    bytes: integer("bytes").notNull(),
-    position: smallint("position").notNull(),
+    id: uuid('id').primaryKey().defaultRandom(),
+    reportId: uuid('report_id')
+      .notNull()
+      .references(() => reports.id),
+    publicId: text('public_id').notNull(),
+    format: text('format').notNull(),
+    bytes: integer('bytes').notNull(),
+    position: smallint('position').notNull(),
   },
   (t) => [
-    unique("report_photos_report_position_unique").on(t.reportId, t.position),
-    check("report_photos_position_range", sql`${t.position} BETWEEN 1 AND 3`),
+    unique('report_photos_report_position_unique').on(t.reportId, t.position),
+    check('report_photos_position_range', sql`${t.position} BETWEEN 1 AND 3`),
   ],
-);
+)
 
 export const duplicateConfirmations = pgTable(
-  "duplicate_confirmations",
+  'duplicate_confirmations',
   {
-    reportId: uuid("report_id").notNull().references(() => reports.id),
-    accountId: uuid("account_id").notNull().references(() => accounts.id),
-    createdAt: timestamptz("created_at").notNull().defaultNow(),
+    reportId: uuid('report_id')
+      .notNull()
+      .references(() => reports.id),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => accounts.id),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.reportId, t.accountId] })],
-);
+)
 
-export type Campus = typeof campuses.$inferSelect;
-export type Account = typeof accounts.$inferSelect;
-export type Building = typeof buildings.$inferSelect;
-export type Space = typeof spaces.$inferSelect;
-export type Category = typeof categories.$inferSelect;
-export type Report = typeof reports.$inferSelect;
+export type Campus = typeof campuses.$inferSelect
+export type Account = typeof accounts.$inferSelect
+export type Building = typeof buildings.$inferSelect
+export type Space = typeof spaces.$inferSelect
+export type Category = typeof categories.$inferSelect
+export type Report = typeof reports.$inferSelect

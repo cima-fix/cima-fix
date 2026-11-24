@@ -1,4 +1,4 @@
-import type { OpenStatus } from '../types/common'
+import type { OpenStatus } from '../types/common.ts'
 
 // Counts and alert thresholds of a campus at one moment, read inside the transaction that holds
 // the campus lock (SDD 9.2, DD-08). A null threshold means none is set.

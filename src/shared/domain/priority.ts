@@ -1,4 +1,4 @@
-import type { LevelValue } from './levels'
+import type { LevelValue } from './levels.ts'
 
 export const CONFIRMATIONS_PER_LEVEL = 3
 

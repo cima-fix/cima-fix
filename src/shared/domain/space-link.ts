@@ -3,7 +3,7 @@ import {
   type CampusCatalog,
   type CatalogBuilding,
   type CatalogItem,
-} from './offered-catalog'
+} from './offered-catalog.ts'
 
 // Space identified by the code of a link, with the building and campus it belongs to.
 export type LinkTarget = { campusId: string; buildingId: string; spaceId: string }

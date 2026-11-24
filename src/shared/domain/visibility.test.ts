@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { StaffRole } from '../types/common'
-import type { CampusRoles } from './permissions'
-import { RESOLVED_VISIBILITY_MS, reportVisibility, type ReportVisibilityFacts } from './visibility'
+import type { StaffRole } from '../types/common.ts'
+import type { CampusRoles } from './permissions.ts'
+import { RESOLVED_VISIBILITY_MS, reportVisibility, type ReportVisibilityFacts } from './visibility.ts'
 
 const CAMPUS = 'campus-a'
 const NOW = new Date('2026-11-23T18:00:00Z')

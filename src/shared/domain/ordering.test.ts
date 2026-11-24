@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { LevelValue } from './levels'
-import { compareReports, type OrderFacts } from './ordering'
+import type { LevelValue } from './levels.ts'
+import { compareReports, type OrderFacts } from './ordering.ts'
 
 function report(
   id: string,

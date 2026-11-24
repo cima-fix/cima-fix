@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Role, StaffRole } from '../types/common'
-import { can, managedCampusIds, roleIn, type CampusRoles, type Permission } from './permissions'
+import type { Role, StaffRole } from '../types/common.ts'
+import { can, managedCampusIds, roleIn, type CampusRoles, type Permission } from './permissions.ts'
 
 const CAMPUS = 'campus-a'
 const OTHER_CAMPUS = 'campus-b'

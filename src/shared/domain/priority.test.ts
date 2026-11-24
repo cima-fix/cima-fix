@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { toLevel, toLevelValue } from './levels'
-import { priority } from './priority'
+import { toLevel, toLevelValue } from './levels.ts'
+import { priority } from './priority.ts'
 
 const LOW = toLevelValue('low')
 const MEDIUM = toLevelValue('medium')

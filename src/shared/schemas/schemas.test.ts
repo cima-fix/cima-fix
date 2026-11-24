@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type * as z from 'zod'
 
-import { MAX_PHOTO_BYTES } from '../domain/limits'
-import { assignRoleBody } from './access'
-import { createCategoryBody, createBuildingBody, updateBuildingBody } from './catalog'
-import { confirmationBody } from './duplicates'
-import { reportQuery } from './management'
-import { checkReportBody, createReportBody } from './reports'
-import { alertThresholdsBody, mapThresholdsBody } from './thresholds'
+import { MAX_PHOTO_BYTES } from '../domain/limits.ts'
+import { assignRoleBody } from './access.ts'
+import { createCategoryBody, createBuildingBody, updateBuildingBody } from './catalog.ts'
+import { confirmationBody } from './duplicates.ts'
+import { reportQuery } from './management.ts'
+import { checkReportBody, createReportBody } from './reports.ts'
+import { alertThresholdsBody, mapThresholdsBody } from './thresholds.ts'
 
 const ID = '7f1d3c2a-9b4e-4c6d-8a1f-2e3b4c5d6e7f'
 

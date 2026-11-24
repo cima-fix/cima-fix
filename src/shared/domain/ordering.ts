@@ -1,6 +1,6 @@
-import type { ReportStatus } from '../types/common'
-import type { LevelValue } from './levels'
-import { isOpen } from './transitions'
+import type { ReportStatus } from '../types/common.ts'
+import type { LevelValue } from './levels.ts'
+import { isOpen } from './transitions.ts'
 
 export type OrderFacts = {
   id: string

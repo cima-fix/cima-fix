@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { REPORT_STATUSES } from '../types/common'
-import { isOpen, nextStatus, type ReportAction } from './transitions'
+import { REPORT_STATUSES } from '../types/common.ts'
+import { isOpen, nextStatus, type ReportAction } from './transitions.ts'
 
 const ACTIONS: ReportAction[] = ['assign', 'resolve', 'cancel']
 

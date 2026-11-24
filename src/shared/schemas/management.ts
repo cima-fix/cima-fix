@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
-import { REPORT_STATUSES } from '../types/common'
-import { id } from './common'
+import { REPORT_STATUSES } from '../types/common.ts'
+import { id } from './common.ts'
 
 // Input of the management endpoints (SDD 7.2, Gestión).
 

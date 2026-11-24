@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { offeredCatalog } from './offered-catalog'
-import { resolveSpaceLink } from './space-link'
+import { offeredCatalog } from './offered-catalog.ts'
+import { resolveSpaceLink } from './space-link.ts'
 
 const catalog = {
   campus: { id: 'campus', isActive: true },

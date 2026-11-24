@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-import { id } from './common'
+import { id } from './common.ts'
 
 // POST /api/reports/:id/confirmations: the campus, category and building of the draft, to check
 // that the confirmed report is a possible duplicate of it (RN-05, RF-DUPLICADO-06).

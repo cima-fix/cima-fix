@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cleanName, nameKey } from './names'
+import { cleanName, nameKey } from './names.ts'
 
 describe('nameKey', () => {
   it('RF-CATALOGO-08: ignores letter case', () => {

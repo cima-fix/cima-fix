@@ -1,0 +1,1154 @@
+{
+  "id": "556274d3-94e9-4a98-b734-525b2a4256af",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.accounts": {
+      "name": "accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "first_login_at": {
+          "name": "first_login_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "accounts_email_unique": {
+          "name": "accounts_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "accounts_email_lowercase": {
+          "name": "accounts_email_lowercase",
+          "value": "\"accounts\".\"email\" = lower(\"accounts\".\"email\")"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.buildings": {
+      "name": "buildings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "campus_id": {
+          "name": "campus_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_key": {
+          "name": "name_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "position_x": {
+          "name": "position_x",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position_y": {
+          "name": "position_y",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "buildings_campus_id_campuses_id_fk": {
+          "name": "buildings_campus_id_campuses_id_fk",
+          "tableFrom": "buildings",
+          "tableTo": "campuses",
+          "columnsFrom": [
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "buildings_id_campus_unique": {
+          "name": "buildings_id_campus_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "campus_id"
+          ]
+        },
+        "buildings_campus_name_key_unique": {
+          "name": "buildings_campus_name_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "campus_id",
+            "name_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "buildings_name_length": {
+          "name": "buildings_name_length",
+          "value": "char_length(trim(\"buildings\".\"name\")) BETWEEN 1 AND 100"
+        },
+        "buildings_position_pair": {
+          "name": "buildings_position_pair",
+          "value": "(\"buildings\".\"position_x\" IS NULL) = (\"buildings\".\"position_y\" IS NULL)"
+        },
+        "buildings_position_min": {
+          "name": "buildings_position_min",
+          "value": "\"buildings\".\"position_x\" >= 0 AND \"buildings\".\"position_y\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.campus_roles": {
+      "name": "campus_roles",
+      "schema": "",
+      "columns": {
+        "campus_id": {
+          "name": "campus_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "campus_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assigned_by": {
+          "name": "assigned_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assigned_at": {
+          "name": "assigned_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "campus_roles_campus_id_campuses_id_fk": {
+          "name": "campus_roles_campus_id_campuses_id_fk",
+          "tableFrom": "campus_roles",
+          "tableTo": "campuses",
+          "columnsFrom": [
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "campus_roles_account_id_accounts_id_fk": {
+          "name": "campus_roles_account_id_accounts_id_fk",
+          "tableFrom": "campus_roles",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "campus_roles_assigned_by_accounts_id_fk": {
+          "name": "campus_roles_assigned_by_accounts_id_fk",
+          "tableFrom": "campus_roles",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "assigned_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "campus_roles_campus_id_account_id_pk": {
+          "name": "campus_roles_campus_id_account_id_pk",
+          "columns": [
+            "campus_id",
+            "account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.campuses": {
+      "name": "campuses",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "floor_plan_public_id": {
+          "name": "floor_plan_public_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "floor_plan_width": {
+          "name": "floor_plan_width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "floor_plan_height": {
+          "name": "floor_plan_height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alert_threshold_new": {
+          "name": "alert_threshold_new",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alert_threshold_in_review": {
+          "name": "alert_threshold_in_review",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "map_threshold_medium": {
+          "name": "map_threshold_medium",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "map_threshold_high": {
+          "name": "map_threshold_high",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "campuses_slug_unique": {
+          "name": "campuses_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "campuses_floor_plan_size": {
+          "name": "campuses_floor_plan_size",
+          "value": "\"campuses\".\"floor_plan_width\" > 0 AND \"campuses\".\"floor_plan_height\" > 0"
+        },
+        "campuses_alert_threshold_new_min": {
+          "name": "campuses_alert_threshold_new_min",
+          "value": "\"campuses\".\"alert_threshold_new\" >= 1"
+        },
+        "campuses_alert_threshold_in_review_min": {
+          "name": "campuses_alert_threshold_in_review_min",
+          "value": "\"campuses\".\"alert_threshold_in_review\" >= 1"
+        },
+        "campuses_map_thresholds_order": {
+          "name": "campuses_map_thresholds_order",
+          "value": "\"campuses\".\"map_threshold_medium\" >= 2 AND \"campuses\".\"map_threshold_high\" > \"campuses\".\"map_threshold_medium\""
+        },
+        "campuses_map_thresholds_pair": {
+          "name": "campuses_map_thresholds_pair",
+          "value": "(\"campuses\".\"map_threshold_medium\" IS NULL) = (\"campuses\".\"map_threshold_high\" IS NULL)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.categories": {
+      "name": "categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "campus_id": {
+          "name": "campus_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_key": {
+          "name": "name_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "severity": {
+          "name": "severity",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "categories_campus_id_campuses_id_fk": {
+          "name": "categories_campus_id_campuses_id_fk",
+          "tableFrom": "categories",
+          "tableTo": "campuses",
+          "columnsFrom": [
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "categories_id_campus_unique": {
+          "name": "categories_id_campus_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "campus_id"
+          ]
+        },
+        "categories_campus_name_key_unique": {
+          "name": "categories_campus_name_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "campus_id",
+            "name_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "categories_name_length": {
+          "name": "categories_name_length",
+          "value": "char_length(trim(\"categories\".\"name\")) BETWEEN 1 AND 100"
+        },
+        "categories_severity_range": {
+          "name": "categories_severity_range",
+          "value": "\"categories\".\"severity\" BETWEEN 1 AND 3"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.duplicate_confirmations": {
+      "name": "duplicate_confirmations",
+      "schema": "",
+      "columns": {
+        "report_id": {
+          "name": "report_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "duplicate_confirmations_report_id_reports_id_fk": {
+          "name": "duplicate_confirmations_report_id_reports_id_fk",
+          "tableFrom": "duplicate_confirmations",
+          "tableTo": "reports",
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "duplicate_confirmations_account_id_accounts_id_fk": {
+          "name": "duplicate_confirmations_account_id_accounts_id_fk",
+          "tableFrom": "duplicate_confirmations",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "duplicate_confirmations_report_id_account_id_pk": {
+          "name": "duplicate_confirmations_report_id_account_id_pk",
+          "columns": [
+            "report_id",
+            "account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.report_photos": {
+      "name": "report_photos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "report_id": {
+          "name": "report_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public_id": {
+          "name": "public_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "format": {
+          "name": "format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bytes": {
+          "name": "bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "report_photos_report_id_reports_id_fk": {
+          "name": "report_photos_report_id_reports_id_fk",
+          "tableFrom": "report_photos",
+          "tableTo": "reports",
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "report_photos_report_position_unique": {
+          "name": "report_photos_report_position_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "report_id",
+            "position"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "report_photos_position_range": {
+          "name": "report_photos_position_range",
+          "value": "\"report_photos\".\"position\" BETWEEN 1 AND 3"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.reports": {
+      "name": "reports",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "campus_id": {
+          "name": "campus_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "building_id": {
+          "name": "building_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "space_id": {
+          "name": "space_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "report_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "is_open": {
+          "name": "is_open",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "status IN ('new', 'in_review')",
+            "type": "stored"
+          }
+        },
+        "priority": {
+          "name": "priority",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "confirmation_count": {
+          "name": "confirmation_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "reporter_id": {
+          "name": "reporter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assignee_id": {
+          "name": "assignee_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "reports_order_idx": {
+          "name": "reports_order_idx",
+          "columns": [
+            {
+              "expression": "is_open",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "priority",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reports_duplicates_idx": {
+          "name": "reports_duplicates_idx",
+          "columns": [
+            {
+              "expression": "campus_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "category_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "building_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_open",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reports_map_idx": {
+          "name": "reports_map_idx",
+          "columns": [
+            {
+              "expression": "campus_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "building_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_open",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reports_thresholds_idx": {
+          "name": "reports_thresholds_idx",
+          "columns": [
+            {
+              "expression": "campus_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_open",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reports_reporter_idx": {
+          "name": "reports_reporter_idx",
+          "columns": [
+            {
+              "expression": "reporter_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reports_assignee_idx": {
+          "name": "reports_assignee_idx",
+          "columns": [
+            {
+              "expression": "assignee_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_open",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "reports_campus_id_campuses_id_fk": {
+          "name": "reports_campus_id_campuses_id_fk",
+          "tableFrom": "reports",
+          "tableTo": "campuses",
+          "columnsFrom": [
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reports_space_id_spaces_id_fk": {
+          "name": "reports_space_id_spaces_id_fk",
+          "tableFrom": "reports",
+          "tableTo": "spaces",
+          "columnsFrom": [
+            "space_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reports_reporter_id_accounts_id_fk": {
+          "name": "reports_reporter_id_accounts_id_fk",
+          "tableFrom": "reports",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "reporter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reports_assignee_id_accounts_id_fk": {
+          "name": "reports_assignee_id_accounts_id_fk",
+          "tableFrom": "reports",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "assignee_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reports_building_campus_fk": {
+          "name": "reports_building_campus_fk",
+          "tableFrom": "reports",
+          "tableTo": "buildings",
+          "columnsFrom": [
+            "building_id",
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id",
+            "campus_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reports_category_campus_fk": {
+          "name": "reports_category_campus_fk",
+          "tableFrom": "reports",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "category_id",
+            "campus_id"
+          ],
+          "columnsTo": [
+            "id",
+            "campus_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reports_description_not_blank": {
+          "name": "reports_description_not_blank",
+          "value": "length(trim(\"reports\".\"description\")) > 0"
+        },
+        "reports_priority_range": {
+          "name": "reports_priority_range",
+          "value": "\"reports\".\"priority\" BETWEEN 1 AND 3"
+        },
+        "reports_confirmation_count_min": {
+          "name": "reports_confirmation_count_min",
+          "value": "\"reports\".\"confirmation_count\" >= 0"
+        },
+        "reports_in_review_has_assignee": {
+          "name": "reports_in_review_has_assignee",
+          "value": "\"reports\".\"status\" <> 'in_review' OR \"reports\".\"assignee_id\" IS NOT NULL"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sessions_account_idx": {
+          "name": "sessions_account_idx",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_account_id_accounts_id_fk": {
+          "name": "sessions_account_id_accounts_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sessions_token_hash_unique": {
+          "name": "sessions_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spaces": {
+      "name": "spaces",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "building_id": {
+          "name": "building_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_key": {
+          "name": "name_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "link_code": {
+          "name": "link_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "spaces_building_id_buildings_id_fk": {
+          "name": "spaces_building_id_buildings_id_fk",
+          "tableFrom": "spaces",
+          "tableTo": "buildings",
+          "columnsFrom": [
+            "building_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "spaces_link_code_unique": {
+          "name": "spaces_link_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "link_code"
+          ]
+        },
+        "spaces_building_name_key_unique": {
+          "name": "spaces_building_name_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "building_id",
+            "name_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "spaces_name_length": {
+          "name": "spaces_name_length",
+          "value": "char_length(trim(\"spaces\".\"name\")) BETWEEN 1 AND 100"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.campus_role": {
+      "name": "campus_role",
+      "schema": "public",
+      "values": [
+        "staff",
+        "admin"
+      ]
+    },
+    "public.report_status": {
+      "name": "report_status",
+      "schema": "public",
+      "values": [
+        "new",
+        "in_review",
+        "resolved",
+        "cancelled"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

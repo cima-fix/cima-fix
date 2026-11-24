@@ -26,3 +26,9 @@ dist-ssr
 # Playwright
 test-results
 playwright-report
+
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+

@@ -131,7 +131,7 @@ export function ReportListPage() {
   return (
     <NavScreen title={`Reportes · ${campus}`}>
       <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-8 lg:py-6">
-        <aside className="flex flex-col gap-3 lg:sticky lg:top-24 lg:rounded-card lg:border lg:border-neutral-border lg:p-4">
+        <aside className="flex flex-col gap-3 lg:sticky lg:top-6 lg:rounded-card lg:border lg:border-neutral-border lg:p-4">
         <h2 className="hidden text-caption font-medium tracking-wide text-neutral-text-secondary uppercase lg:block">
           Filtros
         </h2>

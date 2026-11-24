@@ -18,6 +18,7 @@
 | Versión  | Fecha                   | Cambio                                                                                       |
 | -------- | ----------------------- | -------------------------------------------------------------------------------------------- |
 | Borrador | 16 de noviembre de 2026 | Creación del documento. Cubre todos los módulos del SRS v1.0.0; se distribuye para revisión. |
+| Borrador | 23 de noviembre de 2026 | 7.3: `ReportView` agrega `reportedByMe` y `confirmedByMe`; 8.2 y 10.4 los usan.               |
 
 ---
 
@@ -777,12 +778,17 @@ type ReportView = {
   // Solo presentes si el viewer es Encargado o Admin del campus del reporte (RN-04):
   reporterEmail?: string;
   assigneeEmail?: string | null;
+  // Relación del viewer con el reporte; siempre presentes, para cualquier rol:
+  reportedByMe: boolean; // reports.reporter_id = cuenta del viewer
+  confirmedByMe: boolean; // existe (report_id, cuenta del viewer) en duplicate_confirmations
   // Para que la SPA muestre u oculte acciones; la API vuelve a verificar al ejecutarlas:
   allowedActions: ("assign" | "resolve" | "cancel" | "confirm")[];
 };
 ```
 
 Los campos del registro y de asignación no se "ocultan en la SPA": **no viajan** en la respuesta a una cuenta sin permiso para verlos.
+
+`reportedByMe` y `confirmedByMe` existen porque, sin `reporterEmail`, un Reportante no tiene otra forma de saber si un reporte es suyo. `allowedActions` dice **si** puede confirmar; estos dos campos dicen **por qué no**, para que la SPA muestre la leyenda correcta en los posibles duplicados (8.2) y marque los reportes propios en la consulta (RF-GESTION-15). No contradicen RN-04: solo describen la relación de quien consulta con el reporte y no revelan quién más lo registró o confirmó. Los calcula la misma consulta que trae los reportes (`r.reporter_id = :viewerId` y un `EXISTS` sobre la PK de `duplicate_confirmations`), sin una petición adicional.
 
 ---
 
@@ -876,7 +882,7 @@ Puntos de diseño:
 
 - **Por qué dos pasos (`check` y luego registro)**: RF-DUPLICADO-01 exige mostrar los posibles duplicados **antes** de registrar, y DD-09 exige no subir fotos hasta saber si se va a registrar un reporte nuevo.
 - **`reviewedDuplicateIds`**: si entre la verificación y el envío otra persona registró un reporte que también es posible duplicado, la API responde `409` con la lista actualizada en vez de registrar sin mostrarlo. Si no hay posibles duplicados, el reporte se registra sin paso adicional (RF-DUPLICADO-01).
-- **Posibles duplicados propios**: un reporte abierto registrado por la misma cuenta sí aparece en la lista (RN-05 no lo excluye), pero se muestra con la leyenda "Tú registraste este reporte" y sin botón de confirmar (RF-DUPLICADO-05). Igual con uno que la cuenta ya confirmó.
+- **Posibles duplicados propios**: un reporte abierto registrado por la misma cuenta sí aparece en la lista (RN-05 no lo excluye), pero se muestra con la leyenda "Tú registraste este reporte" y sin botón de confirmar (RF-DUPLICADO-05). Uno que la cuenta ya confirmó también aparece sin botón, con la leyenda "Ya lo confirmaste". La SPA elige la leyenda con `reportedByMe` y `confirmedByMe` de la vista del reporte (7.3).
 - **Doble envío**: el botón se deshabilita mientras la petición está en curso y, además, el `id` del reporte lo genera el cliente, así que un segundo `POST` con el mismo `id` no crea otro reporte (6.2).
 
 ### 8.3 Asignación de un reporte
@@ -1095,7 +1101,7 @@ function can(
 
 El plazo de 7 días se mide en horas exactas desde `resolved_at` (7 × 24 h), no en días de calendario, como pide RN-06.
 
-**Qué datos de cada reporte ve** (RF-GESTION-05): `toReportView` (7.3) incluye `reporterEmail` y `assigneeEmail` solo si `can(roles, "report.viewEmails", report.campusId)`.
+**Qué datos de cada reporte ve** (RF-GESTION-05): `toReportView` (7.3) incluye `reporterEmail` y `assigneeEmail` solo si `can(roles, "report.viewEmails", report.campusId)`. `reportedByMe` y `confirmedByMe` se incluyen para todos los roles, porque solo hablan de la cuenta que consulta.
 
 **Reporte no disponible** (RF-GESTION-19…20): si el reporte existe pero no pasa el predicado, la API responde `404` con `REPORT_RESOLVED_EXPIRED` cuando es un Resuelto fuera del plazo, y `REPORT_UNAVAILABLE` en cualquier otro caso (incluido "no existe"). Ninguno de los dos incluye datos del reporte.
 
@@ -1429,35 +1435,35 @@ Consultadas el 16 de noviembre de 2026:
 
 ### 19.1 Requisitos funcionales
 
-| Requisitos                        | Módulo          | Mecanismo principal                                                         | Sección     |
-| --------------------------------- | --------------- | --------------------------------------------------------------------------- | ----------- |
-| RF-CATALOGO-01                    | `catalog`       | `can(…, "catalog.manage", campus)`                                          | 10.3        |
-| RF-CATALOGO-02…07, 18, 20         | `catalog`       | Endpoints del catálogo; nombres referenciados por FK                        | 6.2, 7.2    |
-| RF-CATALOGO-08                    | `catalog`       | `name_key` + índice único                                                   | 10.8        |
-| RF-CATALOGO-09…12, 21             | `catalog`       | `is_active`, sin rutas de borrado, verificación de reportes abiertos        | 6.2, 7.1    |
-| RF-CATALOGO-13, 17, 19            | `catalog`       | `position_x`, `position_y` nulos                                            | 6.2, 13.4   |
-| RF-CATALOGO-14…16                 | `catalog`       | `link_code` aleatorio e inmutable                                           | 6.2, DD-15  |
-| RF-REPORTE-01…04, 09              | `reports`       | Esquemas Zod compartidos, restricciones de la base, firma de Cloudinary     | 10.8, 10.10 |
-| RF-REPORTE-05, 10, 11             | `reports`       | `GET /api/spaces/link/:code`, parámetro `next`                              | 8.1, 10.9   |
-| RF-REPORTE-06                     | `reports`       | Sin rutas de edición                                                        | 7.1         |
-| RF-REPORTE-07, 08                 | `reports`       | `reporter_id` de la sesión; `status = new`, `created_at`                    | 6.2         |
-| RF-REPORTE-12, 13                 | `reports`       | `offeredCatalog`; FK compuestas                                             | 6.2, 10.9   |
-| RF-REPORTE-14                     | `reports`       | La SPA navega al detalle                                                    | 13.3        |
-| RF-REPORTE-15, 16                 | `reports`       | `f_auto`; subida directa con aviso y formulario intacto                     | 10.10, 12   |
-| RF-DUPLICADO-01…07                | `duplicates`    | `check` + `reviewedDuplicateIds`; PK de confirmaciones                      | 8.2, 10.2   |
-| RF-PRIORIDAD-01…06                | `priority`      | Prioridad almacenada y recalculada por eventos                              | 10.1, DD-07 |
-| RF-GESTION-01, 06                 | `management`    | `can(…)` + condición sobre el recurso                                       | 10.3        |
-| RF-GESTION-02, 05                 | `management`    | `toReportView`                                                              | 7.3, 10.4   |
-| RF-GESTION-03, 04, 15, 22, 23, 24 | `management`    | Filtros de `GET /api/reports`; opciones de los filtros con `filter-options` | 7.2         |
-| RF-GESTION-07…13, 17              | `management`    | Tabla de transiciones; `UPDATE` condicionado                                | 8.3, 9.1    |
-| RF-GESTION-14                     | `management`    | Orden único + índice                                                        | 10.5        |
-| RF-GESTION-16, 18…21              | `management`    | Predicado de visibilidad; `404` con código                                  | 10.4        |
-| RF-MAPA-01…20                     | `map`           | `GET /api/campuses/:id/map`, `CRS.Simple`, sin actualización automática     | 10.6, 13.4  |
-| RF-MAPA-21…24                     | `map`           | `PUT …/map-thresholds`; `CHECK` en `campuses`                               | 6.2         |
-| RF-ACCESO-01, 02, 13, 14          | `access`        | GIS + verificación en servidor; sesión propia                               | 8.1, 11     |
-| RF-ACCESO-03…12                   | `access`        | `campus_roles`; reglas de 10.7                                              | 8.4, 10.7   |
-| RF-NOTIFICACION-01…12, 20         | `notifications` | Eventos de dominio y `resolveRecipients`                                    | 14          |
-| RF-NOTIFICACION-13…19             | `notifications` | `crossedThresholds`; bloqueo del campus                                     | 9.2, DD-08  |
+| Requisitos                        | Módulo          | Mecanismo principal                                                         | Sección        |
+| --------------------------------- | --------------- | --------------------------------------------------------------------------- | -------------- |
+| RF-CATALOGO-01                    | `catalog`       | `can(…, "catalog.manage", campus)`                                          | 10.3           |
+| RF-CATALOGO-02…07, 18, 20         | `catalog`       | Endpoints del catálogo; nombres referenciados por FK                        | 6.2, 7.2       |
+| RF-CATALOGO-08                    | `catalog`       | `name_key` + índice único                                                   | 10.8           |
+| RF-CATALOGO-09…12, 21             | `catalog`       | `is_active`, sin rutas de borrado, verificación de reportes abiertos        | 6.2, 7.1       |
+| RF-CATALOGO-13, 17, 19            | `catalog`       | `position_x`, `position_y` nulos                                            | 6.2, 13.4      |
+| RF-CATALOGO-14…16                 | `catalog`       | `link_code` aleatorio e inmutable                                           | 6.2, DD-15     |
+| RF-REPORTE-01…04, 09              | `reports`       | Esquemas Zod compartidos, restricciones de la base, firma de Cloudinary     | 10.8, 10.10    |
+| RF-REPORTE-05, 10, 11             | `reports`       | `GET /api/spaces/link/:code`, parámetro `next`                              | 8.1, 10.9      |
+| RF-REPORTE-06                     | `reports`       | Sin rutas de edición                                                        | 7.1            |
+| RF-REPORTE-07, 08                 | `reports`       | `reporter_id` de la sesión; `status = new`, `created_at`                    | 6.2            |
+| RF-REPORTE-12, 13                 | `reports`       | `offeredCatalog`; FK compuestas                                             | 6.2, 10.9      |
+| RF-REPORTE-14                     | `reports`       | La SPA navega al detalle                                                    | 13.3           |
+| RF-REPORTE-15, 16                 | `reports`       | `f_auto`; subida directa con aviso y formulario intacto                     | 10.10, 12      |
+| RF-DUPLICADO-01…07                | `duplicates`    | `check` + `reviewedDuplicateIds`; PK de confirmaciones                      | 7.3, 8.2, 10.2 |
+| RF-PRIORIDAD-01…06                | `priority`      | Prioridad almacenada y recalculada por eventos                              | 10.1, DD-07    |
+| RF-GESTION-01, 06                 | `management`    | `can(…)` + condición sobre el recurso                                       | 10.3           |
+| RF-GESTION-02, 05                 | `management`    | `toReportView`                                                              | 7.3, 10.4      |
+| RF-GESTION-03, 04, 15, 22, 23, 24 | `management`    | Filtros de `GET /api/reports`; opciones de los filtros con `filter-options` | 7.2            |
+| RF-GESTION-07…13, 17              | `management`    | Tabla de transiciones; `UPDATE` condicionado                                | 8.3, 9.1       |
+| RF-GESTION-14                     | `management`    | Orden único + índice                                                        | 10.5           |
+| RF-GESTION-16, 18…21              | `management`    | Predicado de visibilidad; `404` con código                                  | 10.4           |
+| RF-MAPA-01…20                     | `map`           | `GET /api/campuses/:id/map`, `CRS.Simple`, sin actualización automática     | 10.6, 13.4     |
+| RF-MAPA-21…24                     | `map`           | `PUT …/map-thresholds`; `CHECK` en `campuses`                               | 6.2            |
+| RF-ACCESO-01, 02, 13, 14          | `access`        | GIS + verificación en servidor; sesión propia                               | 8.1, 11        |
+| RF-ACCESO-03…12                   | `access`        | `campus_roles`; reglas de 10.7                                              | 8.4, 10.7      |
+| RF-NOTIFICACION-01…12, 20         | `notifications` | Eventos de dominio y `resolveRecipients`                                    | 14             |
+| RF-NOTIFICACION-13…19             | `notifications` | `crossedThresholds`; bloqueo del campus                                     | 9.2, DD-08     |
 
 ### 19.2 Reglas de negocio
 

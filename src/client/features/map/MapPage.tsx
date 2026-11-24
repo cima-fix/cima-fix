@@ -27,6 +27,10 @@ function Marker({ building }: { building: MapBuilding }) {
       className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-control border border-neutral-border bg-neutral-white p-3"
       style={{ left: `${building.x}%`, top: `${building.y}%` }}
     >
+      {/* Building name under the marker, so each number says which building it is. */}
+      <span className="pointer-events-none absolute top-full left-1/2 mt-0.5 -translate-x-1/2 text-caption font-medium whitespace-nowrap text-green-dark">
+        {building.name}
+      </span>
       {/* Mouse shortcut only: keyboard and screen reader users get the list below. */}
       <Link
         to={buildingHref(building.name)}

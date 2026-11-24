@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Form, useNavigate, useNavigation, useRouteLoaderData } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Notice } from '../../components/ui/Notice'
-import { CheckIcon } from '../../components/ui/icons'
+import { ArrowLeftIcon, CheckIcon } from '../../components/ui/icons'
 import { cn } from '../../lib/cn'
 import { CURRENT_USER } from '../../lib/demo-api'
 import type { reportDetailLoader } from './data'
@@ -35,11 +35,21 @@ export function AssignSheet() {
     >
       <Form method="post" className="flex flex-col gap-3 px-4 pt-5 pb-6">
         <input type="hidden" name="intent" value="assign" />
-        <div className="flex flex-col gap-1">
-          <h2 id="assign-title" className="text-base font-medium">
-            Asignar reporte
-          </h2>
-          <p className="text-xs text-neutral-text-muted">Solo encargados del {report.campus}.</p>
+        <div className="flex items-start gap-2.5">
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Volver al reporte"
+            className="-m-1 rounded-control p-1 text-neutral-text focus-visible:outline-2 focus-visible:outline-green"
+          >
+            <ArrowLeftIcon className="size-5" />
+          </button>
+          <div className="flex flex-col gap-1">
+            <h2 id="assign-title" className="text-base font-medium">
+              Asignar reporte
+            </h2>
+            <p className="text-xs text-neutral-text-muted">Solo encargados del {report.campus}.</p>
+          </div>
         </div>
 
         <fieldset className="flex flex-col gap-2">

@@ -103,7 +103,7 @@ export function ReportDetailPage() {
                 </ButtonLink>
               </>
             )}
-            <Button type="submit" name="intent" value="cancel" variant="outline" disabled={busy}>
+            <Button type="submit" name="intent" value="cancel" variant="danger" disabled={busy}>
               Cancelar reporte
             </Button>
           </Form>

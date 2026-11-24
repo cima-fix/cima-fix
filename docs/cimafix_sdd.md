@@ -1435,35 +1435,35 @@ Consultadas el 16 de noviembre de 2026:
 
 ### 19.1 Requisitos funcionales
 
-| Requisitos                        | Módulo          | Mecanismo principal                                                         | Sección     |
-| --------------------------------- | --------------- | --------------------------------------------------------------------------- | ----------- |
-| RF-CATALOGO-01                    | `catalog`       | `can(…, "catalog.manage", campus)`                                          | 10.3        |
-| RF-CATALOGO-02…07, 18, 20         | `catalog`       | Endpoints del catálogo; nombres referenciados por FK                        | 6.2, 7.2    |
-| RF-CATALOGO-08                    | `catalog`       | `name_key` + índice único                                                   | 10.8        |
-| RF-CATALOGO-09…12, 21             | `catalog`       | `is_active`, sin rutas de borrado, verificación de reportes abiertos        | 6.2, 7.1    |
-| RF-CATALOGO-13, 17, 19            | `catalog`       | `position_x`, `position_y` nulos                                            | 6.2, 13.4   |
-| RF-CATALOGO-14…16                 | `catalog`       | `link_code` aleatorio e inmutable                                           | 6.2, DD-15  |
-| RF-REPORTE-01…04, 09              | `reports`       | Esquemas Zod compartidos, restricciones de la base, firma de Cloudinary     | 10.8, 10.10 |
-| RF-REPORTE-05, 10, 11             | `reports`       | `GET /api/spaces/link/:code`, parámetro `next`                              | 8.1, 10.9   |
-| RF-REPORTE-06                     | `reports`       | Sin rutas de edición                                                        | 7.1         |
-| RF-REPORTE-07, 08                 | `reports`       | `reporter_id` de la sesión; `status = new`, `created_at`                    | 6.2         |
-| RF-REPORTE-12, 13                 | `reports`       | `offeredCatalog`; FK compuestas                                             | 6.2, 10.9   |
-| RF-REPORTE-14                     | `reports`       | La SPA navega al detalle                                                    | 13.3        |
-| RF-REPORTE-15, 16                 | `reports`       | `f_auto`; subida directa con aviso y formulario intacto                     | 10.10, 12   |
-| RF-DUPLICADO-01…07                | `duplicates`    | `check` + `reviewedDuplicateIds`; PK de confirmaciones                      | 8.2, 10.2   |
-| RF-PRIORIDAD-01…06                | `priority`      | Prioridad almacenada y recalculada por eventos                              | 10.1, DD-07 |
-| RF-GESTION-01, 06                 | `management`    | `can(…)` + condición sobre el recurso                                       | 10.3        |
-| RF-GESTION-02, 05                 | `management`    | `toReportView`                                                              | 7.3, 10.4   |
-| RF-GESTION-03, 04, 15, 22, 23, 24 | `management`    | Filtros de `GET /api/reports`; opciones de los filtros con `filter-options` | 7.2         |
-| RF-GESTION-07…13, 17              | `management`    | Tabla de transiciones; `UPDATE` condicionado                                | 8.3, 9.1    |
-| RF-GESTION-14                     | `management`    | Orden único + índice                                                        | 10.5        |
-| RF-GESTION-16, 18…21              | `management`    | Predicado de visibilidad; `404` con código                                  | 10.4        |
-| RF-MAPA-01…20                     | `map`           | `GET /api/campuses/:id/map`, `CRS.Simple`, sin actualización automática     | 10.6, 13.4  |
-| RF-MAPA-21…24                     | `map`           | `PUT …/map-thresholds`; `CHECK` en `campuses`                               | 6.2         |
-| RF-ACCESO-01, 02, 13, 14          | `access`        | GIS + verificación en servidor; sesión propia                               | 8.1, 11     |
-| RF-ACCESO-03…12                   | `access`        | `campus_roles`; reglas de 10.7                                              | 8.4, 10.7   |
-| RF-NOTIFICACION-01…12, 20         | `notifications` | Eventos de dominio y `resolveRecipients`                                    | 14          |
-| RF-NOTIFICACION-13…19             | `notifications` | `crossedThresholds`; bloqueo del campus                                     | 9.2, DD-08  |
+| Requisitos                        | Módulo          | Mecanismo principal                                                         | Sección        |
+| --------------------------------- | --------------- | --------------------------------------------------------------------------- | -------------- |
+| RF-CATALOGO-01                    | `catalog`       | `can(…, "catalog.manage", campus)`                                          | 10.3           |
+| RF-CATALOGO-02…07, 18, 20         | `catalog`       | Endpoints del catálogo; nombres referenciados por FK                        | 6.2, 7.2       |
+| RF-CATALOGO-08                    | `catalog`       | `name_key` + índice único                                                   | 10.8           |
+| RF-CATALOGO-09…12, 21             | `catalog`       | `is_active`, sin rutas de borrado, verificación de reportes abiertos        | 6.2, 7.1       |
+| RF-CATALOGO-13, 17, 19            | `catalog`       | `position_x`, `position_y` nulos                                            | 6.2, 13.4      |
+| RF-CATALOGO-14…16                 | `catalog`       | `link_code` aleatorio e inmutable                                           | 6.2, DD-15     |
+| RF-REPORTE-01…04, 09              | `reports`       | Esquemas Zod compartidos, restricciones de la base, firma de Cloudinary     | 10.8, 10.10    |
+| RF-REPORTE-05, 10, 11             | `reports`       | `GET /api/spaces/link/:code`, parámetro `next`                              | 8.1, 10.9      |
+| RF-REPORTE-06                     | `reports`       | Sin rutas de edición                                                        | 7.1            |
+| RF-REPORTE-07, 08                 | `reports`       | `reporter_id` de la sesión; `status = new`, `created_at`                    | 6.2            |
+| RF-REPORTE-12, 13                 | `reports`       | `offeredCatalog`; FK compuestas                                             | 6.2, 10.9      |
+| RF-REPORTE-14                     | `reports`       | La SPA navega al detalle                                                    | 13.3           |
+| RF-REPORTE-15, 16                 | `reports`       | `f_auto`; subida directa con aviso y formulario intacto                     | 10.10, 12      |
+| RF-DUPLICADO-01…07                | `duplicates`    | `check` + `reviewedDuplicateIds`; PK de confirmaciones                      | 7.3, 8.2, 10.2 |
+| RF-PRIORIDAD-01…06                | `priority`      | Prioridad almacenada y recalculada por eventos                              | 10.1, DD-07    |
+| RF-GESTION-01, 06                 | `management`    | `can(…)` + condición sobre el recurso                                       | 10.3           |
+| RF-GESTION-02, 05                 | `management`    | `toReportView`                                                              | 7.3, 10.4      |
+| RF-GESTION-03, 04, 15, 22, 23, 24 | `management`    | Filtros de `GET /api/reports`; opciones de los filtros con `filter-options` | 7.2            |
+| RF-GESTION-07…13, 17              | `management`    | Tabla de transiciones; `UPDATE` condicionado                                | 8.3, 9.1       |
+| RF-GESTION-14                     | `management`    | Orden único + índice                                                        | 10.5           |
+| RF-GESTION-16, 18…21              | `management`    | Predicado de visibilidad; `404` con código                                  | 10.4           |
+| RF-MAPA-01…20                     | `map`           | `GET /api/campuses/:id/map`, `CRS.Simple`, sin actualización automática     | 10.6, 13.4     |
+| RF-MAPA-21…24                     | `map`           | `PUT …/map-thresholds`; `CHECK` en `campuses`                               | 6.2            |
+| RF-ACCESO-01, 02, 13, 14          | `access`        | GIS + verificación en servidor; sesión propia                               | 8.1, 11        |
+| RF-ACCESO-03…12                   | `access`        | `campus_roles`; reglas de 10.7                                              | 8.4, 10.7      |
+| RF-NOTIFICACION-01…12, 20         | `notifications` | Eventos de dominio y `resolveRecipients`                                    | 14             |
+| RF-NOTIFICACION-13…19             | `notifications` | `crossedThresholds`; bloqueo del campus                                     | 9.2, DD-08     |
 
 ### 19.2 Reglas de negocio
 

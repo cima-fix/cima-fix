@@ -2,8 +2,6 @@
 
 Cima Fix es un sistema para registrar y dar seguimiento a reportes de incidencias de mantenimiento e infraestructura en el Campus Sauzal de la Universidad Autónoma de Baja California (UABC), Ensenada. Permite a estudiantes y docentes reportar un problema en minutos y consultar su estado en cualquier momento: registro centralizado, prevención de duplicados y notificación directa al personal responsable. No sustituye al personal de mantenimiento ni decide por ellos qué atender; su valor está en darle a la comunidad del campus un canal confiable para reportar, y al personal encargado, trazabilidad real de los reportes.
 
-> **Estado:** en desarrollo.
-
 ---
 
 ## El problema
@@ -55,6 +53,7 @@ Cuando se le asigna un reporte a un encargado, este recibe un correo con el enla
 | [`repository-config.md`](docs/repository-config.md)                  | **Ajustes del repositorio** — configuración de GitHub: Actions, ruleset de `main` y ajustes generales.                                                                                             |
 | [`cimafix_srs.md`](docs/cimafix_srs.md)                              | **Especificación de Requisitos de Software (SRS)** — requisitos funcionales y no funcionales de Cima Fix: qué debe hacer el sistema, independientemente de cómo se implemente.                     |
 | [`cimafix_sdd.md`](docs/cimafix_sdd.md)                              | **Descripción de Diseño de Software (SDD)** — cómo se construye Cima Fix: arquitectura, módulos, modelo de datos, API, seguridad, despliegue y pruebas, con trazabilidad a los requisitos del SRS. |
+| [`Prototipo en Figma`](https://www.figma.com/design/pDPqlASfgvbM1KkeneCcde/Cima-Fix-%E2%80%93-Formulario-de-reporte--UABC-?node-id=0-1&t=fu5vF6nWDpVuoHUn-1) | **Prototipo de interfaz** — diseño de las pantallas y flujos de Cima Fix, referencia visual para la implementación del frontend. |
 
 ---
 

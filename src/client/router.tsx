@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from './components/layout/AppShell'
 import { RouteError } from './components/layout/RouteError'
+import { homeLoader } from './features/home/data'
 import { HomePage } from './features/home/HomePage'
 import { mapLoader } from './features/map/data'
 import { MapPage } from './features/map/MapPage'
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
       </p>
     ),
     children: [
-      { index: true, loader: reportListLoader, element: <HomePage /> },
+      { index: true, loader: homeLoader, element: <HomePage /> },
       { path: 'reportar', loader: getCatalog, element: <ReportFormPage /> },
       { path: 'reportes', loader: reportListLoader, element: <ReportListPage /> },
       {

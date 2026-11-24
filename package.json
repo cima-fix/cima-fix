@@ -24,6 +24,7 @@
     "@hono/zod-validator": "^0.9.1",
     "@neondatabase/serverless": "^1.2.1",
     "@tailwindcss/vite": "^4.3.5",
+    "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.21",

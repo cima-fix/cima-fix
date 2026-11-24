@@ -1,5 +1,6 @@
 import * as z from 'zod'
 
+import { isLinkCode } from '../domain/link-code'
 import { LEVELS } from '../types/common'
 import { catalogName, id } from './common'
 
@@ -63,6 +64,15 @@ export const updateCategoryBody = requireSomeField(
 // Path parameters of routes nested under a building of a campus, such as
 // /api/campuses/:id/buildings/:bid/open-reports.
 export const campusBuildingParams = z.strictObject({ id, bid: id })
+
+// GET /api/spaces/link/:code (RF-REPORTE-05, 10). Letter case is ignored, in case the code is
+// typed from a printed label.
+export const linkCodeParam = z.strictObject({
+  code: z
+    .string()
+    .transform((code) => code.toUpperCase())
+    .refine(isLinkCode, { error: 'El enlace no corresponde a ningún espacio.' }),
+})
 
 export type CreateBuildingBody = z.infer<typeof createBuildingBody>
 export type UpdateBuildingBody = z.infer<typeof updateBuildingBody>

@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
-import { LEVELS } from '../types/common'
-import { catalogName, id } from './common'
+import { LEVELS } from '../types/common.ts'
+import { catalogName, id } from './common.ts'
 
 // Input of the catalog endpoints (SDD 7.2, Catálogo). Every body is strict: unknown fields are
 // rejected (SDD 7.1).

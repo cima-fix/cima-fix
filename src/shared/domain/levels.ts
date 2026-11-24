@@ -1,4 +1,4 @@
-import { LEVELS, type Level } from '../types/common'
+import { LEVELS, type Level } from '../types/common.ts'
 
 // The database stores severity and priority as 1 = low, 2 = medium, 3 = high, so that SQL can
 // compute the priority (SDD 6.2, 10.1). The API and the SPA use the names.

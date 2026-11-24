@@ -1,6 +1,6 @@
-import type { CampusId, ReportStatus } from '../types/common'
-import { can, type CampusRoles } from './permissions'
-import { isOpen } from './transitions'
+import type { CampusId, ReportStatus } from '../types/common.ts'
+import { can, type CampusRoles } from './permissions.ts'
+import { isOpen } from './transitions.ts'
 
 // RN-06: 7 periods of 24 hours from the resolution, not 7 calendar days.
 export const RESOLVED_VISIBILITY_MS = 7 * 24 * 60 * 60 * 1000

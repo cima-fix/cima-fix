@@ -1,4 +1,4 @@
-import { OPEN_STATUSES, type ReportStatus } from '../types/common'
+import { OPEN_STATUSES, type ReportStatus } from '../types/common.ts'
 
 // "assign" covers both assigning a new report and reassigning one in review (SDD 8.3).
 export type ReportAction = 'assign' | 'resolve' | 'cancel'

@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
-import { MAX_NAME_LENGTH, textLength } from '../domain/limits'
-import { cleanName } from '../domain/names'
+import { MAX_NAME_LENGTH, textLength } from '../domain/limits.ts'
+import { cleanName } from '../domain/names.ts'
 
 // Messages that are not written out in a schema (wrong types, unknown fields) also come out in
 // Spanish (RNF-USABILIDAD-03). Every schema module imports this one, so the setting applies

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { crossedThresholds, type ThresholdSnapshot } from './thresholds'
+import { crossedThresholds, type ThresholdSnapshot } from './thresholds.ts'
 
 function snapshot(overrides: Partial<ThresholdSnapshot>): ThresholdSnapshot {
   return { newCount: 0, inReviewCount: 0, thresholdNew: null, thresholdInReview: null, ...overrides }

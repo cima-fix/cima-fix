@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
-import { MIN_ALERT_THRESHOLD, MIN_MAP_MEDIUM_THRESHOLD } from '../domain/limits'
-import './common'
+import { MIN_ALERT_THRESHOLD, MIN_MAP_MEDIUM_THRESHOLD } from '../domain/limits.ts'
+import './common.ts'
 
 // Thresholds of a campus. A JSON number is required: text such as "3" is rejected as
 // non-numeric, and decimals as non-integer (RF-MAPA-23, 24, RF-NOTIFICACION-15).

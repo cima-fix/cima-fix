@@ -1,4 +1,4 @@
-import type { CampusId, Role, StaffRole } from '../types/common'
+import type { CampusId, Role, StaffRole } from '../types/common.ts'
 
 export type Permission =
   | 'report.create'

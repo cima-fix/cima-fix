@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildingLevel, mapLegend } from './map-levels'
+import { buildingLevel, mapLegend } from './map-levels.ts'
 
 const THRESHOLDS = { medium: 3, high: 6 }
 

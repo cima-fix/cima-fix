@@ -1,4 +1,4 @@
-import type { OpenStatus, StaffRole } from './common'
+import type { OpenStatus, StaffRole } from './common.ts'
 
 // Domain events (SDD 14.1). Services emit them inside the transaction and the notifications
 // module turns them into emails after the COMMIT (DD-10). Every event carries the campus it

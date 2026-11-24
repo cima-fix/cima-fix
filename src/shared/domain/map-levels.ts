@@ -1,4 +1,4 @@
-import type { Level } from '../types/common'
+import type { Level } from '../types/common.ts'
 
 export type MapThresholds = { medium: number; high: number }
 

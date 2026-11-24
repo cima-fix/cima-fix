@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isInstitutionalEmail, normalizeEmail } from './institutional-email'
+import { isInstitutionalEmail, normalizeEmail } from './institutional-email.ts'
 
 describe('isInstitutionalEmail', () => {
   it('RF-ACCESO-08: accepts an @uabc.edu.mx address', () => {

@@ -1,8 +1,8 @@
 import * as z from 'zod'
 
-import { isInstitutionalEmail, normalizeEmail } from '../domain/institutional-email'
-import { STAFF_ROLES } from '../types/common'
-import { id } from './common'
+import { isInstitutionalEmail, normalizeEmail } from '../domain/institutional-email.ts'
+import { STAFF_ROLES } from '../types/common.ts'
+import { id } from './common.ts'
 
 // Input of the access endpoints (SDD 7.2, Acceso).
 

@@ -6,8 +6,8 @@ import {
   MAX_PHOTOS,
   PHOTO_FORMATS,
   textLength,
-} from '../domain/limits'
-import { id } from './common'
+} from '../domain/limits.ts'
+import { id } from './common.ts'
 
 // Input of the registration endpoints (SDD 7.2, Reportes y duplicados, and 8.2). Whether the
 // chosen campus, building, space and category are offered (RF-REPORTE-13) is checked by the

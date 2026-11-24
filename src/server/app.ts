@@ -8,6 +8,7 @@ import { anonymousSession } from './middleware/viewer.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { reportRoutes } from './modules/reports/routes.ts'
 import { duplicateRoutes } from './modules/duplicates/routes.ts'
+import { orphanPhotoRoutes } from './modules/reports/orphan-photos.ts'
 import type { AppEnv } from './types.ts'
 
 export type AppOptions = {
@@ -35,6 +36,7 @@ export function createApp(options: AppOptions = {}) {
   api.route('/', catalogRoutes)
   api.route('/', reportRoutes)
   api.route('/', duplicateRoutes)
+  api.route('/', orphanPhotoRoutes)
   options.extend?.(api)
 
   const app = new Hono<AppEnv>().route('/api', api)

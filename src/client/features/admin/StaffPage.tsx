@@ -7,7 +7,7 @@ import { Card, SectionLabel } from '../../components/ui/Card'
 import { Field, Input, Select } from '../../components/ui/Field'
 import { Notice } from '../../components/ui/Notice'
 import { UserIcon } from '../../components/ui/icons'
-import { CAMPUS, CURRENT_USER, type RoleAccount } from '../../lib/demo-api'
+import { CURRENT_USER, type RoleAccount } from '../../lib/demo-api'
 import { ROLE_LABEL } from '../../lib/session'
 import { ActionError, AdminScreen } from './AdminScreen'
 import type { ActionResult, staffLoader } from './data'
@@ -117,7 +117,7 @@ function AssignRoleForm() {
               id={c.id}
               aria-describedby={c.describedBy}
               name="role"
-              options={Object.values(ROLE_LABEL)}
+              options={[ROLE_LABEL.staff, ROLE_LABEL.admin]}
               defaultValue={ROLE_LABEL.staff}
             />
           )}
@@ -151,12 +151,12 @@ function Group({ title, accounts, canManage }: { title: string; accounts: RoleAc
 // /campus/:slug/personal — Figma frame "Personal · Encargado · Escritorio". The Encargado only
 // reads; the Admin also assigns and takes away roles (RF-ACCESO-05…12).
 export function StaffPage() {
-  const { allowed, canManage, roles } = useLoaderData<typeof staffLoader>()
+  const { campus, allowed, canManage, roles } = useLoaderData<typeof staffLoader>()
 
   return (
     <AdminScreen
       title="Personal"
-      subtitle={`UABC ${CAMPUS.name}${canManage ? '' : ' · Solo lectura'}`}
+      subtitle={`${campus.name}${canManage ? '' : ' · Solo lectura'}`}
       allowed={allowed}
     >
       {canManage ? (

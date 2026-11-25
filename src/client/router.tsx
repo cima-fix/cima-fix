@@ -24,15 +24,17 @@ import { reportAction, reportDetailLoader, reportListLoader } from './features/r
 import { ReportDetailPage } from './features/reports/ReportDetailPage'
 import { ReportListPage } from './features/reports/ReportListPage'
 import { getCatalog } from './lib/demo-api'
-import { requireSession, shellLoader } from './lib/session'
+import { withSignIn } from './lib/api-errors'
+import { loadSession, shellLoader } from './lib/session'
 
-// Every loader inside the shell checks the session itself too: loaders run in parallel, so
-// a screen must not load its data before the shell has had the chance to redirect.
-function withSession<T>(loader: (args: LoaderFunctionArgs) => T) {
-  return (args: LoaderFunctionArgs) => {
-    requireSession(args.request)
+// Every loader inside the shell waits for the session too (the same request as the shell's,
+// lib/session.ts): loaders run in parallel, so a screen must not load its data before the shell
+// has had the chance to send the account to /ingresar.
+function withSession<T>(loader: (args: LoaderFunctionArgs) => T | Promise<T>) {
+  return withSignIn(async (args: LoaderFunctionArgs) => {
+    await loadSession(args.request)
     return loader(args)
-  }
+  })
 }
 
 // Routes follow SDD 13.2.

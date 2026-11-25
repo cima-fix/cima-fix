@@ -10,12 +10,12 @@ import {
   MapPinIcon,
   UsersIcon,
 } from '../../components/ui/icons'
-import { CAMPUS, CURRENT_USER, sessionCan } from '../../lib/demo-api'
+import { CURRENT_USER } from '../../lib/demo-api'
 import { formatAge, plural } from '../../lib/format'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
 import { compareReports, isOpen, type Report } from '../../lib/reports'
-import { adminPath } from '../../lib/routes'
-import { ROLE_LABEL, useSession } from '../../lib/session'
+import { adminLinks } from '../../lib/routes'
+import { ROLE_LABEL, sessionRole, useSession } from '../../lib/session'
 import type { homeLoader } from './data'
 
 const linkClasses =
@@ -138,22 +138,15 @@ export function HomePage() {
     .sort(compareReports)
     .slice(0, 4)
 
-  const adminLinks = [
-    { to: adminPath('personal'), label: 'Personal', show: sessionCan(session, 'roles.read') },
-    { to: adminPath('catalogo'), label: 'Catálogo', show: sessionCan(session, 'catalog.manage') },
-    {
-      to: adminPath('configuracion'),
-      label: 'Configuración',
-      show: sessionCan(session, 'mapThresholds.manage'),
-    },
-  ].filter((link) => link.show)
+  const management = adminLinks(session)
+  const role = ROLE_LABEL[sessionRole(session)]
 
   return (
     <>
       <ScreenHeader
         title="Cima Fix"
         desktopTitle="Inicio"
-        subtitle={`UABC ${CAMPUS.name} · ${ROLE_LABEL[session.role]}`}
+        subtitle={session.campus ? `${session.campus.name} · ${role}` : role}
       />
 
       {/* Phone */}
@@ -168,10 +161,10 @@ export function HomePage() {
         <ButtonLink to="/mapa" variant="secondary">
           Ver mapa del campus
         </ButtonLink>
-        {adminLinks.length > 0 && (
+        {management.length > 0 && (
           <nav aria-label="Administración" className="mt-3 flex flex-col gap-2">
             <SectionLabel as="p">Administración del campus</SectionLabel>
-            {adminLinks.map((link) => (
+            {management.map((link) => (
               <ButtonLink key={link.to} to={link.to} variant="outline">
                 {link.label}
               </ButtonLink>
@@ -181,7 +174,7 @@ export function HomePage() {
         {/* The side menu with "Cerrar sesión" is desktop only. */}
         <Form method="post" action="/salir" className="mt-6 flex flex-col gap-2 border-t border-neutral-border pt-4">
           <p className="text-xs text-neutral-text-muted">
-            {session.email} · {ROLE_LABEL[session.role]}
+            {session.email} · {role}
           </p>
           <Button type="submit" variant="outline">
             Cerrar sesión

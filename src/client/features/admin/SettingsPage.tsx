@@ -6,7 +6,6 @@ import { LevelBadge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Field, Input } from '../../components/ui/Field'
-import { CAMPUS } from '../../lib/demo-api'
 import { ActionError, AdminScreen } from './AdminScreen'
 import type { ActionResult, settingsLoader } from './data'
 
@@ -182,10 +181,10 @@ function MapThresholds({ value }: { value: { medium: number; high: number } | nu
 
 // /campus/:slug/configuracion — alert thresholds and map thresholds (SDD 13.2), Admin only.
 export function SettingsPage() {
-  const { allowed, thresholds } = useLoaderData<typeof settingsLoader>()
+  const { campus, allowed, thresholds } = useLoaderData<typeof settingsLoader>()
 
   return (
-    <AdminScreen title="Configuración" subtitle={`UABC ${CAMPUS.name}`} allowed={allowed}>
+    <AdminScreen title="Configuración" subtitle={campus.name} allowed={allowed}>
       {thresholds && (
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
           <AlertThresholds value={thresholds.alert} />

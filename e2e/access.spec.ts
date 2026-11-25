@@ -1,36 +1,100 @@
-import { expect, test } from '@playwright/test'
-import { expectNoA11yViolations, expectNoHorizontalScroll, signInAs, signOut } from './helpers'
+import { chooseGoogleAccount, expect, test } from './fixtures'
+import { expectNoA11yViolations, expectNoHorizontalScroll, isDesktop } from './helpers'
+import { EMAIL } from './seed'
 
 test.describe('sign in (/ingresar)', () => {
-  test('RF-ACCESO-01: without a session every screen goes to /ingresar', async ({ page }) => {
-    await signOut(page)
-    await page.goto('/reportes?estado=open')
+  test.use({ account: null })
 
-    await expect(page).toHaveURL(/\/ingresar\?next=%2Freportes%3Festado%3Dopen$/)
+  test('RF-ACCESO-01: without a session every screen goes to /ingresar', async ({ page }) => {
+    await page.goto('/reportes?estado=new')
+
+    await expect(page).toHaveURL(/\/ingresar\?next=%2Freportes%3Festado%3Dnew$/)
     await expect(page.getByRole('heading', { level: 1, name: 'Inicia sesión' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible()
     await expectNoA11yViolations(page)
     await expectNoHorizontalScroll(page)
   })
 
-  test('RF-GESTION-21: after signing in it opens the address it was going to', async ({ page }) => {
-    await signInAs(page, 'Encargado', '/reportes/r-2')
-    await expect(page).toHaveURL(/\/reportes\/r-2$/)
+  test('SDD 8.1: signing in with Google opens the address it was going to', async ({ page }) => {
+    await page.goto('/mapa')
+    await page.getByRole('button', { name: 'Continuar con Google' }).click()
+
+    await expect(page).toHaveURL(/\/mapa$/)
+    await expect(page.getByRole('heading', { level: 1, name: /Mapa/ })).toBeVisible()
   })
 
   test('SDD 8.1: "next" only takes internal paths', async ({ page }) => {
-    await signInAs(page, 'Encargado', '//example.com')
+    await page.goto('/ingresar?next=%2F%2Fexample.com')
+    await page.getByRole('button', { name: 'Continuar con Google' }).click()
     await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/)
   })
 
-  test('RF-ACCESO-02: shows the notice for an account of another domain', async ({ page }) => {
-    await signOut(page)
-    await page.goto('/ingresar?error=dominio')
-    await expect(page.getByRole('alert')).toHaveText(/Solo se permiten cuentas @uabc\.edu\.mx/)
+  test('RF-ACCESO-02: an account of another domain is rejected', async ({ page }) => {
+    await chooseGoogleAccount(page, 'alguien@gmail.com')
+    await page.goto('/ingresar')
+    await page.getByRole('button', { name: 'Continuar con Google' }).click()
+
+    await expect(page.getByRole('alert')).toHaveText('Solo puedes iniciar sesión con una cuenta @uabc.edu.mx.')
+    await expect(page).toHaveURL(/\/ingresar/)
   })
 
-  test('with a session, /ingresar goes on to the app', async ({ page }) => {
+  test('RNF-DISPONIBILIDAD-01: Google unavailable while verifying', async ({ page }) => {
+    await chooseGoogleAccount(page, 'down')
+    await page.goto('/ingresar')
+    await page.getByRole('button', { name: 'Continuar con Google' }).click()
+
+    await expect(page.getByRole('alert')).toHaveText(
+      'La verificación de identidad no está disponible. Inténtalo más tarde.',
+    )
+  })
+})
+
+test.describe('Google does not load', () => {
+  test.use({ account: null, fakeGoogle: false })
+
+  test('SDD 12: the screen says the verification is unavailable', async ({ page }) => {
+    await page.route('https://accounts.google.com/**', (route) => route.abort())
+    await page.goto('/ingresar')
+    await expect(page.getByRole('alert')).toHaveText(
+      'La verificación de identidad no está disponible. Inténtalo más tarde.',
+    )
+  })
+})
+
+test.describe('with a session', () => {
+  test('/ingresar goes on to the app', async ({ page }) => {
     await page.goto('/ingresar')
     await expect(page).toHaveURL(/\/$/)
+  })
+
+  test('RF-ACCESO-03, 04: the menu shows the role of the account in the campus', async ({ page }) => {
+    await page.goto('/')
+    const role = isDesktop(page)
+      ? page.getByRole('complementary').getByText('Tú · Encargado')
+      : page.getByText(`${EMAIL.staff} · Encargado`)
+    await expect(role).toBeVisible()
+  })
+
+  test('RF-ACCESO-14: "Cerrar sesión" ends the session', async ({ page }) => {
+    await page.goto('/')
+    const signOut = isDesktop(page)
+      ? page.getByRole('complementary').getByRole('button', { name: 'Cerrar sesión' })
+      : page.getByRole('button', { name: 'Cerrar sesión' })
+    await signOut.click()
+
+    await expect(page).toHaveURL(/\/ingresar$/)
+    await page.goto('/reportes')
+    await expect(page).toHaveURL(/\/ingresar\?next=/)
+  })
+})
+
+test.describe('a Reportante', () => {
+  test.use({ account: EMAIL.ana })
+
+  test('RF-ACCESO-03: has no management screens', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByRole('link', { name: 'Personal' })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Catálogo' })).toHaveCount(0)
   })
 })
 
@@ -58,9 +122,15 @@ test.describe('space link (/e/:code)', () => {
     await expect(page.getByRole('alert')).toHaveText(/no está disponible/)
     await expect(page.getByLabel('Edificio')).toHaveValue('')
   })
+})
 
-  test('RF-REPORTE-11: opened without a session, it signs in and then preselects', async ({ page }) => {
-    await signInAs(page, 'Encargado', '/e/K7P2X9QM4A')
+test.describe('space link without a session', () => {
+  test.use({ account: null })
+
+  test('RF-REPORTE-11: signs in and then preselects', async ({ page }) => {
+    await page.goto('/e/K7P2X9QM4A')
+    await expect(page).toHaveURL(/\/ingresar\?next=%2Fe%2FK7P2X9QM4A$/)
+    await page.getByRole('button', { name: 'Continuar con Google' }).click()
 
     await expect(page).toHaveURL(/\/reportar\?/)
     await expect(page.getByLabel('Espacio')).toHaveValue('Salón 204')

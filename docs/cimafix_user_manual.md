@@ -18,6 +18,7 @@
 | -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Borrador | 24 de noviembre de 2026 | Creación del documento. El contenido se completa de forma incremental; las secciones pendientes se marcan como tales. |
 | Borrador | 24 de noviembre de 2026 | Redacción de las secciones 1 a 4: introducción, conceptos básicos, inicio rápido y Reportante.                        |
+| Borrador | 24 de noviembre de 2026 | Redacción de la sección 5: Encargado.                                                                                 |
 
 ---
 
@@ -52,6 +53,14 @@
   - [4.8 Consultar el mapa del campus](#48-consultar-el-mapa-del-campus)
   - [4.9 Correos que recibes](#49-correos-que-recibes)
 - [5. Encargado](#5-encargado)
+  - [5.1 Alcance del rol de Encargado](#51-alcance-del-rol-de-encargado)
+  - [5.2 Encontrar los reportes que atender](#52-encontrar-los-reportes-que-atender)
+  - [5.3 Asignar o reasignar un reporte](#53-asignar-o-reasignar-un-reporte)
+  - [5.4 Resolver un reporte asignado a tu cuenta](#54-resolver-un-reporte-asignado-a-tu-cuenta)
+  - [5.5 Cancelar un reporte del campus](#55-cancelar-un-reporte-del-campus)
+  - [5.6 Consultar las cuentas con rol en el campus](#56-consultar-las-cuentas-con-rol-en-el-campus)
+  - [5.7 Correos que recibes como Encargado](#57-correos-que-recibes-como-encargado)
+  - [5.8 Alertas por acumulación de reportes](#58-alertas-por-acumulaci%C3%B3n-de-reportes)
 - [6. Admin](#6-admin)
 - [7. Solución de problemas y contacto](#7-soluci%C3%B3n-de-problemas-y-contacto)
 - [8. Referencia](#8-referencia)
@@ -449,7 +458,142 @@ Ten presente que:
 
 ## 5. Encargado
 
-Pendiente.
+Esta sección sirve a las personas con rol de Encargado en un campus. Los Encargados también pueden reportar y consultar reportes, así que todo lo de la [sección 4](#4-reportante) sigue disponible.
+
+Antes de empezar cualquiera de estas tareas, inicia sesión ([sección 3.1](#31-iniciar-sesi%C3%B3n)).
+
+### 5.1 Alcance del rol de Encargado
+
+Como Encargado atiendes los reportes del campus donde se te asignó ese rol. Frente a un Reportante, cambia lo siguiente:
+
+- Asignas y reasignas reportes ([sección 5.3](#53-asignar-o-reasignar-un-reporte)), resuelves los asignados a tu cuenta ([sección 5.4](#54-resolver-un-reporte-asignado-a-tu-cuenta)) y cancelas cualquier reporte abierto del campus ([sección 5.5](#55-cancelar-un-reporte-del-campus)).
+- Consultas los reportes Cancelados y los Resueltos sin límite de tiempo, y ves el correo de quien registró cada reporte y el de la persona asignada ([sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien)).
+- Estos permisos rigen solo en el campus donde tienes el rol. En los demás campus sigues siendo Reportante ([sección 2.2](#22-los-tres-roles)).
+- En el detalle de cada reporte, Cima Fix muestra solo las acciones que puedes hacer sobre él.
+
+### 5.2 Encontrar los reportes que atender
+
+**Objetivo.** Ver los reportes del campus que están sin asignar o que tienes a tu cargo.
+
+**Pasos.**
+
+1. Abre la lista de reportes como se explica en la [sección 4.5](#45-consultar-y-filtrar-reportes).
+2. En el filtro **Campus**, elige el campus donde eres Encargado.
+3. Aplica el filtro que necesites:
+   - Para ver los reportes sin asignar, elige el estado **Nuevo** en el filtro **Estado**.
+   - Para ver los reportes que tienes a tu cargo, elige **Asignados a mí**.
+4. Revisa la lista de reportes.
+
+**Resultado.** La lista muestra los reportes del campus que cumplen todos los filtros que aplicaste, con los abiertos primero y, dentro de ellos, los de mayor prioridad (sección 4.5).
+
+> **Nota:** En tu campus, la lista también incluye los reportes Cancelados y los Resueltos hace más de 7 días, que un Reportante no ve.
+
+### 5.3 Asignar o reasignar un reporte
+
+**Objetivo.** Poner un reporte a cargo de un Encargado del campus: el primero que lo atiende, si el reporte está **Nuevo**, o uno distinto, si ya está **En revisión**.
+
+**Antes de empezar.**
+
+- Ten el rol de Encargado en el campus del reporte.
+- Comprueba que el reporte esté abierto (**Nuevo** o **En revisión**).
+- Si lo asignas a otra persona, su cuenta debe tener el rol de Encargado en ese campus. Un Admin no puede recibir reportes.
+
+**Pasos.**
+
+1. Abre el detalle del reporte ([sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)).
+2. Elige a quién asignarlo:
+   - Si vas a encargarte tú, elige **Asignarme**.
+   - Si lo asignas a otro Encargado, elige **Asignar a…**.
+3. Si elegiste **Asignar a…**, elige la cuenta del Encargado.
+
+**Resultado.** El reporte queda asignado a esa cuenta y el detalle lo muestra así. Si estaba **Nuevo**, pasa a **En revisión**; si ya estaba **En revisión**, sigue en ese estado.
+
+> **Nota:** Cima Fix envía un correo a la cuenta que recibe el reporte, salvo que sea la tuya. No avisa a la cuenta que lo tenía asignado antes de un cambio.
+
+> **Nota:** Si el reporte cambia de estado mientras lo asignas, por ejemplo porque otro Encargado lo asignó antes, Cima Fix rechaza la asignación. Abre el detalle para ver el estado actual.
+
+### 5.4 Resolver un reporte asignado a tu cuenta
+
+**Objetivo.** Marcar como solucionado un reporte que tienes a cargo.
+
+**Antes de empezar.** El reporte debe estar **En revisión** y asignado a tu cuenta. Si está asignado a otra cuenta, no puedes resolverlo: primero debe asignarse a la tuya ([sección 5.3](#53-asignar-o-reasignar-un-reporte)).
+
+> **Importante:** Resolver no se puede deshacer: un reporte Resuelto no se reabre. Si el problema vuelve a ocurrir, se debe registrar un reporte nuevo ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)). Al resolverlo, Cima Fix envía un correo a quien registró el reporte y a quienes lo confirmaron como duplicado.
+
+**Pasos.**
+
+1. Abre el detalle del reporte ([sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)).
+2. Elige la opción para resolver el reporte.
+3. Si Cima Fix te pide confirmar, confirma la resolución.
+
+**Resultado.** El reporte pasa al estado **Resuelto**. El detalle muestra la fecha y hora de resolución.
+
+### 5.5 Cancelar un reporte del campus
+
+**Objetivo.** Cancelar un reporte abierto del campus, sin importar quién lo registró.
+
+**Antes de empezar.** Ten el rol de Encargado en el campus del reporte y comprueba que el reporte esté abierto (**Nuevo** o **En revisión**).
+
+> **Importante:** Cancelar no se puede deshacer: un reporte Cancelado no se reabre. Si el problema sigue, se debe registrar un reporte nuevo ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)). Además, el reporte deja de aparecer para los Reportantes, incluidos quien lo registró y quienes lo confirmaron como duplicado ([sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien)).
+
+**Pasos.**
+
+1. Abre el detalle del reporte ([sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)).
+2. Elige la opción para cancelar el reporte.
+3. Si Cima Fix te pide confirmar, confirma la cancelación.
+
+**Resultado.** El reporte pasa al estado **Cancelado**. Reciben un correo de cancelación quien lo registró, la persona asignada, si la hay, y quienes lo confirmaron como duplicado. Tú no recibes correo de una cancelación que hiciste.
+
+> **Nota:** A diferencia de un Reportante, puedes cancelar un reporte aunque otras personas ya lo hayan confirmado como duplicado ([sección 4.7](#47-cancelar-un-reporte-tuyo)).
+
+### 5.6 Consultar las cuentas con rol en el campus
+
+**Objetivo.** Ver qué cuentas tienen el rol de Encargado o de Admin en el campus, por ejemplo para saber a quién puedes asignar un reporte.
+
+**Antes de empezar.** Ten el rol de Encargado o de Admin en ese campus.
+
+**Pasos.**
+
+1. Elige la opción para consultar las cuentas con rol del campus.
+2. Revisa la lista.
+
+**Resultado.** Cima Fix muestra, de cada cuenta con rol de Encargado o de Admin en el campus, su correo institucional y su rol. La lista incluye las cuentas que todavía no han iniciado sesión y no incluye las que solo tienen el rol de Reportante.
+
+> **Nota:** Como Encargado solo consultas la lista. Un Admin del campus asigna y retira los roles ([sección 2.2](#22-los-tres-roles)).
+
+### 5.7 Correos que recibes como Encargado
+
+Además de los correos de la [sección 4.9](#49-correos-que-recibes), Cima Fix te envía estos:
+
+| Cuándo                                               | Qué incluye el correo                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Otra persona te asigna o te reasigna un reporte      | El campus, el edificio, el espacio y la categoría del reporte, y el enlace para abrirlo. |
+| Otra persona cancela un reporte asignado a tu cuenta | El campus, el edificio, el espacio y la categoría del reporte, y el enlace para abrirlo. |
+| Un Admin te asigna un rol en un campus               | El campus y el rol asignado.                                                             |
+| El campus acumula reportes Nuevos o En revisión      | El campus, el estado de los reportes contados y cuántos reportes hay en ese estado.      |
+
+Ten presente que:
+
+- Una alerta por acumulación ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)) también la recibe la persona cuya acción provocó que se alcanzara el umbral. Es la excepción a la regla de no recibir correo de una acción propia.
+- Cima Fix no reintenta el envío de un correo que falla.
+- El correo es un aviso, no la fuente oficial: si esperabas uno y no llega, consulta el reporte en Cima Fix, o la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
+
+### 5.8 Alertas por acumulación de reportes
+
+Una alerta avisa a todo el personal de un campus de que se acumulan reportes sin atender. Cima Fix la envía por correo a todos los Encargados y Admins del campus.
+
+El Admin del campus define el **umbral** de cada estado vigilado: el número de reportes a partir del cual se envía la alerta. Hay un umbral para los reportes **Nuevos**, que siguen sin asignar, y otro para los **En revisión**, que siguen sin resolver. Como Encargado no puedes cambiarlos.
+
+Cuándo se envía una alerta:
+
+- Cuando el número de reportes de ese estado en el campus llega al umbral, es decir, pasa de ser menor a ser igual o mayor.
+- Cuando el Admin define o modifica el umbral y, con el nuevo valor, el número de reportes lo alcanza.
+- Una vez enviada, no se envía otra mientras el número siga igual o mayor que el umbral. Si baja del umbral y vuelve a alcanzarlo, se envía de nuevo.
+
+Ten presente que:
+
+- La alerta cuenta todos los reportes del campus en ese estado, no solo los tuyos.
+- Un campus sin umbral definido para un estado no envía alertas de ese estado.
 
 ## 6. Admin
 

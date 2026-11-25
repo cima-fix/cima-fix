@@ -15,6 +15,17 @@ const { values } = parseArgs({
   },
 })
 
+// The script writes wherever .env points (SDD 15.2): show it before writing anything.
+function databaseHost(): string {
+  try {
+    return new URL(process.env.DATABASE_URL ?? '').host
+  } catch {
+    return '(DATABASE_URL no está definida)'
+  }
+}
+console.log(`Base de datos: ${databaseHost()}`)
+console.log(`Folder de Cloudinary: ${process.env.CLOUDINARY_FOLDER ?? '(CLOUDINARY_FOLDER no está definida)'}`)
+
 try {
   const campus = await createCampus({
     slug: values.slug ?? '',

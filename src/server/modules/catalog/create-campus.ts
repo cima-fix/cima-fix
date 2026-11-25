@@ -67,7 +67,7 @@ export async function createCampus(
     })
   } catch (error) {
     // The campus was not created, so its plan is not kept. If deleting it fails too, the orphan
-    // photo task removes it a day later.
+    // photo task removes it a day later, but only in production: Vercel runs it nowhere else.
     await storage.deleteUploads([plan.publicId]).catch(() => {})
     throw error
   }

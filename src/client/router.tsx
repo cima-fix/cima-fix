@@ -3,7 +3,6 @@ import { AppShell } from './components/layout/AppShell'
 import { RouteError } from './components/layout/RouteError'
 import { signInAction, signInLoader, signOutAction, spaceLinkLoader } from './features/access/data'
 import { SignInPage } from './features/access/SignInPage'
-import { CatalogPage } from './features/admin/CatalogPage'
 import {
   catalogAction,
   catalogLoader,
@@ -12,8 +11,6 @@ import {
   staffAction,
   staffLoader,
 } from './features/admin/data'
-import { SettingsPage } from './features/admin/SettingsPage'
-import { StaffPage } from './features/admin/StaffPage'
 import { homeLoader } from './features/home/data'
 import { HomePage } from './features/home/HomePage'
 import { buildingReportsLoader, mapLoader, shouldRevalidateMap } from './features/map/data'
@@ -89,14 +86,20 @@ export const router = createBrowserRouter([
         path: 'campus/:slug/catalogo',
         loader: catalogLoader,
         action: catalogAction,
-        element: <CatalogPage />,
+        // The management screens load only when opened: most accounts never do.
+        lazy: async () => ({ Component: (await import('./features/admin/CatalogPage')).CatalogPage }),
       },
-      { path: 'campus/:slug/personal', loader: staffLoader, action: staffAction, element: <StaffPage /> },
+      {
+        path: 'campus/:slug/personal',
+        loader: staffLoader,
+        action: staffAction,
+        lazy: async () => ({ Component: (await import('./features/admin/StaffPage')).StaffPage }),
+      },
       {
         path: 'campus/:slug/configuracion',
         loader: settingsLoader,
         action: settingsAction,
-        element: <SettingsPage />,
+        lazy: async () => ({ Component: (await import('./features/admin/SettingsPage')).SettingsPage }),
       },
     ],
   },

@@ -19,6 +19,7 @@
 | Borrador | 24 de noviembre de 2026 | Creación del documento. El contenido se completa de forma incremental; las secciones pendientes se marcan como tales. |
 | Borrador | 24 de noviembre de 2026 | Redacción de las secciones 1 a 4: introducción, conceptos básicos, inicio rápido y Reportante.                        |
 | Borrador | 24 de noviembre de 2026 | Redacción de la sección 5: Encargado.                                                                                 |
+| Borrador | 24 de noviembre de 2026 | Redacción de la sección 6: Admin.                                                                                     |
 
 ---
 
@@ -62,6 +63,20 @@
   - [5.7 Correos que recibes como Encargado](#57-correos-que-recibes-como-encargado)
   - [5.8 Alertas por acumulación de reportes](#58-alertas-por-acumulaci%C3%B3n-de-reportes)
 - [6. Admin](#6-admin)
+  - [6.1 Alcance del rol de Admin](#61-alcance-del-rol-de-admin)
+  - [6.2 Consultar el catálogo del campus](#62-consultar-el-cat%C3%A1logo-del-campus)
+  - [6.3 Agregar un edificio, un espacio o una categoría](#63-agregar-un-edificio-un-espacio-o-una-categor%C3%ADa)
+  - [6.4 Cambiar el nombre de un edificio, un espacio o una categoría](#64-cambiar-el-nombre-de-un-edificio-un-espacio-o-una-categor%C3%ADa)
+  - [6.5 Cambiar la gravedad de una categoría](#65-cambiar-la-gravedad-de-una-categor%C3%ADa)
+  - [6.6 Desactivar y reactivar un edificio, un espacio o una categoría](#66-desactivar-y-reactivar-un-edificio-un-espacio-o-una-categor%C3%ADa)
+  - [6.7 Indicar la posición de un edificio en el plano](#67-indicar-la-posici%C3%B3n-de-un-edificio-en-el-plano)
+  - [6.8 Consultar y copiar el enlace de un espacio](#68-consultar-y-copiar-el-enlace-de-un-espacio)
+  - [6.9 Asignar o cambiar el rol de una cuenta](#69-asignar-o-cambiar-el-rol-de-una-cuenta)
+  - [6.10 Retirar el rol de una cuenta](#610-retirar-el-rol-de-una-cuenta)
+  - [6.11 Definir los umbrales de alerta](#611-definir-los-umbrales-de-alerta)
+  - [6.12 Definir los umbrales del mapa](#612-definir-los-umbrales-del-mapa)
+  - [6.13 Atender reportes como Admin](#613-atender-reportes-como-admin)
+  - [6.14 Correos que recibes como Admin](#614-correos-que-recibes-como-admin)
 - [7. Solución de problemas y contacto](#7-soluci%C3%B3n-de-problemas-y-contacto)
 - [8. Referencia](#8-referencia)
 - [9. Glosario](#9-glosario)
@@ -597,7 +612,346 @@ Ten presente que:
 
 ## 6. Admin
 
-Pendiente.
+Esta sección sirve a las personas con rol de Admin en un campus. Los Admins también pueden reportar y consultar reportes, así que todo lo de la [sección 4](#4-reportante) sigue disponible.
+
+Antes de empezar cualquiera de estas tareas, inicia sesión ([sección 3.1](#31-iniciar-sesi%C3%B3n)).
+
+### 6.1 Alcance del rol de Admin
+
+Como Admin configuras el campus donde se te asignó ese rol. Frente a un Reportante, cambia lo siguiente:
+
+- Mantienes el catálogo del campus: edificios, espacios y categorías ([secciones 6.2 a 6.6](#62-consultar-el-cat%C3%A1logo-del-campus)), la posición de los edificios en el plano ([sección 6.7](#67-indicar-la-posici%C3%B3n-de-un-edificio-en-el-plano)) y el enlace de cada espacio ([sección 6.8](#68-consultar-y-copiar-el-enlace-de-un-espacio)).
+- Asignas y retiras los roles de Encargado y de Admin ([sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta) y [sección 6.10](#610-retirar-el-rol-de-una-cuenta)).
+- Defines los umbrales de alerta y los umbrales del mapa ([sección 6.11](#611-definir-los-umbrales-de-alerta) y [sección 6.12](#612-definir-los-umbrales-del-mapa)).
+- Asignas y cancelas reportes del campus, pero no los resuelves, y no puedes recibir reportes asignados ([sección 6.13](#613-atender-reportes-como-admin)).
+- Consultas los reportes Cancelados y los Resueltos sin límite de tiempo, y ves el correo de quien registró cada reporte y el de la persona asignada ([sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien)).
+- Estos permisos rigen solo en el campus donde tienes el rol. En los demás campus sigues siendo Reportante, a menos que también te asignen un rol ahí ([sección 2.2](#22-los-tres-roles)).
+
+Lo que no se hace desde Cima Fix:
+
+- **Dar de alta un campus nuevo.** El alta de un campus y de su primer Admin se hace fuera de Cima Fix, por el equipo de desarrollo. El plano del campus se incorpora junto con el alta y tampoco se cambia desde Cima Fix.
+- **Imprimir y colocar los códigos QR.** Cima Fix te da el enlace de cada espacio; imprimir y colocar el código QR corresponde a la UABC.
+
+### 6.2 Consultar el catálogo del campus
+
+**Objetivo.** Ver los edificios, los espacios y las categorías del campus, incluidos los que están desactivados.
+
+**Antes de empezar.** Ten el rol de Admin en el campus.
+
+**Pasos.**
+
+1. Elige la opción para gestionar el catálogo del campus.
+2. Si eres Admin en más de un campus, elige el campus que quieres configurar.
+3. Revisa los edificios, los espacios de cada edificio y las categorías.
+
+**Resultado.** Cima Fix muestra los edificios del campus, los espacios de cada edificio y las categorías del campus. De cada uno indica si está activo o desactivado. Los desactivados siguen apareciendo. Cada espacio muestra su enlace.
+
+> **Nota:** Esta lista no es la que ve quien registra un reporte. En el formulario de reporte solo aparecen los elementos que se ofrecen ([sección 6.6](#66-desactivar-y-reactivar-un-edificio-un-espacio-o-una-categor%C3%ADa)).
+
+### 6.3 Agregar un edificio, un espacio o una categoría
+
+**Objetivo.** Registrar un edificio, un espacio o una categoría nuevos en el catálogo del campus.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Ten el nombre del elemento. Para una categoría, decide también su gravedad: Baja, Media o Alta.
+- Para un espacio, comprueba que su edificio ya esté registrado.
+- Comprueba que el nombre no exista ya en el catálogo, ni siquiera como elemento desactivado.
+
+**Pasos.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige la opción para agregar lo que necesitas:
+   - Para un edificio, la opción para agregar un edificio.
+   - Para un espacio, elige primero el edificio y luego la opción para agregar un espacio.
+   - Para una categoría, la opción para agregar una categoría.
+3. Escribe el nombre.
+4. Si agregas una categoría, elige su gravedad.
+5. Guarda el nuevo elemento.
+
+**Resultado.** El elemento aparece en el catálogo del campus. Cada espacio nuevo recibe su propio enlace ([sección 6.8](#68-consultar-y-copiar-el-enlace-de-un-espacio)). Una categoría nueva existe solo en este campus.
+
+> **Importante:** Un edificio nuevo no aparece en el formulario de reporte hasta que tenga al menos un espacio activo. Agrega sus espacios después de registrarlo.
+
+> **Importante:** Un elemento del catálogo no se puede eliminar. Si te equivocas en el nombre, cámbialo ([sección 6.4](#64-cambiar-el-nombre-de-un-edificio-un-espacio-o-una-categor%C3%ADa)); si ya no lo necesitas, desactívalo ([sección 6.6](#66-desactivar-y-reactivar-un-edificio-un-espacio-o-una-categor%C3%ADa)).
+
+> **Nota:** No puede haber dos edificios con el mismo nombre en un campus, ni dos espacios con el mismo nombre en un edificio, ni dos categorías con el mismo nombre en un campus. Cima Fix no distingue mayúsculas de minúsculas ni acentos, ignora los espacios sobrantes y cuenta también los elementos desactivados. Si el nombre ya lo tiene un elemento desactivado, reactívalo en lugar de crear otro. El mismo nombre sí se acepta en otro edificio (para un espacio) o en otro campus (para un edificio o una categoría).
+
+> **Nota:** La gravedad de una categoría es obligatoria y determina la prioridad de sus reportes ([sección 2.4](#24-prioridad)).
+
+### 6.4 Cambiar el nombre de un edificio, un espacio o una categoría
+
+**Objetivo.** Corregir o actualizar el nombre de un elemento del catálogo.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Ten el nuevo nombre. Debe cumplir las reglas de nombres de la [sección 6.3](#63-agregar-un-edificio-un-espacio-o-una-categor%C3%ADa).
+
+**Pasos.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige el elemento. Si es un espacio, búscalo dentro de su edificio.
+3. Elige la opción para cambiar el nombre.
+4. Escribe el nuevo nombre.
+5. Guarda el cambio.
+
+**Resultado.** El nuevo nombre se muestra en el catálogo y en los reportes que ya tenían asociado ese elemento.
+
+> **Nota:** El enlace de un espacio no cambia al renombrar el espacio ni su edificio. Los códigos QR que ya imprimiste siguen funcionando.
+
+### 6.5 Cambiar la gravedad de una categoría
+
+**Objetivo.** Cambiar la gravedad de una categoría, que es el punto de partida de la prioridad de sus reportes.
+
+**Antes de empezar.** Ten el rol de Admin en el campus y la categoría ya registrada.
+
+> **Importante:** Al guardar, Cima Fix recalcula la prioridad de todos los reportes abiertos de esa categoría con la nueva gravedad, y por eso cambia su lugar en la consulta ([sección 4.5](#45-consultar-y-filtrar-reportes)). Los reportes Resueltos y Cancelados conservan la prioridad que tenían.
+
+**Pasos.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige la categoría.
+3. Elige la opción para cambiar la gravedad.
+4. Elige la nueva gravedad: Baja, Media o Alta.
+5. Guarda el cambio.
+
+**Resultado.** La categoría conserva la nueva gravedad. Cada reporte abierto de esa categoría muestra la prioridad que resulta de ella: la gravedad sube un nivel por cada 3 confirmaciones de duplicado, sin pasar de Alta ([sección 2.4](#24-prioridad)).
+
+> **Nota:** Nadie puede cambiar a mano la prioridad de un reporte, tampoco un Admin. Se calcula con la gravedad de la categoría y las confirmaciones de duplicado.
+
+### 6.6 Desactivar y reactivar un edificio, un espacio o una categoría
+
+**Objetivo.** Dejar de ofrecer un edificio, un espacio o una categoría que ya no se usan, o volver a ofrecerlos.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Para desactivar un edificio o una categoría, comprueba que no tenga reportes abiertos asociados. Si los tiene, espera a que se resuelvan o cancélalos ([sección 6.13](#613-atender-reportes-como-admin)). Los reportes Resueltos y Cancelados no lo impiden.
+- Un espacio sí se puede desactivar aunque tenga reportes abiertos.
+
+> **Importante:** Desactivar un edificio también deja de ofrecer todos sus espacios, y desactivar el último espacio activo de un edificio deja de ofrecer el edificio. Quien abra el enlace de un espacio que no se ofrece verá un aviso de que el espacio no está disponible ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)).
+
+**Pasos para desactivar.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige el edificio, el espacio o la categoría.
+3. Elige la opción para desactivarlo.
+4. Si Cima Fix te pide confirmar, confirma.
+
+**Pasos para reactivar.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige el elemento desactivado.
+3. Elige la opción para reactivarlo.
+4. Si Cima Fix te pide confirmar, confirma.
+
+**Resultado.**
+
+- Al desactivar, el elemento deja de aparecer entre las opciones al registrar un reporte y en los filtros de la consulta. Sigue en el catálogo, marcado como desactivado, y los reportes que ya lo tenían asociado lo siguen mostrando.
+- Al reactivar, el elemento vuelve a ofrecerse, salvo que siga sin ofrecerse por otra razón: un espacio cuyo edificio sigue desactivado, o un edificio sin espacios activos.
+
+> **Nota:** Desactivar es la única forma de retirar un elemento del catálogo: no se elimina.
+
+> **Nota:** Si Cima Fix rechaza desactivar un edificio o una categoría, es porque tiene reportes abiertos. Cuando se resuelvan o se cancelen, vuelve a intentarlo.
+
+### 6.7 Indicar la posición de un edificio en el plano
+
+**Objetivo.** Ubicar un edificio sobre el plano del campus para que el mapa le muestre un indicador, y cambiar o retirar esa posición cuando haga falta.
+
+**Antes de empezar.** Ten el rol de Admin en el campus y el edificio ya registrado ([sección 6.3](#63-agregar-un-edificio-un-espacio-o-una-categor%C3%ADa)).
+
+**Pasos para indicar o cambiar la posición.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige el edificio.
+3. Elige la opción para indicar su posición en el plano.
+4. Indica sobre el plano la posición del edificio.
+5. Guarda la posición.
+
+**Pasos para retirar la posición.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Elige el edificio.
+3. Elige la opción para retirar su posición.
+4. Si Cima Fix te pide confirmar, confirma.
+
+**Resultado.**
+
+- Al indicar o cambiar la posición, Cima Fix la conserva. Si el edificio tiene reportes abiertos, el mapa le muestra un indicador en esa posición.
+- Al retirarla, el edificio queda sin posición y sin indicador en el mapa. Puedes indicarle otra después.
+
+> **Nota:** Un edificio sin posición sí se puede elegir al registrar un reporte. Solo que el mapa no le muestra indicador, aunque tenga reportes abiertos.
+
+> **Nota:** Si ningún edificio del campus tiene posición, el mapa muestra el plano con un aviso ([sección 4.8](#48-consultar-el-mapa-del-campus)).
+
+> **Nota:** El mapa no se actualiza solo. Quien lo tenga abierto verá el cambio al recargarlo ([sección 4.8](#48-consultar-el-mapa-del-campus)).
+
+### 6.8 Consultar y copiar el enlace de un espacio
+
+**Objetivo.** Obtener el enlace de un espacio, por ejemplo para generar su código QR.
+
+**Antes de empezar.** Ten el rol de Admin en el campus y el espacio ya registrado ([sección 6.3](#63-agregar-un-edificio-un-espacio-o-una-categor%C3%ADa)).
+
+**Pasos.**
+
+1. Abre el catálogo del campus (pasos 1 y 2 de la [sección 6.2](#62-consultar-el-cat%C3%A1logo-del-campus)).
+2. Busca el espacio dentro de su edificio.
+3. Copia el enlace del espacio.
+
+**Resultado.** Tienes el enlace propio del espacio. Al abrirlo, Cima Fix muestra el formulario de reporte con el campus, el edificio y el espacio ya elegidos ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)).
+
+> **Nota:** El enlace de cada espacio es distinto de los demás y nunca cambia, ni siquiera al renombrar el espacio o su edificio.
+
+> **Nota:** Si el espacio no se ofrece, porque está desactivado o porque lo está su edificio, el enlace muestra el aviso de espacio no disponible ([sección 6.6](#66-desactivar-y-reactivar-un-edificio-un-espacio-o-una-categor%C3%ADa)). Al reactivarlo, el mismo enlace vuelve a funcionar.
+
+> **Nota:** Antes de imprimir un código QR, abre el enlace con tu sesión iniciada y comprueba que lleva al espacio correcto.
+
+### 6.9 Asignar o cambiar el rol de una cuenta
+
+**Objetivo.** Dar a una cuenta el rol de Encargado o de Admin en tu campus, o cambiarle de uno a otro.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Ten el correo institucional de la cuenta, que debe terminar en `@uabc.edu.mx`. Da igual si la persona ya inició sesión alguna vez: si no lo ha hecho, el rol queda asignado y lo conserva cuando inicie sesión por primera vez. Dos correos que solo difieren en mayúsculas y minúsculas son la misma cuenta.
+- Si vas a pasar a Admin a una cuenta que es Encargado, comprueba que no tenga reportes abiertos asignados en el campus. Si los tiene, reasígnalos antes ([sección 5.3](#53-asignar-o-reasignar-un-reporte)).
+- Si vas a pasar a Encargado a un Admin, incluida tu propia cuenta, comprueba que el campus conserve otro Admin que ya haya iniciado sesión al menos una vez.
+
+> **Importante:** Revisa bien el correo antes de guardar. Un Encargado o un Admin ve el correo de quien registra cada reporte ([sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien)).
+
+**Pasos.**
+
+1. Abre la lista de cuentas con rol del campus, como se explica en la [sección 5.6](#56-consultar-las-cuentas-con-rol-en-el-campus).
+2. Elige la opción para asignar un rol.
+3. Escribe el correo institucional de la cuenta.
+4. Elige el rol: Encargado o Admin.
+5. Guarda la asignación.
+
+**Resultado.** La cuenta aparece en la lista con el rol que le asignaste. Ese rol reemplaza al que tenía en este campus y no cambia el que tenga en otros campus. Cima Fix envía a la cuenta un correo con el campus y el rol asignado, haya iniciado sesión antes o no.
+
+> **Nota:** Para cambiar el rol de una cuenta que ya tiene uno, repite los pasos con el rol nuevo.
+
+> **Nota:** No recibes correo de una asignación de rol que hiciste a tu propia cuenta.
+
+Cima Fix rechaza la asignación y te muestra el motivo en estos casos:
+
+- El correo no termina en `@uabc.edu.mx`.
+- La cuenta es Encargado, tiene reportes abiertos asignados en el campus y la pasarías a Admin.
+- El cambio dejaría al campus sin ningún Admin que haya iniciado sesión al menos una vez. Un Admin recién asignado que nunca ha iniciado sesión no cuenta: pídele que inicie sesión.
+
+### 6.10 Retirar el rol de una cuenta
+
+**Objetivo.** Quitar a una cuenta el rol de Encargado o de Admin en tu campus.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Si la cuenta es Encargado, comprueba que no tenga reportes abiertos asignados en el campus. Si los tiene, reasígnalos ([sección 5.3](#53-asignar-o-reasignar-un-reporte)) o cancélalos ([sección 5.5](#55-cancelar-un-reporte-del-campus)) antes. Los reportes Resueltos o Cancelados asignados a la cuenta no lo impiden.
+- Si la cuenta es Admin, comprueba que el campus conserve otro Admin que ya haya iniciado sesión al menos una vez.
+
+**Pasos.**
+
+1. Abre la lista de cuentas con rol del campus, como se explica en la [sección 5.6](#56-consultar-las-cuentas-con-rol-en-el-campus).
+2. Elige la cuenta.
+3. Elige la opción para retirar su rol.
+4. Si Cima Fix te pide confirmar, confirma.
+
+**Resultado.** La cuenta pasa a ser Reportante en este campus: puede reportar y consultar reportes, pero ya no atiende reportes ni configura el campus. Su rol en otros campus no cambia, y deja de aparecer en la lista de cuentas con rol.
+
+> **Nota:** Cima Fix no envía correo cuando se retira un rol. Si hace falta, avisa tú a la persona.
+
+### 6.11 Definir los umbrales de alerta
+
+**Objetivo.** Definir a partir de cuántos reportes Nuevos o En revisión se avisa por correo al personal del campus ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)).
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Decide el número de cada estado. Debe ser un número entero de 1 o más.
+- Hay un umbral para los reportes **Nuevos** y otro para los **En revisión**. Puedes definir uno, el otro o los dos.
+
+> **Importante:** Si con el valor que guardas el campus ya tiene ese número de reportes en el estado vigilado, y antes no alcanzaba el umbral o no lo tenía, Cima Fix envía la alerta de inmediato a todos los Encargados y Admins del campus, incluido tú. Por ejemplo, si hay 8 reportes Nuevos y defines un umbral de 5, la alerta sale al guardar.
+
+**Pasos.**
+
+1. Elige la opción para configurar los umbrales de alerta del campus.
+2. Si eres Admin en más de un campus, elige el campus que quieres configurar.
+3. En el umbral de reportes **Nuevos**, escribe el número.
+4. En el umbral de reportes **En revisión**, escribe el número.
+5. Guarda los umbrales.
+
+**Para modificar o retirar un umbral.** Para modificarlo, repite los pasos con el nuevo número. Para retirarlo, usa la opción para quitarlo y guarda. Un campus sin umbral en un estado no envía alertas de ese estado.
+
+**Resultado.** Los umbrales se conservan y aplican solo a este campus. Desde ese momento, cuando el número de reportes de un estado llega a su umbral, todos los Encargados y Admins del campus reciben una alerta por correo.
+
+> **Nota:** Cima Fix rechaza el cero, los números negativos, los decimales y los valores que no son números. Te muestra un aviso con el motivo.
+
+> **Nota:** Si el campus ya había alcanzado el umbral y con el nuevo valor lo sigue alcanzando, no se envía otra alerta.
+
+> **Nota:** Cima Fix no reintenta el envío de un correo que falla. Una alerta que no llegó no se reenvía mientras el número de reportes siga igual o mayor que el umbral. Consulta la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
+
+### 6.12 Definir los umbrales del mapa
+
+**Objetivo.** Definir a partir de cuántos reportes abiertos el mapa marca un edificio con nivel Medio o Alto.
+
+**Antes de empezar.**
+
+- Ten el rol de Admin en el campus.
+- Decide dos números, que se definen siempre juntos:
+  - El umbral de nivel **Medio**: un número entero de 2 o más.
+  - El umbral de nivel **Alto**: un número entero mayor que el de nivel Medio.
+
+**Pasos.**
+
+1. Elige la opción para configurar los umbrales del mapa del campus.
+2. Si eres Admin en más de un campus, elige el campus que quieres configurar.
+3. Escribe el umbral de nivel **Medio**.
+4. Escribe el umbral de nivel **Alto**.
+5. Guarda los umbrales.
+
+**Para modificarlos o retirarlos.** Para modificarlos, repite los pasos con los nuevos números. Para retirarlos, usa la opción para quitarlos y guarda; se retiran los dos a la vez.
+
+**Resultado.** Los indicadores del mapa se distinguen por nivel y el mapa muestra una leyenda con el rango de cada nivel. Por ejemplo, con un umbral Medio de 3 y un umbral Alto de 6, la leyenda indica Bajo: 1 a 2, Medio: 3 a 5 y Alto: 6 o más. Sin umbrales, todos los indicadores se ven igual y no hay leyenda.
+
+> **Nota:** Cima Fix rechaza un umbral Medio menor que 2, un umbral Alto que no sea mayor que el Medio, los decimales y los valores que no son números. Te muestra un aviso con el motivo.
+
+> **Nota:** Los umbrales del mapa solo cambian cómo se ve el mapa. No envían correos y no tienen relación con los umbrales de alerta ([sección 6.11](#611-definir-los-umbrales-de-alerta)).
+
+> **Nota:** Los umbrales de un campus no afectan a los de otro. El mapa no se actualiza solo: quien lo tenga abierto verá el cambio al recargarlo ([sección 4.8](#48-consultar-el-mapa-del-campus)).
+
+### 6.13 Atender reportes como Admin
+
+Como Admin también atiendes reportes del campus, con algunas diferencias respecto del Encargado. Los pasos de cada tarea están en la [sección 5](#5-encargado); aquí solo se indica qué cambia para ti.
+
+| Tarea                                                                           | Como Admin                                                                                                                                                     |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Encontrar los reportes que atender](#52-encontrar-los-reportes-que-atender)    | Igual. No uses el filtro **Asignados a mí**: un Admin no puede tener reportes asignados.                                                                       |
+| [Asignar o reasignar un reporte](#53-asignar-o-reasignar-un-reporte)            | Puedes hacerlo. No puedes asignarte reportes a ti: elige siempre **Asignar a…** y escoge a un Encargado del campus.                                            |
+| [Resolver un reporte](#54-resolver-un-reporte-asignado-a-tu-cuenta)             | No puedes. Solo resuelve el Encargado a quien está asignado el reporte. Si un reporte necesita resolverse, asígnalo a un Encargado.                            |
+| [Cancelar un reporte del campus](#55-cancelar-un-reporte-del-campus)            | Igual: puedes cancelar cualquier reporte abierto del campus, aunque otras personas ya lo hayan confirmado como duplicado.                                      |
+| [Consultar las cuentas con rol](#56-consultar-las-cuentas-con-rol-en-el-campus) | Igual. Además, tú asignas y retiras los roles ([sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta) y [sección 6.10](#610-retirar-el-rol-de-una-cuenta)). |
+
+> **Nota:** Donde la sección 5 pide el rol de Encargado para asignar o cancelar un reporte, el rol de Admin también sirve.
+
+> **Nota:** Si el campus no tiene Encargados a quienes asignar, asigna primero el rol de Encargado a una cuenta ([sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta)).
+
+### 6.14 Correos que recibes como Admin
+
+Además de los correos de la [sección 4.9](#49-correos-que-recibes), Cima Fix te envía estos:
+
+| Cuándo                                          | Qué incluye el correo                                                               |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Otro Admin te asigna un rol en un campus        | El campus y el rol asignado.                                                        |
+| El campus acumula reportes Nuevos o En revisión | El campus, el estado de los reportes contados y cuántos reportes hay en ese estado. |
+
+Ten presente que:
+
+- Como no puedes tener reportes asignados, no recibes los correos de asignación de un reporte ni los de cancelación de un reporte asignado a tu cuenta ([sección 5.7](#57-correos-que-recibes-como-encargado)).
+- La alerta por acumulación ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)) también la recibes cuando tu propia acción provoca que se alcance el umbral. Es la excepción a la regla de no recibir correo de una acción propia.
+- Cima Fix no reintenta el envío de un correo que falla.
+- El correo es un aviso, no la fuente oficial: si esperabas uno y no llega, consulta la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
 
 ## 7. Solución de problemas y contacto
 

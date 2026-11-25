@@ -13,6 +13,7 @@ import { duplicateRoutes } from './modules/duplicates/routes.ts'
 import { orphanPhotoRoutes } from './modules/reports/orphan-photos.ts'
 import { mapRoutes } from './modules/map/routes.ts'
 import type { AppEnv } from './types.ts'
+import { managementRoutes } from './modules/management/routes.ts'
 
 export type AppOptions = {
   /** Session middleware. Production default: `session` (cookie `cf_session`). Tests pass `asViewer()`. */
@@ -42,6 +43,7 @@ export function createApp(options: AppOptions = {}) {
   api.route('/', duplicateRoutes)
   api.route('/', orphanPhotoRoutes)
   api.route('/', mapRoutes)
+  api.route('/', managementRoutes)
   options.extend?.(api)
 
   const app = new Hono<AppEnv>().route('/api', api)

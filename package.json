@@ -27,6 +27,7 @@
     "@tailwindcss/vite": "^4.3.5",
     "@upstash/ratelimit": "^2.2.2",
     "@upstash/redis": "^1.41.1",
+    "@vercel/functions": "^3.11.3",
     "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",

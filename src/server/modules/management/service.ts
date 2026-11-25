@@ -8,6 +8,7 @@ import type { AssignmentBody, ReportQuery } from '../../../shared/schemas/manage
 import type { Viewer } from '../../../shared/types/viewer.ts'
 import { withCampusLock, type CampusLockContext } from '../../db/campus-lock.ts'
 import { getDb } from '../../db/client.ts'
+import { thresholdSnapshot } from '../../db/threshold-snapshot.ts'
 import { duplicateConfirmations, reports } from '../../db/schema.ts'
 import { AppError } from '../../middleware/errors.ts'
 import { getReport, listReports, type ReportPage } from '../reports/service.ts'
@@ -127,7 +128,7 @@ export async function assignReport(viewer: Viewer, reportId: string, body: Assig
 
     const state = await repo.findReportState(tx, reportId)
     if (!state) throw unavailable()
-    const before = await repo.thresholdSnapshot(tx, campusId)
+    const before = await thresholdSnapshot(tx, campusId)
     const wasNew = state.status === 'new'
     const done = wasNew
       ? await repo.assignNew(tx, reportId, body.assigneeId) // RF-GESTION-07, 08
@@ -161,7 +162,7 @@ export async function resolveReport(viewer: Viewer, reportId: string): Promise<R
 
   await withCampusLock(campusId, async (ctx) => {
     const { tx } = ctx
-    const before = await repo.thresholdSnapshot(tx, campusId)
+    const before = await thresholdSnapshot(tx, campusId)
     if (!(await repo.resolve(tx, reportId, viewer.accountId))) {
       const state = await repo.findReportState(tx, reportId)
       if (!state) throw unavailable()
@@ -194,7 +195,7 @@ export async function cancelReport(viewer: Viewer, reportId: string): Promise<vo
     // Read under the lock, so it is still the status the UPDATE below changes.
     const state = await repo.findReportState(tx, reportId)
     if (!state) throw unavailable()
-    const before = await repo.thresholdSnapshot(tx, campusId)
+    const before = await thresholdSnapshot(tx, campusId)
 
     if (!(await repo.cancel(tx, reportId, viewer.accountId, canCancelAny))) {
       if (!isOpen(state.status)) throw invalidTransition()

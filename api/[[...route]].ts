@@ -1,5 +1,9 @@
 import { handle } from 'hono/vercel'
 import { app } from '../src/server/app.ts'
+import { startNotifications } from '../src/server/modules/notifications/service.ts'
+
+// Emails of the domain events, after each COMMIT (SDD 14.1).
+startNotifications()
 
 const handler = handle(app)
 

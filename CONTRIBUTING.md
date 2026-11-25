@@ -30,6 +30,26 @@ npm run dev
 
 La aplicación queda disponible en la URL que indique la terminal.
 
+### Conectarse a la base de datos de desarrollo
+
+1. Pide al equipo la cadena de conexión de la rama `dev` de Neon, por mensaje privado y nunca en el grupo.
+2. `cp .env.example .env`
+3. Rellena en `.env`:
+   - `DATABASE_URL`: cadena **pooled** de `dev` (el host lleva `-pooler`).
+   - `DATABASE_URL_UNPOOLED`: cadena **directa** de `dev` (sin `-pooler`). Solo se usa para migrar.
+   - `APP_BASE_URL=http://localhost:5173`
+4. Si hay migraciones pendientes: `npm run db:migrate`
+5. Levanta la API en una terminal: `npm run dev:server` (escucha en `localhost:8787`)
+6. Levanta el cliente en otra terminal: `npm run dev` y abre http://localhost:5173
+
+Vite manda `/api` a `localhost:8787`: si solo corres `npm run dev`, la app abre pero todas las llamadas a la API fallan.
+
+Las pruebas (`npm test`) no necesitan base de datos externa: usan PGlite.
+
+Los valores de Google, Resend, Upstash y Cloudinary se agregan en el `.env` conforme se terminen sus fases; hasta entonces las partes que los usan quedan deshabilitadas o usan la versión de consola.
+
+Si agregas una variable de entorno nueva, ponla en `.env.example` (sin valor), en Vercel por entorno y, si la usa un workflow, en los secrets de GitHub Actions.
+
 ---
 
 ## Idioma

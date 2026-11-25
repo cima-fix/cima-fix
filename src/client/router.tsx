@@ -3,7 +3,6 @@ import { AppShell } from './components/layout/AppShell'
 import { RouteError } from './components/layout/RouteError'
 import { signInAction, signInLoader, signOutAction, spaceLinkLoader } from './features/access/data'
 import { SignInPage } from './features/access/SignInPage'
-import { CatalogPage } from './features/admin/CatalogPage'
 import {
   catalogAction,
   catalogLoader,
@@ -12,18 +11,15 @@ import {
   staffAction,
   staffLoader,
 } from './features/admin/data'
-import { SettingsPage } from './features/admin/SettingsPage'
-import { StaffPage } from './features/admin/StaffPage'
 import { homeLoader } from './features/home/data'
 import { HomePage } from './features/home/HomePage'
-import { mapLoader } from './features/map/data'
-import { MapPage } from './features/map/MapPage'
+import { buildingReportsLoader, mapLoader, shouldRevalidateMap } from './features/map/data'
+import { reportFormLoader } from './features/report-form/data'
 import { ReportFormPage } from './features/report-form/ReportFormPage'
 import { AssignSheet } from './features/reports/AssignSheet'
 import { reportAction, reportDetailLoader, reportListLoader } from './features/reports/data'
 import { ReportDetailPage } from './features/reports/ReportDetailPage'
 import { ReportListPage } from './features/reports/ReportListPage'
-import { getCatalog } from './lib/demo-api'
 import { withSignIn } from './lib/api-errors'
 import { loadSession, shellLoader } from './lib/session'
 
@@ -61,7 +57,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, loader: withSession(homeLoader), element: <HomePage /> },
       { path: 'e/:code', loader: spaceLinkLoader },
-      { path: 'reportar', loader: withSession(getCatalog), element: <ReportFormPage /> },
+      { path: 'reportar', loader: reportFormLoader, element: <ReportFormPage /> },
       { path: 'reportes', loader: withSession(reportListLoader), element: <ReportListPage /> },
       {
         id: 'report',
@@ -71,19 +67,39 @@ export const router = createBrowserRouter([
         element: <ReportDetailPage />,
         children: [{ path: 'asignar', action: reportAction, element: <AssignSheet /> }],
       },
-      { path: 'mapa', loader: withSession(mapLoader), element: <MapPage /> },
+      {
+        id: 'map',
+        path: 'mapa',
+        loader: mapLoader,
+        shouldRevalidate: shouldRevalidateMap,
+        // Leaflet only loads when the map opens.
+        lazy: async () => ({ Component: (await import('./features/map/MapPage')).MapPage }),
+        children: [
+          {
+            path: 'edificios/:buildingId',
+            loader: buildingReportsLoader,
+            lazy: async () => ({ Component: (await import('./features/map/MapPage')).BuildingReports }),
+          },
+        ],
+      },
       {
         path: 'campus/:slug/catalogo',
         loader: catalogLoader,
         action: catalogAction,
-        element: <CatalogPage />,
+        // The management screens load only when opened: most accounts never do.
+        lazy: async () => ({ Component: (await import('./features/admin/CatalogPage')).CatalogPage }),
       },
-      { path: 'campus/:slug/personal', loader: staffLoader, action: staffAction, element: <StaffPage /> },
+      {
+        path: 'campus/:slug/personal',
+        loader: staffLoader,
+        action: staffAction,
+        lazy: async () => ({ Component: (await import('./features/admin/StaffPage')).StaffPage }),
+      },
       {
         path: 'campus/:slug/configuracion',
         loader: settingsLoader,
         action: settingsAction,
-        element: <SettingsPage />,
+        lazy: async () => ({ Component: (await import('./features/admin/SettingsPage')).SettingsPage }),
       },
     ],
   },

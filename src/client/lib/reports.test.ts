@@ -1,35 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  compareReports,
-  computePriority,
-  descriptionLength,
-  isOpen,
-  type Priority,
-  type Report,
-} from './reports'
-
-describe('computePriority', () => {
-  // Verification table of RF-PRIORIDAD-02.
-  const cases: [Priority, number, Priority][] = [
-    ['low', 0, 'low'],
-    ['low', 2, 'low'],
-    ['low', 3, 'medium'],
-    ['low', 5, 'medium'],
-    ['low', 6, 'high'],
-    ['medium', 0, 'medium'],
-    ['medium', 2, 'medium'],
-    ['medium', 3, 'high'],
-    ['high', 0, 'high'],
-    ['high', 9, 'high'],
-  ]
-
-  it.each(cases)(
-    'RF-PRIORIDAD-02: severity %s with %i confirmations is %s',
-    (severity, confirmations, expected) => {
-      expect(computePriority(severity, confirmations)).toBe(expected)
-    },
-  )
-})
+import { compareReports, descriptionLength, isOpen, type Priority, type Report } from './reports'
 
 describe('isOpen', () => {
   const report = (status: Report['status']) => ({ status }) as Report

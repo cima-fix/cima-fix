@@ -1,225 +1,285 @@
-import { Link, useLoaderData } from 'react-router'
-import { mapLegend } from '../../../shared/domain/map-levels.ts'
+import { divIcon, CRS, type LatLngBoundsExpression } from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { ImageOverlay, MapContainer, Marker, Popup, ZoomControl } from 'react-leaflet'
+import { Link, useLoaderData, useLocation, useNavigate, useOutlet, useRouteLoaderData } from 'react-router'
 import { NavScreen } from '../../components/layout/NavScreen'
 import { LevelBadge } from '../../components/ui/Badge'
 import { Card, SectionLabel } from '../../components/ui/Card'
-import { ChevronRightIcon } from '../../components/ui/icons'
+import { Select } from '../../components/ui/Field'
+import { Notice } from '../../components/ui/Notice'
+import { ArrowLeftIcon, ChevronRightIcon } from '../../components/ui/icons'
+import { ReportCard } from '../../components/ui/ReportCard'
 import { cn } from '../../lib/cn'
-import type { MapBuilding, MapLevel } from '../../lib/demo-api'
 import { plural } from '../../lib/format'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
-import type { mapLoader } from './data'
+import type { buildingReportsLoader, mapLoader } from './data'
 
-const LEVEL_LABEL: Record<MapLevel, string> = { low: 'Bajo', medium: 'Medio', high: 'Alto' }
+type MapData = Awaited<ReturnType<typeof mapLoader>>
+type Indicator = MapData['map']['indicators'][number]
+type Level = NonNullable<Indicator['level']>
 
-// Color plus a distinct shape or border per level, so the level never depends on color alone
-// (RF-MAPA-09, RNF-USABILIDAD-06). A campus without map thresholds shows plain counts.
-const phoneMarker: Record<MapLevel | 'none', string> = {
-  low: 'size-7 rounded-full bg-green-light border border-green-dark text-neutral-black',
-  medium: 'size-8 rounded-full bg-yellow border-2 border-gold-dark text-neutral-black',
-  high: 'size-9 rounded-full bg-gold border-[3px] border-neutral-text text-neutral-black',
-  none: 'size-8 rounded-full bg-neutral-white border-2 border-neutral-text-secondary text-neutral-text',
-}
+const LEVEL_LABEL: Record<Level, string> = { low: 'Bajo', medium: 'Medio', high: 'Alto' }
 
-// Desktop frame "Mapa · Encargado · Escritorio": circles for Bajo and Medio, a square for Alto.
-const desktopMarker: Record<MapLevel | 'none', string> = {
+// Color plus a different shape or border per level, so the level never depends on color alone
+// (RF-MAPA-09, RNF-USABILIDAD-06). Circles for Bajo and Medio, a square for Alto, as in the
+// desktop frame; without map thresholds every indicator looks the same.
+const markerStyle: Record<Level | 'none', string> = {
   low: 'rounded-full bg-green-light border-2 border-green-dark text-neutral-black',
   medium: 'rounded-full bg-yellow border-2 border-gold-dark text-neutral-black',
   high: 'rounded-control bg-status-error border-2 border-neutral-text text-neutral-white',
   none: 'rounded-full bg-neutral-white border-2 border-neutral-text-secondary text-neutral-text',
 }
 
-// RF-MAPA-16: the open reports of the building.
-function buildingHref(name: string) {
-  return `/reportes?${new URLSearchParams({ edificio: name, estado: 'open' })}`
+const range = (min: number, max: number | null) => (max === null ? `${min} o más` : `${min} a ${max}`)
+
+function campusQuery(slug: string) {
+  return `?${new URLSearchParams({ campus: slug })}`
 }
 
-function describe(building: MapBuilding) {
-  const count = plural(building.openReports, 'reporte abierto', 'reportes abiertos')
-  return building.level ? `${count}, nivel ${LEVEL_LABEL[building.level]}` : count
+// The query of the current address (?campus=…, or none), kept when opening a building and coming
+// back, so the map is not loaded again (RF-MAPA-19).
+function useMapQuery() {
+  return useLocation().search
 }
 
-// Mouse shortcut on the plan: keyboard and screen reader users get the list instead.
-function MarkerLink({ building, className }: { building: MapBuilding; className: string }) {
+function describe(indicator: Indicator) {
+  const count = plural(indicator.openCount, 'reporte abierto', 'reportes abiertos')
+  return indicator.level ? `${count} · Nivel ${LEVEL_LABEL[indicator.level].toLowerCase()}` : count
+}
+
+// The plan of the campus with an indicator per building (SDD 13.4, DD-12): Leaflet in
+// CRS.Simple with the plan as an image layer, so zooming and panning keep each indicator on its
+// building (RF-MAPA-12, 13). Positions are plan coordinates with y from the bottom edge.
+function PlanMap({ data, className }: { data: MapData; className: string }) {
+  const { map } = data
+  const query = useMapQuery()
+  const bounds: LatLngBoundsExpression = [
+    [0, 0],
+    [map.floorPlan.height, map.floorPlan.width],
+  ]
   return (
-    <Link
-      to={buildingHref(building.name)}
-      tabIndex={-1}
-      aria-label={`${building.name}: ${describe(building)}`}
-      className={cn(
-        'flex items-center justify-center text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green',
-        className,
-      )}
-    >
-      {building.openReports}
-    </Link>
-  )
-}
-
-function PhoneMarker({ building }: { building: MapBuilding & { position: { x: number; y: number } } }) {
-  return (
-    <div
-      className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-control border border-neutral-border bg-neutral-white p-3"
-      style={{ left: `${building.position.x}%`, top: `${building.position.y}%` }}
-    >
-      {/* Building name under the marker, so each number says which building it is. */}
-      <span className="pointer-events-none absolute top-full left-1/2 mt-0.5 -translate-x-1/2 text-caption font-medium whitespace-nowrap text-green-dark">
-        {building.name}
-      </span>
-      <MarkerLink building={building} className={phoneMarker[building.level ?? 'none']} />
+    <div role="region" aria-label={`Plano del ${map.campus.name}`} className={className}>
+      <MapContainer
+        crs={CRS.Simple}
+        bounds={bounds}
+        maxBounds={bounds}
+        maxBoundsViscosity={0.8}
+        minZoom={-4}
+        maxZoom={2}
+        zoomSnap={0.25}
+        zoomControl={false}
+        attributionControl={false}
+        // Leaflet paints its own gray behind the plan; the canvas color of the frames instead.
+        className="size-full"
+        style={{ background: 'var(--color-canvas)' }}
+      >
+        <ImageOverlay url={map.floorPlan.url} bounds={bounds} />
+        <ZoomControl position="topright" zoomInTitle="Acercar" zoomOutTitle="Alejar" />
+        {map.indicators.map((indicator) => (
+          <Marker
+            key={indicator.building.id}
+            position={[indicator.position.y, indicator.position.x]}
+            // The list under the map is the keyboard and screen reader way in (RF-MAPA-15).
+            keyboard={false}
+            icon={divIcon({
+              className: '',
+              iconSize: [40, 40],
+              iconAnchor: [20, 20],
+              html: `<span class="flex size-10 items-center justify-center text-base font-bold shadow-sm ${markerStyle[indicator.level ?? 'none']}">${indicator.openCount}</span>`,
+            })}
+          >
+            {/* Selecting an indicator shows the name of its building (manual 4.8). */}
+            <Popup>
+              <span className="flex flex-col gap-1 font-sans">
+                <strong className="text-sm">{indicator.building.name}</strong>
+                <span className="text-xs text-neutral-text-muted">{describe(indicator)}</span>
+                <Link
+                  to={`/mapa/edificios/${indicator.building.id}${query}`}
+                  className="text-xs font-semibold text-green underline"
+                >
+                  Ver reportes abiertos
+                </Link>
+              </span>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   )
 }
 
-// Desktop plan: each building with a position is a block with its name; the ones with open
-// reports carry the indicator (RF-MAPA-07).
-function DesktopBuilding({
-  building,
-}: {
-  building: MapBuilding & { position: { x: number; y: number } }
-}) {
+// RF-MAPA-10: ranges from the campus thresholds; none without thresholds (RF-MAPA-09).
+function Legend({ data, desktop }: { data: MapData; desktop: boolean }) {
+  const legend = data.map.legend
+  if (!legend) return null
+  if (desktop) {
+    return (
+      <Card as="ul" aria-label="Leyenda de niveles" className="flex flex-wrap gap-6 px-4 py-3">
+        {legend.map(({ level, min, max }) => (
+          <li key={level} className="flex items-center gap-2 text-xs font-medium text-neutral-text">
+            <span aria-hidden="true" className={cn('size-4', markerStyle[level])} />
+            {LEVEL_LABEL[level]}: {range(min, max)}
+          </li>
+        ))}
+      </Card>
+    )
+  }
   return (
-    <div
-      className="absolute flex h-[22%] w-[26%] -translate-x-1/2 -translate-y-1/2 flex-col justify-between rounded-control border border-card-border bg-canvas p-3"
-      style={{ left: `${building.position.x}%`, top: `${building.position.y}%` }}
-    >
-      <div className="flex flex-1 items-center justify-center">
-        {building.openReports > 0 && (
-          <MarkerLink
-            building={building}
-            className={cn('size-10 text-base', desktopMarker[building.level ?? 'none'])}
-          />
-        )}
-      </div>
-      <span className="text-xs text-neutral-text-muted">{building.name}</span>
-    </div>
+    <ul className="flex flex-wrap gap-1.5" aria-label="Leyenda de niveles">
+      {legend.map(({ level, min, max }) => (
+        <li key={level}>
+          <LevelBadge level={level}>
+            {LEVEL_LABEL[level]}: {range(min, max)}
+          </LevelBadge>
+        </li>
+      ))}
+    </ul>
   )
 }
 
-// /mapa — Figma frame D "Mapa del campus" and "Mapa · Encargado · Escritorio".
-// The plan is a placeholder: the Leaflet plan (SDD 13.4) arrives with the catalog API.
-export function MapPage() {
-  const { buildings, thresholds, campus } = useLoaderData<typeof mapLoader>()
-  const isDesktop = useMediaQuery(DESKTOP_QUERY)
-  const withReports = buildings
-    .filter((b) => b.openReports > 0)
-    .sort((a, b) => b.openReports - a.openReports)
-  const onPlan = buildings.filter(
-    (b): b is MapBuilding & { position: { x: number; y: number } } => b.position !== null,
-  )
-  // RF-MAPA-10: ranges from the campus thresholds; none without thresholds.
-  const legend = mapLegend(thresholds)
-  const range = (min: number, max: number | null) => (max === null ? `${min} o más` : `${min} a ${max}`)
-
-  const list = (
+// Text alternative to the plan (RF-MAPA-15): the same buildings, as links to their reports.
+function BuildingList({ data, desktop }: { data: MapData; desktop: boolean }) {
+  const { map } = data
+  const query = useMapQuery()
+  const buildings = [...map.indicators].sort((a, b) => b.openCount - a.openCount)
+  return (
     <section className="flex flex-col gap-2 lg:gap-3" aria-labelledby="map-list">
       <SectionLabel id="map-list" className="lg:mt-1">
         Edificios con reportes abiertos
       </SectionLabel>
-      {withReports.length === 0 ? (
+      {buildings.length === 0 ? (
         <p className="text-body text-neutral-text-muted">No hay reportes abiertos.</p>
       ) : (
         <ul className="flex flex-col gap-2 lg:gap-3">
-          {withReports.map((b) => (
-            <li key={b.name}>
-              {isDesktop ? (
-                <Link
-                  to={buildingHref(b.name)}
-                  className="flex items-center gap-3 rounded-xl border border-card-border bg-neutral-white px-4 py-3.5 hover:border-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+          {buildings.map((b) => (
+            <li key={b.building.id}>
+              <Link
+                to={`/mapa/edificios/${b.building.id}${query}`}
+                className={cn(
+                  'flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green',
+                  desktop
+                    ? 'rounded-xl border border-card-border bg-neutral-white px-4 py-3.5 hover:border-green'
+                    : 'rounded-card border border-neutral-border px-3 py-3 hover:bg-neutral-surface',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'flex size-9 shrink-0 items-center justify-center text-sm font-bold',
+                    markerStyle[b.level ?? 'none'],
+                  )}
                 >
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      'flex size-9 shrink-0 items-center justify-center text-sm font-bold',
-                      desktopMarker[b.level ?? 'none'],
-                    )}
-                  >
-                    {b.openReports}
-                  </span>
-                  <span className="flex flex-1 flex-col">
-                    <span className="text-sm font-bold text-neutral-text">{b.name}</span>
-                    <span className="text-caption text-neutral-text-muted">
-                      {plural(b.openReports, 'reporte abierto', 'reportes abiertos')}
-                      {b.level && ` · Nivel ${LEVEL_LABEL[b.level].toLowerCase()}`}
-                    </span>
-                  </span>
-                  <ChevronRightIcon className="size-5 text-neutral-text-secondary" />
-                </Link>
-              ) : (
-                <Link
-                  to={buildingHref(b.name)}
-                  className="flex items-center gap-2 rounded-card border border-neutral-border px-3 py-3 text-body hover:bg-neutral-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
-                >
-                  <span className="flex-1">{b.name}</span>
-                  <span className="text-xs text-neutral-text-muted">
-                    {plural(b.openReports, 'reporte', 'reportes')}
-                  </span>
-                  {b.level && <LevelBadge level={b.level}>{LEVEL_LABEL[b.level]}</LevelBadge>}
-                </Link>
-              )}
+                  {b.openCount}
+                </span>
+                <span className="flex flex-1 flex-col">
+                  <span className="text-sm font-bold text-neutral-text">{b.building.name}</span>
+                  <span className="text-caption text-neutral-text-muted">{describe(b)}</span>
+                </span>
+                <ChevronRightIcon className="size-5 text-neutral-text-secondary" />
+              </Link>
             </li>
           ))}
         </ul>
       )}
     </section>
   )
+}
+
+// /mapa/edificios/:buildingId — open reports of a building, in the order of the consultation
+// (RF-MAPA-16…18). Coming back to the map does not reload it (RF-MAPA-19).
+export function BuildingReports() {
+  const { buildingId, reports } = useLoaderData<typeof buildingReportsLoader>()
+  const data = useRouteLoaderData<typeof mapLoader>('map')
+  const query = useMapQuery()
+  const building = data?.map.indicators.find((i) => i.building.id === buildingId)?.building
+  const name = building?.name ?? reports[0]?.building.name ?? 'Edificio'
+
+  return (
+    <section className="flex flex-col gap-3" aria-labelledby="building-title">
+      <Link
+        to={`/mapa${query}`}
+        className="flex w-fit items-center gap-1.5 rounded-chip text-sm font-semibold text-green hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+      >
+        <ArrowLeftIcon className="size-4" />
+        Volver al mapa
+      </Link>
+      <h2 id="building-title" className="text-heading font-bold text-neutral-text">
+        {name} · {plural(reports.length, 'reporte abierto', 'reportes abiertos')}
+      </h2>
+      {reports.length === 0 ? (
+        <p className="text-body text-neutral-text-muted">Este edificio ya no tiene reportes abiertos.</p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {reports.map((report) => (
+            <ReportCard key={report.id} report={report} href={`/reportes/${report.id}`} />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+// /mapa — Figma frame D "Mapa del campus" and "Mapa · Encargado · Escritorio".
+export function MapPage() {
+  const data = useLoaderData<typeof mapLoader>()
+  const navigate = useNavigate()
+  const outlet = useOutlet()
+  const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  const { campus, campuses, map } = data
+  const side = outlet ?? <BuildingList data={data} desktop={isDesktop} />
+
+  // RF-MAPA-03: the campus selector only appears with more than one active campus.
+  const selector = campuses.length > 1 && (
+    <Select
+      size="sm"
+      aria-label="Campus"
+      options={campuses.map((c) => ({ value: c.slug, label: c.name }))}
+      value={campus.slug}
+      onChange={(e) => navigate(`/mapa${campusQuery(e.target.value)}`)}
+      className={isDesktop ? 'w-64 border-card-border bg-neutral-white py-2.5 text-sm' : undefined}
+    />
+  )
+  // RF-MAPA-11
+  const unplaced = map.noPositionedBuildings && (
+    <Notice tone="info" className="text-body">
+      Ningún edificio del campus está ubicado en el plano todavía.
+    </Notice>
+  )
+  // The map does not update by itself (RF-MAPA-20).
+  const note = (
+    <p className="text-xs text-neutral-text-muted">
+      El mapa muestra los reportes abiertos al momento de abrirlo. Recarga la página para ver cambios.
+    </p>
+  )
 
   if (isDesktop) {
     return (
-      <NavScreen title={`Mapa · ${campus}`} desktopTitle="Mapa" subtitle={`UABC ${campus}`}>
+      <NavScreen title={`Mapa · ${map.campus.name}`} desktopTitle="Mapa" subtitle={map.campus.name}>
         <div className="grid grid-cols-[minmax(0,1fr)_400px] items-start gap-8 px-10 py-8">
           <div className="flex flex-col gap-3">
-            <Card className="relative aspect-[3/2] max-h-[calc(100dvh-16rem)] min-h-96 overflow-hidden">
-              <div aria-hidden="true" className="absolute inset-6">
-                {onPlan.map((b) => (
-                  <DesktopBuilding key={b.name} building={b} />
-                ))}
-              </div>
+            {selector}
+            {unplaced}
+            <Card className="overflow-hidden">
+              <PlanMap data={data} className="h-[calc(100dvh-17rem)] min-h-96" />
             </Card>
-            {legend && (
-              <Card as="ul" aria-label="Leyenda de niveles" className="flex flex-wrap gap-6 px-4 py-3">
-                {legend.map(({ level, min, max }) => (
-                  <li key={level} className="flex items-center gap-2 text-xs font-medium text-neutral-text">
-                    <span aria-hidden="true" className={cn('size-4', desktopMarker[level])} />
-                    {LEVEL_LABEL[level]}: {range(min, max)}
-                  </li>
-                ))}
-              </Card>
-            )}
+            <Legend data={data} desktop />
+            {note}
           </div>
-          {list}
+          {side}
         </div>
       </NavScreen>
     )
   }
 
   return (
-    <NavScreen title={`Mapa · ${campus}`}>
+    <NavScreen title={`Mapa · ${map.campus.name}`}>
       <div className="flex flex-col gap-3 px-4 py-3.5">
-        <div
-          aria-hidden="true"
-          className="relative aspect-4/3 overflow-hidden rounded-card border border-neutral-border bg-green-surface"
-        >
-          {/* RF-MAPA-07: no indicator for a building without open reports. */}
-          {onPlan
-            .filter((b) => b.openReports > 0)
-            .map((b) => (
-              <PhoneMarker key={b.name} building={b} />
-            ))}
-        </div>
-
-        {legend && (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Leyenda de niveles">
-            {legend.map(({ level, min, max }) => (
-              <li key={level}>
-                <LevelBadge level={level}>
-                  {LEVEL_LABEL[level]}: {range(min, max)}
-                </LevelBadge>
-              </li>
-            ))}
-          </ul>
-        )}
-        {list}
+        {selector}
+        {unplaced}
+        <PlanMap data={data} className="aspect-4/3 overflow-hidden rounded-card border border-neutral-border" />
+        <Legend data={data} desktop={false} />
+        {note}
+        {side}
       </div>
     </NavScreen>
   )

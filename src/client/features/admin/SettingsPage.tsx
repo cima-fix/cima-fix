@@ -7,7 +7,8 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Field, Input } from '../../components/ui/Field'
 import { ActionError, AdminScreen } from './AdminScreen'
-import type { ActionResult, settingsLoader } from './data'
+import { Notice } from '../../components/ui/Notice'
+import type { ActionResult, SettingsResult, settingsLoader } from './data'
 
 const LEVEL_LABEL = { low: 'Bajo', medium: 'Medio', high: 'Alto' } as const
 
@@ -52,8 +53,12 @@ function NumberField({
 }
 
 // RF-NOTIFICACION-14, 15: a threshold of Nuevos and one of En revisión, each optional.
-function AlertThresholds({ value }: { value: { new: number | null; inReview: number | null } }) {
-  const fetcher = useFetcher<ActionResult>()
+// The API cannot tell the saved values yet (only PUT exists, SDD 7.2), and the PUT replaces both
+// thresholds, so the screen says so and shows what it saved.
+function AlertThresholds() {
+  const fetcher = useFetcher<SettingsResult>()
+  const saved = fetcher.data?.ok ? fetcher.data.alert : undefined
+  const describe = (value: number | null | undefined) => (value == null ? 'sin alerta' : String(value))
   return (
     <Card as="section" aria-labelledby="alert-title" className="flex flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-col gap-1">
@@ -61,23 +66,27 @@ function AlertThresholds({ value }: { value: { new: number | null; inReview: num
           Umbrales de alerta
         </h2>
         <p className="text-body text-neutral-text-secondary">
-          Cuando los reportes abiertos del campus llegan al umbral, los Admin reciben un correo.
-          Déjalo vacío para no recibir esa alerta.
+          Cuando los reportes abiertos del campus llegan al umbral, los Encargados y Admins del
+          campus reciben un correo. Déjalo vacío para no recibir esa alerta.
         </p>
       </div>
+      <Notice tone="info" className="text-body">
+        Todavía no se pueden consultar los umbrales guardados. Al guardar se reemplazan los dos:
+        escribe también el que quieras conservar.
+      </Notice>
       <fetcher.Form method="post" noValidate className="flex flex-col gap-4">
         <input type="hidden" name="intent" value="alert" />
         <div className="grid gap-4 sm:grid-cols-2">
           <NumberField
             label="Reportes Nuevos"
             name="new"
-            defaultValue={value.new}
+            defaultValue={null}
             hint={`Sin asignar. Número entero, ${MIN_ALERT_THRESHOLD} o más.`}
           />
           <NumberField
             label="Reportes En revisión"
             name="inReview"
-            defaultValue={value.inReview}
+            defaultValue={null}
             hint={`Asignados. Número entero, ${MIN_ALERT_THRESHOLD} o más.`}
           />
         </div>
@@ -86,7 +95,10 @@ function AlertThresholds({ value }: { value: { new: number | null; inReview: num
           <Button type="submit" disabled={fetcher.state !== 'idle'} className="lg:w-auto lg:px-6">
             Guardar umbrales de alerta
           </Button>
-          <Saved result={fetcher.data} text="Umbrales de alerta guardados." />
+          <Saved
+            result={fetcher.data}
+            text={`Umbrales de alerta guardados: Nuevos, ${describe(saved?.new)}; En revisión, ${describe(saved?.inReview)}.`}
+          />
         </div>
       </fetcher.Form>
     </Card>
@@ -181,17 +193,17 @@ function MapThresholds({ value }: { value: { medium: number; high: number } | nu
 
 // /campus/:slug/configuracion — alert thresholds and map thresholds (SDD 13.2), Admin only.
 export function SettingsPage() {
-  const { campus, allowed, thresholds } = useLoaderData<typeof settingsLoader>()
+  const { campus, allowed, mapThresholds } = useLoaderData<typeof settingsLoader>()
 
   return (
     <AdminScreen title="Configuración" subtitle={campus.name} allowed={allowed}>
-      {thresholds && (
+      {allowed && (
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
-          <AlertThresholds value={thresholds.alert} />
+          <AlertThresholds />
           <MapThresholds
             // Remounts only when the thresholds are removed, to empty the fields.
-            key={thresholds.map ? 'set' : 'none'}
-            value={thresholds.map}
+            key={mapThresholds ? 'set' : 'none'}
+            value={mapThresholds}
           />
         </div>
       )}

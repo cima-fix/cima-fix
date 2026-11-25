@@ -58,13 +58,13 @@ test.describe('as Admin', () => {
     // RF-CATALOGO-08: same name ignoring case and extra spaces.
     await name.fill('  biblioteca ')
     await page.getByRole('button', { name: 'Agregar edificio' }).click()
-    await expect(page.getByRole('alert')).toHaveText('Ya existe "biblioteca".')
+    await expect(page.getByRole('alert')).toHaveText('Ya existe un edificio con ese nombre en este campus.')
   })
 
   test('Catálogo RF-CATALOGO-21: a building with open reports cannot be deactivated', async ({ page }) => {
     await page.goto(CATALOG)
     await page.getByRole('button', { name: 'Desactivar edificio Edificio 5' }).click()
-    await expect(page.getByRole('alert')).toContainText('Edificio 5 tiene reportes abiertos')
+    await expect(page.getByRole('alert')).toHaveText('No se puede desactivar un edificio con reportes abiertos.')
   })
 
   test('Catálogo RF-CATALOGO-13: sets the position of a building', async ({ page }) => {
@@ -124,6 +124,6 @@ test.describe('as Admin', () => {
     await page.getByLabel('Reportes Nuevos').fill('')
     await page.getByLabel('Reportes En revisión').fill('3')
     await page.getByRole('button', { name: 'Guardar umbrales de alerta' }).click()
-    await expect(page.getByText('Umbrales de alerta guardados.')).toBeVisible()
+    await expect(page.getByText('Umbrales de alerta guardados: Nuevos, sin alerta; En revisión, 3.')).toBeVisible()
   })
 })

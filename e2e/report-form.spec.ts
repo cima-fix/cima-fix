@@ -1,8 +1,15 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import { expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
+import { API_PORT, REPORT } from './seed'
 
 const MB = 1024 * 1024
+
+// A real 1 × 1 PNG, so the browser can read it before uploading (SDD 10.10).
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+)
 
 function image(name: string, bytes = 16) {
   return { name, mimeType: 'image/png', buffer: Buffer.alloc(bytes) }
@@ -53,7 +60,7 @@ test.describe('report form (/reportar)', () => {
 
     await page.getByLabel('Edificio').selectOption('Biblioteca')
     await expect(space).toBeEnabled()
-    await expect(space.locator('option')).toHaveText(['Elige un espacio', 'Planta baja', 'Planta alta'])
+    await expect(space.locator('option')).toHaveText(['Elige un espacio', 'Planta alta', 'Planta baja'])
   })
 
   test('RF-REPORTE-02: accepts exactly 1,000 characters', async ({ page }) => {
@@ -160,10 +167,33 @@ test.describe('report form (/reportar)', () => {
     const first = page.getByRole('article').first()
     await first.getByRole('button', { name: 'Es el mismo problema' }).click()
 
-    // r-3 had 4 confirmations. Desktop: "5 duplicados confirmados".
-    await expect(page).toHaveURL(/\/reportes\/r-3$/)
+    // r3 had 4 confirmations. Desktop: "5 duplicados confirmados".
+    await expect(page).toHaveURL(new RegExp(`/reportes/${REPORT.r3}$`))
     await expect(
       page.getByRole('definition').filter({ hasText: /^5( duplicados confirmados)?$/ }),
     ).toBeVisible()
+  })
+
+  test('RF-REPORTE-03, SDD 8.2: the photos go to Cloudinary and show in the report', async ({ page }) => {
+    await fillValidReport(page, 'La mesa del fondo está rota.')
+    await page.getByLabel('Agregar foto').setInputFiles({ name: 'mesa.png', mimeType: 'image/png', buffer: PNG })
+    await page.getByRole('button', { name: 'Enviar reporte' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Listo, registramos tu reporte' })).toBeVisible()
+    await page.getByRole('link', { name: 'Planta alta · Mobiliario' }).click()
+    await expect(page.getByRole('img', { name: 'Foto 1 del reporte' })).toBeVisible()
+  })
+
+  test('RF-REPORTE-16: a photo that cannot be saved keeps the form', async ({ page }) => {
+    await page.route(`http://localhost:${API_PORT}/__e2e/cloudinary/upload`, (route) =>
+      route.fulfill({ status: 500, body: 'down' }),
+    )
+    await fillValidReport(page, 'La mesa del fondo está rota.')
+    await page.getByLabel('Agregar foto').setInputFiles({ name: 'mesa.png', mimeType: 'image/png', buffer: PNG })
+    await page.getByRole('button', { name: 'Enviar reporte' }).click()
+
+    await expect(page.getByRole('alert')).toContainText('No pudimos guardar mesa.png')
+    await expect(page.getByLabel('Descripción')).toHaveValue('La mesa del fondo está rota.')
+    await expect(page.getByRole('heading', { name: 'Listo, registramos tu reporte' })).toHaveCount(0)
   })
 })

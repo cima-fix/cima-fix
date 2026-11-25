@@ -8,15 +8,27 @@ import { Dialog } from '../../components/ui/Dialog'
 import { Input, Select } from '../../components/ui/Field'
 import { CheckIcon, CopyIcon, MapPinIcon, PencilIcon } from '../../components/ui/icons'
 import { cn } from '../../lib/cn'
-import {
-  type ManagedBuilding,
-  type ManagedCategory,
-  type ManagedSpace,
-  type Position,
-} from '../../lib/demo-api'
 import { PRIORITY_LABEL, type Priority } from '../../lib/reports'
 import { ActionError, AdminScreen } from './AdminScreen'
 import type { ActionResult, catalogLoader } from './data'
+
+type Loaded = Awaited<ReturnType<typeof catalogLoader>>
+type ManagedBuilding = NonNullable<Loaded['catalog']>['buildings'][number]
+type ManagedSpace = ManagedBuilding['spaces'][number]
+type ManagedCategory = NonNullable<Loaded['catalog']>['categories'][number]
+type Plan = NonNullable<Loaded['plan']>
+type Position = { x: number; y: number }
+
+// Positions are plan coordinates with y from the bottom edge, as the map draws them (SDD 13.4,
+// DD-12). The screen shows them as percentages from the top-left corner of the plan.
+const percentOf = (position: Position, plan: Plan): Position => ({
+  x: Math.round((position.x / plan.width) * 100),
+  y: Math.round((1 - position.y / plan.height) * 100),
+})
+const planOf = (percent: Position, plan: Plan): Position => ({
+  x: Math.round((percent.x / 100) * plan.width),
+  y: Math.round((1 - percent.y / 100) * plan.height),
+})
 
 const SEVERITIES: Priority[] = ['low', 'medium', 'high']
 const iconButton =
@@ -210,7 +222,7 @@ function SpaceRow({ space, buildingActive }: { space: ManagedSpace; buildingActi
         {!space.isActive && <Chip tone="gray">Desactivado</Chip>}
       </EditableName>
       <div className="flex items-center justify-between gap-3 sm:justify-end">
-        <SpaceLink code={space.code} space={space.name} />
+        <SpaceLink code={space.linkCode} space={space.name} />
         <ToggleActive
           intent="toggle-space"
           id={space.id}
@@ -229,13 +241,19 @@ function SpaceRow({ space, buildingActive }: { space: ManagedSpace; buildingActi
 function PositionDialog({
   building,
   others,
+  plan,
   onClose,
 }: {
   building: ManagedBuilding
   others: ManagedBuilding[]
+  plan: Plan
   onClose: () => void
 }) {
-  const [position, setPosition] = useState<Position>(building.position ?? { x: 50, y: 50 })
+  // In percent while editing; sent as plan coordinates.
+  const [position, setPosition] = useState<Position>(
+    building.position ? percentOf(building.position, plan) : { x: 50, y: 50 },
+  )
+  const saved = planOf(position, plan)
   const fetcher = useCatalogFetcher(onClose)
   const busy = fetcher.state !== 'idle'
   const clamp = (n: number) => Math.min(100, Math.max(0, Math.round(n)))
@@ -245,6 +263,8 @@ function PositionDialog({
       <fetcher.Form method="post" className="flex flex-col gap-4 p-5 lg:p-6">
         <input type="hidden" name="intent" value="position-building" />
         <input type="hidden" name="id" value={building.id} />
+        <input type="hidden" name="x" value={saved.x} />
+        <input type="hidden" name="y" value={saved.y} />
         <div className="flex flex-col gap-1">
           <h2 id="position-title" className="text-heading font-bold">
             Posición de {building.name} en el plano
@@ -254,7 +274,8 @@ function PositionDialog({
           </p>
         </div>
         <div
-          className="relative aspect-[3/2] cursor-crosshair overflow-hidden rounded-xl border border-card-border bg-canvas"
+          className="relative cursor-crosshair overflow-hidden rounded-xl border border-card-border bg-canvas"
+          style={{ aspectRatio: `${plan.width} / ${plan.height}` }}
           onClick={(e) => {
             const box = e.currentTarget.getBoundingClientRect()
             setPosition({
@@ -264,13 +285,14 @@ function PositionDialog({
           }}
           aria-hidden="true"
         >
+          <img src={plan.url} alt="" className="absolute inset-0 size-full object-fill" />
           {others
             .filter((b) => b.position)
             .map((b) => (
               <span
                 key={b.id}
                 className="absolute -translate-x-1/2 -translate-y-1/2 rounded-chip bg-neutral-white px-1.5 py-0.5 text-caption text-neutral-text-muted shadow-sm"
-                style={{ left: `${b.position!.x}%`, top: `${b.position!.y}%` }}
+                style={{ left: `${percentOf(b.position!, plan).x}%`, top: `${percentOf(b.position!, plan).y}%` }}
               >
                 {b.name}
               </span>
@@ -293,7 +315,6 @@ function PositionDialog({
                 type="number"
                 min={0}
                 max={100}
-                name={axis}
                 value={position[axis]}
                 onChange={(e) => setPosition((p) => ({ ...p, [axis]: clamp(Number(e.target.value)) }))}
                 className="py-2"
@@ -327,7 +348,8 @@ function PositionDialog({
   )
 }
 
-function BuildingCard({ building, all }: { building: ManagedBuilding; all: ManagedBuilding[] }) {
+function BuildingCard({ building, all, plan }: { building: ManagedBuilding; all: ManagedBuilding[]; plan: Plan }) {
+  const shown = building.position && percentOf(building.position, plan)
   const [placing, setPlacing] = useState(false)
   const close = useCallback(() => setPlacing(false), [])
   const activeSpaces = building.spaces.filter((s) => s.isActive).length
@@ -354,9 +376,7 @@ function BuildingCard({ building, all }: { building: ManagedBuilding; all: Manag
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-text-muted">
         <span className="flex items-center gap-1">
           <MapPinIcon className="size-3.5" />
-          {building.position
-            ? `En el plano (${building.position.x}%, ${building.position.y}%)`
-            : 'Sin posición en el plano'}
+          {shown ? `En el plano (${shown.x}%, ${shown.y}%)` : 'Sin posición en el plano'}
         </span>
         <button type="button" onClick={() => setPlacing(true)} className={iconButton}>
           {building.position ? 'Cambiar posición' : 'Indicar posición'}
@@ -377,7 +397,9 @@ function BuildingCard({ building, all }: { building: ManagedBuilding; all: Manag
         placeholder={`Nuevo espacio en ${building.name}`}
         button="Agregar"
       />
-      {placing && <PositionDialog building={building} others={all.filter((b) => b !== building)} onClose={close} />}
+      {placing && (
+        <PositionDialog building={building} others={all.filter((b) => b !== building)} plan={plan} onClose={close} />
+      )}
     </Card>
   )
 }
@@ -450,7 +472,7 @@ function AddCategory() {
 // each building on the plan (SDD 13.2, 3.3.1). Admin only. Includes deactivated items
 // (RF-CATALOGO-20).
 export function CatalogPage() {
-  const { campus, allowed, catalog } = useLoaderData<typeof catalogLoader>()
+  const { campus, allowed, catalog, plan } = useLoaderData<typeof catalogLoader>()
 
   return (
     <AdminScreen
@@ -458,7 +480,7 @@ export function CatalogPage() {
       subtitle={`${campus.name} · Edificios, espacios y categorías`}
       allowed={allowed}
     >
-      {catalog && (
+      {catalog && plan && (
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
           <section aria-labelledby="buildings-title" className="flex flex-col gap-3">
             <SectionLabel id="buildings-title">
@@ -474,7 +496,7 @@ export function CatalogPage() {
             </Card>
             <ul className="flex flex-col gap-3">
               {catalog.buildings.map((building) => (
-                <BuildingCard key={building.id} building={building} all={catalog.buildings} />
+                <BuildingCard key={building.id} building={building} all={catalog.buildings} plan={plan} />
               ))}
             </ul>
           </section>

@@ -60,7 +60,8 @@ function borderFor(invalid: boolean | undefined) {
 type SelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size'> & {
   invalid?: boolean
   placeholder?: string
-  options: string[]
+  // A text is both the value and the label; an object sets them apart (ids of the API).
+  options: (string | { value: string; label: string })[]
   // sm: compact filter selects on the report list (Figma frame A).
   size?: 'md' | 'sm'
 }
@@ -90,11 +91,15 @@ export function Select({
         {...props}
       >
         {placeholder !== undefined && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option} value={option} className="text-neutral-text">
-            {option}
-          </option>
-        ))}
+        {options.map((option) => {
+          const { value: optionValue, label } =
+            typeof option === 'string' ? { value: option, label: option } : option
+          return (
+            <option key={optionValue} value={optionValue} className="text-neutral-text">
+              {label}
+            </option>
+          )
+        })}
       </select>
       <ChevronDownIcon
         className={cn(

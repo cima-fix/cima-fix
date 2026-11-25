@@ -144,7 +144,7 @@ Tu rol determina qué puedes hacer en Cima Fix. Estas reglas aplican a los tres:
 
 | Rol        | Qué hace                                                                                                                                                                                             |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Reportante | Registra reportes en cualquier campus activo, confirma duplicados, consulta reportes y el mapa, y cancela los reportes que registró.               |
+| Reportante | Registra reportes en cualquier campus activo, confirma duplicados, consulta reportes y el mapa, y cancela los reportes que registró.                                                                 |
 | Encargado  | Todo lo de un Reportante, y además atiende los reportes de su campus: se asigna reportes o los asigna a otros Encargados, resuelve los asignados a su cuenta y cancela cualquier reporte del campus. |
 | Admin      | Todo lo de un Reportante, y además configura su campus: catálogo, roles y umbrales. También asigna y cancela reportes, pero no los resuelve.                                                         |
 

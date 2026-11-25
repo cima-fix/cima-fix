@@ -4,31 +4,41 @@ import { ScreenHeader } from '../../components/layout/ScreenHeader'
 import { Button, ButtonNote } from '../../components/ui/Button'
 import { Notice } from '../../components/ui/Notice'
 import { ReportCard } from '../../components/ui/ReportCard'
-import { confirmReport } from '../../lib/demo-api'
+import { api } from '../../api'
+import { read } from '../../lib/api-errors'
 import type { Report } from '../../lib/reports'
+import type { Draft } from './ReportFormPage'
 
 type DuplicatesStepProps = {
+  draft: Draft
   building: string
-  similar: Report[]
+  duplicates: Report[]
   busy: boolean
   onBack: () => void
   onContinue: () => void
 }
 
-// Figma frame 2 "Posibles duplicados" (RF-DUPLICADO-01…07, SDD 8.2).
-// `similar` already comes in the RF-GESTION-14 order (RF-DUPLICADO-07).
-export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: DuplicatesStepProps) {
+// Figma frame 2 "Posibles duplicados" (RF-DUPLICADO-01…07, SDD 8.2). The duplicates come in
+// the RF-GESTION-14 order from the API (RF-DUPLICADO-07).
+export function DuplicatesStep({ draft, building, duplicates, busy, onBack, onContinue }: DuplicatesStepProps) {
   const navigate = useNavigate()
   const [confirming, setConfirming] = useState<string>()
   const [error, setError] = useState<string>()
 
+  // POST /api/reports/:id/confirmations with the campus, category and building of the draft,
+  // so the API can check it is still a possible duplicate (RN-05, RF-DUPLICADO-06).
   async function confirm(report: Report) {
     setConfirming(report.id)
     setError(undefined)
     try {
-      await confirmReport(report.id)
-      // RF-DUPLICADO-03 / RF-REPORTE-14: the confirmation replaces the new report;
-      // show the confirmed one.
+      await read(
+        api.reports[':id'].confirmations.$post({
+          param: { id: report.id },
+          json: { campusId: draft.campusId, categoryId: draft.categoryId, buildingId: draft.buildingId },
+        }),
+      )
+      // RF-DUPLICADO-03 / RF-REPORTE-14: the confirmation replaces the new report; show the
+      // confirmed one.
       navigate(`/reportes/${report.id}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No pudimos registrar la confirmación.')
@@ -38,38 +48,36 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
 
   return (
     <>
-      <ScreenHeader
-        title="¿Es el mismo problema?"
-        onBack={onBack}
-        backLabel="Volver al formulario"
-      />
+      <ScreenHeader title="¿Es el mismo problema?" onBack={onBack} backLabel="Volver al formulario" />
 
       <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:w-full lg:max-w-5xl lg:rounded-xl lg:border lg:border-card-border lg:bg-neutral-white lg:p-8">
         <p className="text-body text-neutral-text-secondary">
-          Hay reportes abiertos parecidos en el {building}. Si es el tuyo, confírmalo en vez de
-          crear otro.
+          Hay reportes abiertos parecidos en el {building}. Si es el tuyo, confírmalo en vez de crear
+          otro.
         </p>
 
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
-        {similar.map((report) => (
-          <ReportCard key={report.id} report={report}>
-            {/* RF-DUPLICADO-05 (SDD 8.2): no confirm button on your own report or on one
-                you already confirmed, only the reason. */}
-            {report.reportedByMe ? (
-              <ButtonNote>Tú registraste este reporte</ButtonNote>
-            ) : report.confirmedByMe ? (
-              <ButtonNote>Ya lo confirmaste</ButtonNote>
-            ) : (
-              <Button
-                variant="secondary"
-                disabled={confirming !== undefined || busy}
-                onClick={() => confirm(report)}
-              >
-                {confirming === report.id ? 'Confirmando…' : 'Es el mismo problema'}
-              </Button>
-            )}
-          </ReportCard>
-        ))}
+          {duplicates.map((report) => (
+            <ReportCard key={report.id} report={report}>
+              {/* RF-DUPLICADO-05 (SDD 8.2): no confirm button on your own report or on one you
+                  already confirmed, only the reason; allowedActions says whether it can be. */}
+              {report.reportedByMe ? (
+                <ButtonNote>Tú registraste este reporte</ButtonNote>
+              ) : report.confirmedByMe ? (
+                <ButtonNote>Ya lo confirmaste</ButtonNote>
+              ) : (
+                report.allowedActions.includes('confirm') && (
+                  <Button
+                    variant="secondary"
+                    disabled={confirming !== undefined || busy}
+                    onClick={() => confirm(report)}
+                  >
+                    {confirming === report.id ? 'Confirmando…' : 'Es el mismo problema'}
+                  </Button>
+                )
+              )}
+            </ReportCard>
+          ))}
         </div>
 
         {error && (
@@ -78,7 +86,11 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
           </Notice>
         )}
 
-        <Button disabled={busy || confirming !== undefined} onClick={onContinue} className="mt-1 lg:w-auto lg:self-end lg:px-10">
+        <Button
+          disabled={busy || confirming !== undefined}
+          onClick={onContinue}
+          className="mt-1 lg:w-auto lg:self-end lg:px-10"
+        >
           {busy ? 'Enviando…' : 'Ninguno es mi problema, continuar'}
         </Button>
       </div>

@@ -142,7 +142,8 @@ async function seed() {
     ...[admin, director].map((a) => ({ campusId: campus.id, accountId: a.id, role: 'admin' as const })),
   ])
 
-  // Positions are coordinates of the 2000 × 1200 plan (DD-12).
+  // Positions are coordinates of the 2000 × 1200 plan (DD-12), with y measured from the bottom
+  // edge as Leaflet's CRS.Simple does (SDD 13.4).
   const building = async (name: string, x: number | null, y: number | null) =>
     one(
       await db
@@ -150,9 +151,9 @@ async function seed() {
         .values({ campusId: campus.id, name, nameKey: nameKey(name), positionX: x, positionY: y })
         .returning(),
     )
-  const edificio2 = await building('Edificio 2', 1160, 288)
-  const edificio5 = await building('Edificio 5', 1480, 864)
-  const biblioteca = await building('Biblioteca', 440, 288)
+  const edificio2 = await building('Edificio 2', 1160, 912)
+  const edificio5 = await building('Edificio 5', 1480, 336)
+  const biblioteca = await building('Biblioteca', 440, 912)
 
   const space = async (buildingId: string, name: string, linkCode: string, isActive = true) =>
     one(

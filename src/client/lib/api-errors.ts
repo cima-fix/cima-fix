@@ -24,6 +24,10 @@ const UNEXPECTED_MESSAGE = 'Ocurrió un error inesperado. Inténtalo de nuevo.'
 
 type Response<T> = { ok: boolean; status: number; json(): Promise<T> }
 
+// The body of a successful response. A route can also declare an error body (e.g. the 409 of
+// POST /api/reports); those always carry `error` (SDD 7.1) and never reach the caller.
+type Success<R> = R extends { json(): Promise<infer T> } ? Exclude<T, { error: unknown }> : never
+
 async function errorOf(response: { status: number; json(): Promise<unknown> }): Promise<ApiError> {
   const body = (await response.json().catch(() => null)) as
     | ({ error?: { code?: string; message?: string; field?: string } } & Record<string, unknown>)
@@ -38,7 +42,7 @@ async function errorOf(response: { status: number; json(): Promise<unknown> }): 
   )
 }
 
-async function settle<T>(call: Promise<Response<T>>): Promise<Response<T>> {
+async function settle<R>(call: Promise<R>): Promise<R> {
   try {
     return await call
   } catch {
@@ -47,10 +51,10 @@ async function settle<T>(call: Promise<Response<T>>): Promise<Response<T>> {
 }
 
 // The JSON of a successful response; anything else throws ApiError.
-export async function read<T>(call: Promise<Response<T>>): Promise<T> {
+export async function read<R extends Response<unknown>>(call: Promise<R>): Promise<Success<R>> {
   const response = await settle(call)
   if (!response.ok) throw await errorOf(response)
-  return response.json()
+  return (await response.json()) as Success<R>
 }
 
 // For the responses without a body (204).

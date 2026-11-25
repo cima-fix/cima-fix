@@ -1,27 +1,30 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { CURRENT_USER } from '../../lib/demo-api'
 import { formatDateTime, plural } from '../../lib/format'
 import { isOpen, type Report } from '../../lib/reports'
 import { cn } from '../../lib/cn'
+import { useSession } from '../../lib/session'
 import { PriorityBadge, StatusBadge } from './Badge'
 
 type Variant = 'compact' | 'list'
 
-function assigneeText(report: Report) {
-  if (!report.assignee) return 'Sin asignar'
-  return report.assignee === CURRENT_USER ? 'Asignado a ti' : `Asignado a ${report.assignee}`
+// RN-04: the assignee email only comes to the staff of the campus; without it nothing is said.
+function assigneeText(report: Report, email: string) {
+  if (report.assigneeEmail === undefined) return undefined
+  if (report.assigneeEmail === null) return 'Sin asignar'
+  return report.assigneeEmail === email ? 'Asignado a ti' : `Asignado a ${report.assigneeEmail}`
 }
 
-function metaText(report: Report, variant: Variant) {
+function metaText(report: Report, variant: Variant, email: string) {
   if (report.status === 'resolved' && report.resolvedAt) {
     return `Resuelto ${formatDateTime(report.resolvedAt)}`
   }
   const parts = [
-    plural(report.confirmations, 'confirmación', 'confirmaciones'),
+    plural(report.confirmationCount, 'confirmación', 'confirmaciones'),
     formatDateTime(report.createdAt),
   ]
-  if (variant === 'list' && isOpen(report)) parts.unshift(assigneeText(report))
+  const assignee = variant === 'list' && isOpen(report) ? assigneeText(report, email) : undefined
+  if (assignee) parts.unshift(assignee)
   return parts.join(' · ')
 }
 
@@ -29,7 +32,7 @@ type ReportCardProps = {
   report: Report
   // compact: duplicates/confirmation (space · category); list: report list (building · space).
   variant?: Variant
-  // Extra line under the description (e.g. building and campus).
+  // Extra line under the title (e.g. building and campus).
   location?: string
   href?: string
   children?: ReactNode
@@ -37,12 +40,13 @@ type ReportCardProps = {
 
 // Figma "Tarjeta reporte".
 export function ReportCard({ report, variant = 'compact', location, href, children }: ReportCardProps) {
+  const { email } = useSession()
   const title =
     variant === 'list'
-      ? `${report.building} · ${report.space}`
-      : `${report.space} · ${report.category}`
+      ? `${report.building.name} · ${report.space.name}`
+      : `${report.space.name} · ${report.category.name}`
   const description =
-    variant === 'list' ? `${report.category} · ${report.description}` : report.description
+    variant === 'list' ? `${report.category.name} · ${report.description}` : report.description
 
   return (
     <article
@@ -68,7 +72,7 @@ export function ReportCard({ report, variant = 'compact', location, href, childr
       <p className="text-body text-neutral-text-secondary">{description}</p>
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={report.status} />
-        <span className="text-xs text-neutral-text-muted">{metaText(report, variant)}</span>
+        <span className="text-xs text-neutral-text-muted">{metaText(report, variant, email)}</span>
       </div>
       {children && <div className="relative mt-1 flex flex-col gap-2">{children}</div>}
     </article>

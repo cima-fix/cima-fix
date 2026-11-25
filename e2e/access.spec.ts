@@ -103,8 +103,8 @@ test.describe('space link (/e/:code)', () => {
     await page.goto('/e/K7P2X9QM4A')
 
     await expect(page.getByRole('heading', { name: 'Nuevo reporte' })).toBeVisible()
-    await expect(page.getByLabel('Edificio')).toHaveValue('Edificio 5')
-    await expect(page.getByLabel('Espacio')).toHaveValue('Salón 204')
+    await expect(page.getByLabel('Edificio').locator('option:checked')).toHaveText('Edificio 5')
+    await expect(page.getByLabel('Espacio').locator('option:checked')).toHaveText('Salón 204')
     await expect(page.getByRole('alert')).toHaveCount(0)
   })
 
@@ -112,7 +112,7 @@ test.describe('space link (/e/:code)', () => {
     await page.goto('/e/B6YP2ZR8MT')
 
     await expect(page.getByRole('alert')).toHaveText(/no está disponible/)
-    await expect(page.getByLabel('Edificio')).toHaveValue('Edificio 2')
+    await expect(page.getByLabel('Edificio').locator('option:checked')).toHaveText('Edificio 2')
     await expect(page.getByLabel('Espacio')).toHaveValue('')
     await expectNoA11yViolations(page)
   })
@@ -133,6 +133,6 @@ test.describe('space link without a session', () => {
     await page.getByRole('button', { name: 'Continuar con Google' }).click()
 
     await expect(page).toHaveURL(/\/reportar\?/)
-    await expect(page.getByLabel('Espacio')).toHaveValue('Salón 204')
+    await expect(page.getByLabel('Espacio').locator('option:checked')).toHaveText('Salón 204')
   })
 })

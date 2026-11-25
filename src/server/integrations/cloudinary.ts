@@ -44,7 +44,15 @@ export type PhotoStorage = {
   // call Cloudinary.
   listUploads(cursor?: string): Promise<UploadPage>
   deleteUploads(publicIds: string[]): Promise<void>
+  // Upload API, used only by the campus creation script (SDD 15.4).
+  uploadFloorPlan(filePath: string): Promise<FloorPlan>
 }
+
+// The plan of a campus in Cloudinary, with the size that defines the map coordinates (DD-12).
+export type FloorPlan = { publicId: string; width: number; height: number }
+
+// A plan is a raster image (SDD 2.5).
+const FLOOR_PLAN_FORMATS = ['png', 'jpg', 'webp']
 
 // One page of the photos uploaded to the folder of the environment.
 export type UploadPage = {
@@ -141,6 +149,16 @@ export function createPhotoStorage(config: PhotoStorageConfig): PhotoStorage {
         })),
         nextCursor: page.next_cursor,
       }
+    },
+
+    async uploadFloorPlan(filePath) {
+      const uploaded = await cloudinary.uploader.upload(filePath, {
+        ...credentials,
+        resource_type: 'image',
+        folder: `${config.folder}/plans`,
+        allowed_formats: FLOOR_PLAN_FORMATS,
+      })
+      return { publicId: uploaded.public_id, width: uploaded.width, height: uploaded.height }
     },
 
     async deleteUploads(publicIds) {

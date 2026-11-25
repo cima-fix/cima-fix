@@ -13,5 +13,5 @@
     "erasableSyntaxOnly": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["api", "src/server", "src/shared", "tests", "drizzle.config.ts"]
+  "include": ["api", "src/server", "src/shared", "tests", "scripts", "drizzle.config.ts"]
 }

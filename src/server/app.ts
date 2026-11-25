@@ -4,7 +4,9 @@ import { csrf } from 'hono/csrf'
 import { secureHeaders } from 'hono/secure-headers'
 import { errorHandler, notFoundHandler } from './middleware/errors.ts'
 import { jsonOnly } from './middleware/json-only.ts'
-import { anonymousSession } from './middleware/viewer.ts'
+import { writeRateLimit } from './middleware/rate-limit.ts'
+import { session } from './middleware/session.ts'
+import { accessRoutes } from './modules/access/routes.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { reportRoutes } from './modules/reports/routes.ts'
 import { duplicateRoutes } from './modules/duplicates/routes.ts'
@@ -13,7 +15,7 @@ import { mapRoutes } from './modules/map/routes.ts'
 import type { AppEnv } from './types.ts'
 
 export type AppOptions = {
-  /** Session middleware. Production default: phase 3 replaces `anonymousSession`. Tests pass `asViewer()`. */
+  /** Session middleware. Production default: `session` (cookie `cf_session`). Tests pass `asViewer()`. */
   session?: MiddlewareHandler<AppEnv>
   /** Tests only: mount extra routes (paths are relative to /api). */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,9 +33,10 @@ export function createApp(options: AppOptions = {}) {
           origin === (process.env.APP_BASE_URL ?? new URL(c.req.url).origin),
       }),
     )
-    .use(options.session ?? anonymousSession)
+    .use(options.session ?? session)
+    .use(writeRateLimit)
   // Module routes: each block adds ONE line per module (work plan, section 7)
-  // .route('/', accessRoutes)
+  api.route('/', accessRoutes)
   api.route('/', catalogRoutes)
   api.route('/', reportRoutes)
   api.route('/', duplicateRoutes)

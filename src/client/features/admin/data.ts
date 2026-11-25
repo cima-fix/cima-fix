@@ -3,7 +3,6 @@ import type { Permission } from '../../../shared/domain/permissions.ts'
 import {
   ApiError,
   assignRole,
-  CAMPUS,
   createBuilding,
   createCategory,
   createSpace,
@@ -13,7 +12,6 @@ import {
   removeRole,
   renameBuilding,
   renameSpace,
-  sessionCan,
   setAlertThresholds,
   setBuildingActive,
   setBuildingPosition,
@@ -23,7 +21,8 @@ import {
   updateCategory,
 } from '../../lib/demo-api'
 import { PRIORITY_LABEL, type Priority } from '../../lib/reports'
-import { requireSession } from '../../lib/session'
+import { withSignIn } from '../../lib/api-errors'
+import { loadSession, sessionCan } from '../../lib/session'
 
 // Result of every management action, read by the form that sent it (fetcher.data).
 export type ActionResult = { ok: true } | { ok: false; error: string }
@@ -31,10 +30,11 @@ export type ActionResult = { ok: true } | { ok: false; error: string }
 // Management screens live under /campus/:slug (SDD 13.2). An unknown campus is a 404; an
 // account without the role sees "acceso no permitido" and its data is not loaded (SDD 13.2,
 // RN-01, RN-03; the API rejects the actions anyway).
-function guard({ request, params }: LoaderFunctionArgs, permission: Permission) {
-  const session = requireSession(request)
-  if (params.slug !== CAMPUS.slug) throw data('Este campus no existe.', { status: 404 })
-  return { session, allowed: sessionCan(session, permission) }
+async function guard({ request, params }: LoaderFunctionArgs, permission: Permission) {
+  const session = await loadSession(request)
+  const campus = session.campuses.find((c) => c.slug === params.slug)
+  if (!campus) throw data('Este campus no existe.', { status: 404 })
+  return { session, campus, allowed: sessionCan(session, permission, campus.id) }
 }
 
 async function run(change: () => Promise<unknown>): Promise<ActionResult> {
@@ -65,10 +65,10 @@ function threshold(form: FormData, key: string) {
 
 /* Catálogo (3.3.1) */
 
-export async function catalogLoader(args: LoaderFunctionArgs) {
-  const { allowed } = guard(args, 'catalog.manage')
-  return { allowed, catalog: allowed ? await getManagedCatalog() : null }
-}
+export const catalogLoader = withSignIn(async (args: LoaderFunctionArgs) => {
+  const { campus, allowed } = await guard(args, 'catalog.manage')
+  return { campus, allowed, catalog: allowed ? await getManagedCatalog() : null }
+})
 
 export async function catalogAction({ request }: ActionFunctionArgs) {
   const form = await request.formData()
@@ -107,14 +107,15 @@ export async function catalogAction({ request }: ActionFunctionArgs) {
 
 /* Personal (RF-ACCESO-05…12) */
 
-export async function staffLoader(args: LoaderFunctionArgs) {
-  const { session, allowed } = guard(args, 'roles.read')
+export const staffLoader = withSignIn(async (args: LoaderFunctionArgs) => {
+  const { session, campus, allowed } = await guard(args, 'roles.read')
   return {
+    campus,
     allowed,
-    canManage: sessionCan(session, 'roles.manage'),
+    canManage: sessionCan(session, 'roles.manage', campus.id),
     roles: allowed ? await listRoles() : [],
   }
-}
+})
 
 export async function staffAction({ request }: ActionFunctionArgs) {
   const form = await request.formData()
@@ -134,10 +135,10 @@ export async function staffAction({ request }: ActionFunctionArgs) {
 
 /* Configuración (RF-NOTIFICACION-13…15, RF-MAPA-21…24) */
 
-export async function settingsLoader(args: LoaderFunctionArgs) {
-  const { allowed } = guard(args, 'alertThresholds.manage')
-  return { allowed, thresholds: allowed ? await getThresholds() : null }
-}
+export const settingsLoader = withSignIn(async (args: LoaderFunctionArgs) => {
+  const { campus, allowed } = await guard(args, 'alertThresholds.manage')
+  return { campus, allowed, thresholds: allowed ? await getThresholds() : null }
+})
 
 export async function settingsAction({ request }: ActionFunctionArgs) {
   const form = await request.formData()

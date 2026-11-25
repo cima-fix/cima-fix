@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { expectNoA11yViolations, expectNoHorizontalScroll, isDesktop } from './helpers'
 
 const URGENT = 'Lo más urgente para ti'

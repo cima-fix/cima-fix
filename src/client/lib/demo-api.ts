@@ -1,6 +1,5 @@
 import { cleanName, nameKey } from '../../shared/domain/names.ts'
 import { offeredCatalog } from '../../shared/domain/offered-catalog.ts'
-import { can, type CampusRoles, type Permission } from '../../shared/domain/permissions.ts'
 import { resolveSpaceLink } from '../../shared/domain/space-link.ts'
 import { buildingLevel, type MapThresholds } from '../../shared/domain/map-levels.ts'
 import { LINK_CODE_ALPHABET, LINK_CODE_LENGTH } from '../../shared/domain/link-code.ts'
@@ -13,8 +12,8 @@ import { compareReports, computePriority, isOpen, type Priority, type Report } f
 /*
   In-memory stand-in for the Hono API (SDD 7) so the screens can be built
   before the client is wired to it. Same function shapes the typed client will
-  expose; swap the bodies for `api.*` calls later. Data resets on reload, except
-  the demo session, which is kept in localStorage.
+  expose; swap the bodies for `api.*` calls later. Data resets on reload. The session
+  already comes from the API (lib/session.ts).
 */
 
 export const CURRENT_USER = 'laura.martinez@uabc.edu.mx'
@@ -44,46 +43,6 @@ export class ApiError extends Error {
 
 // Fake latency so loading states are visible during development.
 const delay = () => new Promise((resolve) => setTimeout(resolve, 150))
-
-/* ---------- Session (SDD 8.1) ---------- */
-
-export type Session = { email: string; role: StaffRole }
-
-const SESSION_KEY = 'cima-fix.demo-session'
-// The demo starts signed in as the Encargado of the Figma frames, so every screen opens
-// directly; "Cerrar sesión" leads to /ingresar.
-const DEFAULT_SESSION: Session = { email: CURRENT_USER, role: 'staff' }
-
-function storage() {
-  return typeof localStorage === 'undefined' ? null : localStorage
-}
-
-export function getSession(): Session | null {
-  const stored = storage()?.getItem(SESSION_KEY)
-  if (stored === undefined || stored === null) return DEFAULT_SESSION
-  return JSON.parse(stored) as Session | null
-}
-
-// Stand-in for POST /api/auth/google: the demo picks the role instead of Google.
-export async function signIn(role: StaffRole) {
-  await delay()
-  const session: Session = { email: CURRENT_USER, role }
-  storage()?.setItem(SESSION_KEY, JSON.stringify(session))
-  const account = roles.find((r) => r.email === CURRENT_USER)
-  if (account) account.role = role
-  return session
-}
-
-export async function signOut() {
-  await delay()
-  storage()?.setItem(SESSION_KEY, 'null')
-}
-
-// RN-01/RN-03 through the shared permission matrix, for the demo campus.
-export function sessionCan(session: Session | null, permission: Permission) {
-  const campusRoles: CampusRoles = new Map(session ? [[CAMPUS.id, session.role]] : [])
-  return can(campusRoles, permission, CAMPUS.id)
-}
 
 /* ---------- Catalog (SDD 7.2, Catálogo) ---------- */
 

@@ -37,17 +37,3 @@ export async function listedReportIds(page: Page) {
     return id ? [id] : []
   })
 }
-
-// The demo keeps its session in localStorage; "null" means signed out.
-export async function signOut(page: Page) {
-  await page.goto('/ingresar')
-  await page.evaluate(() => localStorage.setItem('cima-fix.demo-session', 'null'))
-}
-
-// Signs in through /ingresar with the demo role picker.
-export async function signInAs(page: Page, role: 'Encargado' | 'Admin', next = '/') {
-  await signOut(page)
-  await page.goto(`/ingresar?next=${encodeURIComponent(next)}`)
-  await page.getByText(role, { exact: true }).click()
-  await page.getByRole('button', { name: 'Continuar con Google' }).click()
-}

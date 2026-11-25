@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test'
-import { expectNoA11yViolations, expectNoHorizontalScroll, signInAs } from './helpers'
+import { expect, test } from './fixtures'
+import { expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
+import { EMAIL } from './seed'
 
 const CATALOG = '/campus/sauzal/catalogo'
 const STAFF = '/campus/sauzal/personal'
@@ -32,10 +33,7 @@ test.describe('as Encargado', () => {
 })
 
 test.describe('as Admin', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAs(page, 'Admin')
-    await expect(page).toHaveURL(/\/$/)
-  })
+  test.use({ account: EMAIL.admin })
 
   test('Catálogo: lists every building, space link and category', async ({ page }) => {
     await page.goto(CATALOG)

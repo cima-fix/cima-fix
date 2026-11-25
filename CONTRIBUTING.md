@@ -46,6 +46,8 @@ Vite manda `/api` a `localhost:8787`: si solo corres `npm run dev`, la app abre 
 
 Las pruebas (`npm test`) no necesitan base de datos externa: usan PGlite.
 
+Las pruebas end-to-end (`npm run test:e2e`) tampoco necesitan `.env`: Playwright levanta Vite y una API de prueba (`tests/e2e-server.ts`), que es la app Hono real sobre PGlite con Google, Cloudinary y Resend falsos y una copia de la base de datos para cada prueba. Los datos de esa base están en `e2e/seed.ts`.
+
 Los valores de Google, Resend, Upstash y Cloudinary se agregan en el `.env` conforme se terminen sus fases; hasta entonces las partes que los usan quedan deshabilitadas o usan la versión de consola.
 
 Si agregas una variable de entorno nueva, ponla en `.env.example` (sin valor), en Vercel por entorno y, si la usa un workflow, en los secrets de GitHub Actions.

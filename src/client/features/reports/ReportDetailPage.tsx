@@ -11,7 +11,7 @@ import { CURRENT_USER } from '../../lib/demo-api'
 import { formatDateTime, formatLongDateTime, formatNumber, plural } from '../../lib/format'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
 import { isOpen, type Report } from '../../lib/reports'
-import { useSession } from '../../lib/session'
+import { sessionRole, useSession } from '../../lib/session'
 import type { reportDetailLoader } from './data'
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -92,7 +92,7 @@ export function ReportDetailPage() {
   const busy = navigation.state === 'submitting'
   const assignedToMe = report.assignee === CURRENT_USER
   // Only Encargados take reports (RF-GESTION-06); an Admin assigns them to someone.
-  const canTakeIt = session.role === 'staff'
+  const canTakeIt = sessionRole(session) === 'staff'
 
   const assigneeText = !report.assignee ? 'Sin asignar' : assignedToMe ? 'Tú' : report.assignee
 

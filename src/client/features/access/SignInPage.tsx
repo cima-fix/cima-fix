@@ -1,27 +1,9 @@
-import { useState } from 'react'
-import { Form, useLoaderData, useNavigation, useSearchParams } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { useActionData, useLoaderData, useNavigation, useSubmit } from 'react-router'
 import { Notice } from '../../components/ui/Notice'
-import { CheckIcon, GoogleIcon } from '../../components/ui/icons'
-import { cn } from '../../lib/cn'
-import { CAMPUS } from '../../lib/demo-api'
-import type { signInLoader } from './data'
-
-// Errors that come back from Google sign-in (SDD 8.1, RF-ACCESO-02, RNF-DISPONIBILIDAD-01).
-const ERRORS = {
-  dominio: {
-    tone: 'error',
-    text: 'Solo se permiten cuentas @uabc.edu.mx. Entra con tu cuenta institucional.',
-  },
-  verificacion: {
-    tone: 'warning',
-    text: 'No pudimos verificar tu cuenta con Google en este momento. Intenta de nuevo en unos minutos.',
-  },
-} as const
-
-const ROLES = [
-  { value: 'staff', label: 'Encargado' },
-  { value: 'admin', label: 'Admin' },
-] as const
+import { CheckIcon } from '../../components/ui/icons'
+import { GOOGLE_CLIENT_ID, loadGoogleIdentity } from '../../lib/google'
+import type { SignInResult, signInLoader } from './data'
 
 const POINTS = [
   'Reporta un problema del campus en menos de un minuto.',
@@ -29,15 +11,77 @@ const POINTS = [
   'Sigue en qué va cada reporte y quién lo atiende.',
 ]
 
-// /ingresar — sign in with the institutional Google account (SDD 13.2).
+// SDD 12: what the screen says when Google cannot be reached.
+const UNAVAILABLE = 'La verificación de identidad no está disponible. Inténtalo más tarde.'
+
+// The GIS button: Google draws it and calls back with the credential (SDD 8.1).
+function GoogleButton({ onCredential }: { onCredential: (credential: string) => void }) {
+  const container = useRef<HTMLDivElement>(null)
+  const callback = useRef(onCredential)
+  const [state, setState] = useState<'loading' | 'ready' | 'unavailable'>(
+    GOOGLE_CLIENT_ID ? 'loading' : 'unavailable',
+  )
+
+  useEffect(() => {
+    callback.current = onCredential
+  })
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return
+    let active = true
+    loadGoogleIdentity()
+      .then((google) => {
+        if (!active || !container.current) return
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: ({ credential }) => callback.current(credential),
+          hd: 'uabc.edu.mx',
+          ux_mode: 'popup',
+        })
+        google.accounts.id.renderButton(container.current, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'rectangular',
+          locale: 'es',
+          width: Math.min(container.current.clientWidth || 384, 400),
+        })
+        setState('ready')
+      })
+      .catch(() => {
+        if (active) setState('unavailable')
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  return (
+    <div className="flex flex-col gap-3">
+      {state === 'unavailable' && (
+        <Notice tone="warning" className="text-body">
+          {UNAVAILABLE}
+        </Notice>
+      )}
+      {state === 'loading' && (
+        <p role="status" className="text-body text-neutral-text-muted">
+          Cargando el inicio de sesión de Google…
+        </p>
+      )}
+      <div ref={container} className="flex min-h-11 justify-center" />
+    </div>
+  )
+}
+
+// /ingresar — sign in with the institutional Google account (SDD 13.2, 8.1).
 // Phone: green band with the name and the card below. Desktop: brand panel on the left and the
 // card on the gray canvas of the "· Escritorio" frames.
 export function SignInPage() {
   const { next } = useLoaderData<typeof signInLoader>()
-  const [params] = useSearchParams()
+  const result = useActionData<SignInResult>()
   const navigation = useNavigation()
-  const [role, setRole] = useState<'staff' | 'admin'>('staff')
-  const error = ERRORS[params.get('error') as keyof typeof ERRORS]
+  const submit = useSubmit()
   const busy = navigation.state !== 'idle'
 
   return (
@@ -46,7 +90,7 @@ export function SignInPage() {
         <div className="flex flex-col gap-2">
           <p className="text-[28px] leading-tight font-bold lg:text-[40px]">Cima Fix</p>
           <p className="text-body text-neutral-white/90 lg:text-base">
-            Mantenimiento e infraestructura · UABC {CAMPUS.name}
+            Mantenimiento e infraestructura · UABC
           </p>
         </div>
         <ul className="hidden flex-col gap-4 lg:flex">
@@ -75,57 +119,24 @@ export function SignInPage() {
             </p>
           </div>
 
-          {error && (
-            <Notice tone={error.tone} className="text-body">
-              {error.text}
+          {/* DOMAIN_NOT_ALLOWED, IDENTITY_UNAVAILABLE…: the API's own message (SDD 13.1). */}
+          {result?.error && !busy && (
+            <Notice
+              tone={result.error.code === 'IDENTITY_UNAVAILABLE' ? 'warning' : 'error'}
+              className="text-body"
+            >
+              {result.error.message}
             </Notice>
           )}
 
-          <Form method="post" className="flex flex-col gap-4">
-            <input type="hidden" name="next" value={next} />
-
-            {/* Demo only: there is no Google here, so the role is picked by hand. */}
-            <fieldset className="flex flex-col gap-2 rounded-control border border-dashed border-neutral-border p-3">
-              <legend className="px-1 text-xs text-neutral-text-muted">
-                Demostración: entrar como
-              </legend>
-              <div className="grid grid-cols-2 gap-2">
-                {ROLES.map((option) => {
-                  const checked = role === option.value
-                  return (
-                    <label
-                      key={option.value}
-                      className={cn(
-                        'flex cursor-pointer items-center justify-center gap-2 rounded-control border px-3 py-2 text-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green',
-                        checked
-                          ? 'border-green bg-green-surface font-semibold text-green-dark'
-                          : 'border-neutral-border text-neutral-text-secondary',
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="role"
-                        value={option.value}
-                        checked={checked}
-                        onChange={() => setRole(option.value)}
-                        className="sr-only"
-                      />
-                      {option.label}
-                    </label>
-                  )
-                })}
-              </div>
-            </fieldset>
-
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full items-center justify-center gap-3 rounded-control border border-neutral-field-border bg-neutral-white px-4 py-3 text-control font-medium text-neutral-text hover:bg-neutral-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <GoogleIcon className="size-5" />
-              {busy ? 'Entrando…' : 'Continuar con Google'}
-            </button>
-          </Form>
+          <GoogleButton
+            onCredential={(credential) => submit({ credential, next }, { method: 'post' })}
+          />
+          {busy && (
+            <p role="status" className="text-center text-body text-neutral-text-muted">
+              Entrando…
+            </p>
+          )}
 
           <p className="text-xs text-neutral-text-muted">
             Solo se aceptan cuentas del dominio @uabc.edu.mx. Si es tu primera vez, entrarás como

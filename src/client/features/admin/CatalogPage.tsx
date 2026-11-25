@@ -9,7 +9,6 @@ import { Input, Select } from '../../components/ui/Field'
 import { CheckIcon, CopyIcon, MapPinIcon, PencilIcon } from '../../components/ui/icons'
 import { cn } from '../../lib/cn'
 import {
-  CAMPUS,
   type ManagedBuilding,
   type ManagedCategory,
   type ManagedSpace,
@@ -451,12 +450,12 @@ function AddCategory() {
 // each building on the plan (SDD 13.2, 3.3.1). Admin only. Includes deactivated items
 // (RF-CATALOGO-20).
 export function CatalogPage() {
-  const { allowed, catalog } = useLoaderData<typeof catalogLoader>()
+  const { campus, allowed, catalog } = useLoaderData<typeof catalogLoader>()
 
   return (
     <AdminScreen
       title="Catálogo"
-      subtitle={`UABC ${CAMPUS.name} · Edificios, espacios y categorías`}
+      subtitle={`${campus.name} · Edificios, espacios y categorías`}
       allowed={allowed}
     >
       {catalog && (

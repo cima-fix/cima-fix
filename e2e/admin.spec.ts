@@ -103,10 +103,12 @@ test.describe('as Admin', () => {
     await expect(page.getByRole('alert')).toContainText('tiene reportes abiertos asignados')
   })
 
-  test('Configuración RF-MAPA-23: rejects a Medio threshold below 2', async ({ page }) => {
+  test('Configuración RF-MAPA-23: rejects a Medio threshold below 2', async ({ page, browserName }) => {
     await page.goto(SETTINGS)
     await expect(page.getByRole('heading', { level: 1, name: 'Configuración' })).toBeVisible()
-    await expectNoA11yViolations(page)
+    // axe crashes the Firefox page on this screen ("Page crashed", every run); the same steps pass
+    // without it, so it is axe and not the app. Chromium and WebKit still run the check here.
+    if (browserName !== 'firefox') await expectNoA11yViolations(page)
 
     await page.getByLabel('Nivel Medio desde').fill('1')
     await page.getByRole('button', { name: 'Guardar umbrales del mapa' }).click()

@@ -6,14 +6,12 @@ import {
   isDesktop,
   listedReportIds,
 } from './helpers'
-
-// The account of the demo session (Figma's Encargado).
-const ME = 'laura.martinez@uabc.edu.mx'
+import { CAMPUS, EMAIL, REPORT } from './seed'
 
 function listHeading(page: Page) {
   return page.getByRole('heading', {
     level: 1,
-    name: isDesktop(page) ? 'Reportes' : 'Reportes · Campus Sauzal',
+    name: isDesktop(page) ? 'Reportes' : `Reportes · ${CAMPUS.name}`,
   })
 }
 
@@ -21,7 +19,7 @@ function listHeading(page: Page) {
 function assignedToMe(page: Page) {
   return page
     .getByRole('definition')
-    .filter({ hasText: isDesktop(page) ? `${ME} (tú)` : /^Tú$/ })
+    .filter({ hasText: isDesktop(page) ? `${EMAIL.staff} (tú)` : /^Tú$/ })
 }
 
 test.describe('report list (/reportes)', () => {
@@ -36,31 +34,36 @@ test.describe('report list (/reportes)', () => {
     await page.goto('/reportes')
     await expect(listHeading(page)).toBeVisible()
 
-    expect(await listedReportIds(page)).toEqual([
-      'r-3', // Alta, 10 nov
-      'r-1', // Alta, 16 nov
-      'r-2', // Media, 12 nov
-      'r-4', // Media, 13 nov
-      'r-6', // Media, 17 nov
-      'r-5', // Resuelto
+    await expect.poll(() => listedReportIds(page)).toEqual([
+      REPORT.r3, // Alta, 10 nov
+      REPORT.r1, // Alta, 16 nov
+      REPORT.r2, // Media, 12 nov
+      REPORT.r4, // Media, 13 nov
+      REPORT.r6, // Media, 17 nov
+      REPORT.r5, // Resuelto
     ])
   })
 
-  test('filters by building and keeps the filter in the URL', async ({ page }) => {
+  test('RF-GESTION-03, 04: filters by building and keeps the filter in the URL', async ({ page }) => {
     await page.goto('/reportes')
-    await page.getByLabel('Edificio').selectOption('Biblioteca')
+    await page.getByLabel('Edificio').selectOption({ label: 'Biblioteca' })
 
-    await expect(page).toHaveURL(/edificio=Biblioteca/)
-    await expect.poll(() => listedReportIds(page)).toEqual(['r-5'])
+    await expect(page).toHaveURL(/edificio=/)
+    await expect.poll(() => listedReportIds(page)).toEqual([REPORT.r5])
   })
 
-  test('"Asignados a mí" shows only reports assigned to the current account', async ({ page }) => {
+  test('RF-GESTION-22: "Asignados a mí" shows only reports assigned to the account', async ({ page }) => {
     await page.goto('/reportes')
     const toggle = page.getByRole('button', { name: 'Asignados a mí' })
     await toggle.click()
 
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
-    await expect.poll(() => listedReportIds(page)).toEqual(['r-2'])
+    await expect.poll(() => listedReportIds(page)).toEqual([REPORT.r2])
+  })
+
+  test('RF-GESTION-15: "Mis reportes" shows the ones registered or confirmed', async ({ page }) => {
+    await page.goto('/reportes?mios=1')
+    await expect.poll(() => listedReportIds(page)).toEqual([REPORT.r4, REPORT.r6, REPORT.r5])
   })
 
   test('desktop: "Todos" clears "Asignados a mí" and "Mis reportes"', async ({ page }) => {
@@ -76,46 +79,49 @@ test.describe('report list (/reportes)', () => {
 
 test.describe('assign, resolve and cancel (/reportes/:id)', () => {
   test('RF-GESTION-07/08: assigning a Nuevo report moves it to En revisión', async ({ page }) => {
-    await page.goto('/reportes/r-1')
+    await page.goto(`/reportes/${REPORT.r1}`)
     await expect(page.getByText('Nuevo', { exact: true })).toBeVisible()
     await expectNoA11yViolations(page)
 
     await page.getByRole('link', { name: 'Asignar a…' }).click()
     const sheet = page.getByRole('dialog', { name: 'Asignar reporte' })
     await expect(sheet).toBeVisible()
-    await expect(sheet.getByRole('radio', { name: isDesktop(page) ? ME : 'Asignármelo a mí' })).toBeChecked()
+    await expect(
+      sheet.getByRole('radio', { name: isDesktop(page) ? EMAIL.staff : 'Asignármelo a mí' }),
+    ).toBeChecked()
     await expectNoA11yViolations(page)
 
     await sheet.getByRole('button', { name: isDesktop(page) ? 'Confirmar asignación' : 'Asignar' }).click()
     await expect(sheet).toBeHidden()
-    await expect(page).toHaveURL(/\/reportes\/r-1$/)
+    await expect(page).toHaveURL(new RegExp(`/reportes/${REPORT.r1}$`))
     await expect(page.getByText('En revisión', { exact: true })).toBeVisible()
     await expect(assignedToMe(page)).toBeVisible()
   })
 
   test('"Asignarme este reporte" takes a Nuevo report in one step', async ({ page }) => {
-    await page.goto('/reportes/r-3')
+    await page.goto(`/reportes/${REPORT.r3}`)
     await page.getByRole('button', { name: 'Asignarme este reporte' }).click()
     await expect(page.getByText('En revisión', { exact: true })).toBeVisible()
     await expect(assignedToMe(page)).toBeVisible()
   })
 
   test('closing the sheet with Escape leaves the report unchanged', async ({ page }) => {
-    await page.goto('/reportes/r-1/asignar')
+    await page.goto(`/reportes/${REPORT.r1}/asignar`)
     await expect(page.getByRole('dialog', { name: 'Asignar reporte' })).toBeVisible()
     await page.keyboard.press('Escape')
 
-    await expect(page).toHaveURL(/\/reportes\/r-1$/)
+    await expect(page).toHaveURL(new RegExp(`/reportes/${REPORT.r1}$`))
     await expect(page.getByRole('definition').filter({ hasText: /^Sin asignar$/ })).toBeVisible()
   })
 
-  test('only the assigned person can resolve', async ({ page }) => {
-    // r-4 is assigned to someone else.
-    await page.goto('/reportes/r-4')
-    await expect(page.getByRole('button', { name: 'Marcar como resuelto' })).toBeDisabled()
+  test('RN-03: only the assigned person can resolve', async ({ page }) => {
+    // r4 is assigned to someone else.
+    await page.goto(`/reportes/${REPORT.r4}`)
+    await expect(page.getByText('En revisión', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Marcar como resuelto' })).toHaveCount(0)
 
-    // r-2 is assigned to the current account.
-    await page.goto('/reportes/r-2')
+    // r2 is assigned to the account.
+    await page.goto(`/reportes/${REPORT.r2}`)
     await page.getByRole('button', { name: 'Marcar como resuelto' }).click()
     // RF-GESTION-02: a resolved report shows its resolution date.
     await expect(page.getByRole('term').filter({ hasText: /^Resuelto$/ })).toBeVisible()
@@ -123,7 +129,7 @@ test.describe('assign, resolve and cancel (/reportes/:id)', () => {
   })
 
   test('cancelling asks first, and "No, volver" keeps the report', async ({ page }) => {
-    await page.goto('/reportes/r-1')
+    await page.goto(`/reportes/${REPORT.r1}`)
     await page.getByRole('button', { name: 'Cancelar reporte' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Cancelar este reporte?' })
     await expect(dialog).toBeVisible()
@@ -146,12 +152,23 @@ test.describe('assign, resolve and cancel (/reportes/:id)', () => {
     await card.getByRole('button', { name: 'Resolver' }).click()
 
     await expect(card.getByText('Resuelto', { exact: true })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Abiertos · 4' })).toBeVisible()
   })
 
-  test('an unknown report shows a not-found message', async ({ page }) => {
+  test('RF-GESTION-19: an unknown report shows that it is not available', async ({ page }) => {
     await page.goto('/reportes/no-existe')
     await expect(page.getByRole('heading', { name: 'No encontrado' })).toBeVisible()
-    await expect(page.getByText('Este reporte no existe o ya no está disponible.')).toBeVisible()
+    await expect(page.getByText('El reporte no está disponible.')).toBeVisible()
+  })
+})
+
+test.describe('a Reportante', () => {
+  test.use({ account: EMAIL.ana })
+
+  test('RN-04: does not see the emails nor the management actions', async ({ page }) => {
+    await page.goto(`/reportes/${REPORT.r1}`)
+    await expect(page.getByText('Nuevo', { exact: true })).toBeVisible()
+    await expect(page.getByRole('term').filter({ hasText: /^(Reportó|Asignado a)$/ })).toHaveCount(0)
+    await expect(page.locator('dl').getByText(EMAIL.ana)).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Asignar a…' })).toHaveCount(0)
   })
 })

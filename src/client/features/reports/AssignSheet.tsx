@@ -1,33 +1,39 @@
 import { useState } from 'react'
-import { Form, useNavigate, useNavigation, useRouteLoaderData } from 'react-router'
+import { Form, useActionData, useNavigate, useNavigation, useRouteLoaderData } from 'react-router'
 import { Chip } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
 import { Notice } from '../../components/ui/Notice'
 import { ArrowLeftIcon, CheckIcon } from '../../components/ui/icons'
 import { cn } from '../../lib/cn'
-import { CURRENT_USER } from '../../lib/demo-api'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
-import type { reportDetailLoader } from './data'
+import { useSession } from '../../lib/session'
+import type { ReportActionResult, reportDetailLoader } from './data'
 
 // /reportes/:id/asignar — Figma frame C "Asignar reporte", a bottom sheet over the detail,
-// and "Modal · Asignar reporte · Escritorio" from lg up.
+// and "Modal · Asignar reporte · Escritorio" from lg up. POST /api/reports/:id/assignment
+// (SDD 8.3).
 export function AssignSheet() {
   const loaded = useRouteLoaderData<typeof reportDetailLoader>('report')
+  const result = useActionData<ReportActionResult>()
+  const session = useSession()
   const navigate = useNavigate()
   const navigation = useNavigation()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
-  // Only Encargados of the campus can receive a report; the current account first.
+  // Only Encargados of the campus can receive a report (RF-GESTION-06); the account first.
   const staff = loaded?.staff ?? []
-  const options = staff.includes(CURRENT_USER)
-    ? [CURRENT_USER, ...staff.filter((email) => email !== CURRENT_USER)]
-    : staff
-  const [assignee, setAssignee] = useState(loaded?.report.assignee ?? options[0] ?? '')
+  const options = [
+    ...staff.filter((s) => s.accountId === session.accountId),
+    ...staff.filter((s) => s.accountId !== session.accountId),
+  ]
+  const current = options.find((s) => s.email === loaded?.report.assigneeEmail)
+  const [assignee, setAssignee] = useState(current?.accountId ?? options[0]?.accountId ?? '')
 
   if (!loaded) return null
   const { report } = loaded
   const close = () => navigate(`/reportes/${report.id}`, { replace: true })
   const submitting = navigation.state === 'submitting'
+  const unchanged = assignee === current?.accountId
 
   return (
     <Dialog labelledBy="assign-title" onClose={close} variant="sheet">
@@ -47,19 +53,19 @@ export function AssignSheet() {
               Asignar reporte
             </h2>
             <p className="text-xs text-neutral-text-muted">
-              Solo aparecen Encargados del {report.campus}.
+              Solo aparecen Encargados del {report.campus.name}.
             </p>
           </div>
         </div>
 
         <fieldset className="flex flex-col gap-2">
           <legend className="sr-only">Persona encargada</legend>
-          {options.map((email) => {
-            const checked = assignee === email
-            const mine = email === CURRENT_USER
+          {options.map(({ accountId, email }) => {
+            const checked = assignee === accountId
+            const mine = accountId === session.accountId
             return (
               <label
-                key={email}
+                key={accountId}
                 className={cn(
                   'flex cursor-pointer items-center gap-2.5 rounded-control border px-3 py-3 text-body has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green',
                   checked
@@ -69,10 +75,10 @@ export function AssignSheet() {
               >
                 <input
                   type="radio"
-                  name="assignee"
-                  value={email}
+                  name="assigneeId"
+                  value={accountId}
                   checked={checked}
-                  onChange={() => setAssignee(email)}
+                  onChange={() => setAssignee(accountId)}
                   className="sr-only"
                 />
                 <span
@@ -92,7 +98,7 @@ export function AssignSheet() {
                     <Chip tone="solid">Tú</Chip>
                   </span>
                 )}
-                {email === report.assignee && (
+                {email === report.assigneeEmail && (
                   <span className={cn('text-xs text-neutral-text-muted', !(mine && isDesktop) && 'ml-auto')}>
                     Actual
                   </span>
@@ -102,6 +108,16 @@ export function AssignSheet() {
           })}
         </fieldset>
 
+        {options.length === 0 && (
+          <Notice tone="warning" className="text-body">
+            El campus no tiene Encargados a quienes asignar el reporte.
+          </Notice>
+        )}
+        {result?.error && !submitting && (
+          <Notice tone="error" className="text-body">
+            {result.error}
+          </Notice>
+        )}
         {!isDesktop && (
           <Notice tone="info">
             Al asignar, el reporte pasa a En revisión y la persona recibe un correo.
@@ -115,7 +131,7 @@ export function AssignSheet() {
             </Button>
             <Button
               type="submit"
-              disabled={submitting || assignee === report.assignee}
+              disabled={submitting || unchanged || !assignee}
               className="w-auto px-5 py-2.5 text-sm"
             >
               Confirmar asignación
@@ -123,7 +139,7 @@ export function AssignSheet() {
           </div>
         ) : (
           <>
-            <Button type="submit" disabled={submitting || assignee === report.assignee}>
+            <Button type="submit" disabled={submitting || unchanged || !assignee}>
               Asignar
             </Button>
             <Button variant="secondary" onClick={close}>

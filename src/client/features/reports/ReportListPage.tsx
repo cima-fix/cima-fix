@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useFetcher, useLoaderData, useSearchParams } from 'react-router'
 import { NavScreen } from '../../components/layout/NavScreen'
 import { PriorityBadge, StatusBadge } from '../../components/ui/Badge'
@@ -7,33 +8,16 @@ import { Select } from '../../components/ui/Field'
 import { ChevronRightIcon, UsersIcon } from '../../components/ui/icons'
 import { ReportCard } from '../../components/ui/ReportCard'
 import { cn } from '../../lib/cn'
-import { CURRENT_USER } from '../../lib/demo-api'
 import { formatAge, formatNumber } from '../../lib/format'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
 import { isOpen, STATUS_LABEL, type Report, type ReportStatus } from '../../lib/reports'
-import type { reportListLoader } from './data'
+import { sessionCan, useSession } from '../../lib/session'
+import { FILTERS, type reportListLoader } from './data'
 
-// Estado filter: every status plus "Abiertos" (Nuevo + En revisión), used by the map
-// to list only the open reports of a building (RF-MAPA-16).
-type StatusFilter = ReportStatus | 'open'
-const STATUS_FILTER_LABEL: Record<StatusFilter, string> = { open: 'Abiertos', ...STATUS_LABEL }
-const STATUS_BY_LABEL = Object.fromEntries(
-  Object.entries(STATUS_FILTER_LABEL).map(([status, label]) => [label, status]),
-) as Record<string, StatusFilter>
-
-function matchesStatus(report: Report, status: string) {
-  if (!status) return true
-  return status === 'open' ? isOpen(report) : report.status === status
-}
-
-// Filter state lives in the URL so it survives reloads and can be linked (e.g. from the map).
-const FILTERS = {
-  building: 'edificio',
-  category: 'categoria',
-  status: 'estado',
-  mine: 'mios',
-  assigned: 'asignados',
-} as const
+const STATUS_OPTIONS = (Object.keys(STATUS_LABEL) as ReportStatus[]).map((status) => ({
+  value: status,
+  label: STATUS_LABEL[status],
+}))
 
 function FilterTag({
   pressed,
@@ -59,22 +43,23 @@ function FilterTag({
   )
 }
 
+// Shortcuts on a phone card; the API's allowedActions decides which ones (SDD 7.3).
 function ReportActions({ report }: { report: Report }) {
   const fetcher = useFetcher()
-  if (report.status === 'new') {
-    return (
-      <ButtonLink to={`/reportes/${report.id}/asignar`} size="sm">
-        Asignar
-      </ButtonLink>
-    )
-  }
-  if (report.status === 'in_review' && report.assignee === CURRENT_USER) {
+  if (report.allowedActions.includes('resolve')) {
     return (
       <fetcher.Form method="post" action={`/reportes/${report.id}`}>
         <Button type="submit" name="intent" value="resolve" size="sm" disabled={fetcher.state !== 'idle'}>
           {fetcher.state === 'idle' ? 'Resolver' : 'Resolviendo…'}
         </Button>
       </fetcher.Form>
+    )
+  }
+  if (report.status === 'new' && report.allowedActions.includes('assign')) {
+    return (
+      <ButtonLink to={`/reportes/${report.id}/asignar`} size="sm">
+        Asignar
+      </ButtonLink>
     )
   }
   return null
@@ -87,7 +72,7 @@ function Section({ title, reports }: { title: string; reports: Report[] }) {
       <h2 className="text-caption font-medium tracking-wide text-neutral-text-secondary uppercase">
         {title}
       </h2>
-      <div className="flex flex-col gap-2.5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
+      <div className="flex flex-col gap-2.5">
         {reports.map((report) => (
           <ReportCard key={report.id} report={report} variant="list" href={`/reportes/${report.id}`}>
             {isOpen(report) && <ReportActions report={report} />}
@@ -100,7 +85,11 @@ function Section({ title, reports }: { title: string; reports: Report[] }) {
 
 // Desktop table of the Figma frame "Reportes · Encargado · Escritorio".
 function ReportTable({ reports }: { reports: Report[] }) {
+  const { email } = useSession()
   const head = 'px-4 py-3 text-left text-caption font-semibold tracking-wide uppercase'
+  // RN-04: the Asignado a column only exists for the staff of the campus.
+  const showAssignee = reports.some((r) => r.assigneeEmail !== undefined)
+  const columns = showAssignee ? 7 : 6
   return (
     <Card className="overflow-hidden">
       <table className="w-full border-collapse text-body">
@@ -120,9 +109,11 @@ function ReportTable({ reports }: { reports: Report[] }) {
                 Confirm.
               </abbr>
             </th>
-            <th scope="col" className={head}>
-              Asignado a
-            </th>
+            {showAssignee && (
+              <th scope="col" className={head}>
+                Asignado a
+              </th>
+            )}
             <th scope="col" className={head}>
               Creado
             </th>
@@ -148,27 +139,29 @@ function ReportTable({ reports }: { reports: Report[] }) {
                   to={`/reportes/${report.id}`}
                   className="font-bold text-neutral-text after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-green focus-visible:after:ring-inset"
                 >
-                  {report.category} · {report.space}
+                  {report.category.name} · {report.space.name}
                 </Link>
                 <p className="text-xs text-neutral-text-muted">
-                  {report.building} · {report.campus}
+                  {report.building.name} · {report.campus.name}
                 </p>
               </td>
               <td className="px-4 py-3.5 text-neutral-text-secondary">
                 <span className="flex items-center gap-1.5">
                   <UsersIcon className="size-4" />
-                  {formatNumber(report.confirmations)}
+                  {formatNumber(report.confirmationCount)}
                 </span>
               </td>
-              <td className="max-w-56 truncate px-4 py-3.5 text-xs">
-                {!report.assignee ? (
-                  <span className="text-neutral-text-muted">Sin asignar</span>
-                ) : report.assignee === CURRENT_USER ? (
-                  <span className="font-bold text-neutral-text">Tú</span>
-                ) : (
-                  <span className="font-medium text-neutral-text">{report.assignee}</span>
-                )}
-              </td>
+              {showAssignee && (
+                <td className="max-w-56 truncate px-4 py-3.5 text-xs">
+                  {!report.assigneeEmail ? (
+                    <span className="text-neutral-text-muted">Sin asignar</span>
+                  ) : report.assigneeEmail === email ? (
+                    <span className="font-bold text-neutral-text">Tú</span>
+                  ) : (
+                    <span className="font-medium text-neutral-text">{report.assigneeEmail}</span>
+                  )}
+                </td>
+              )}
               <td className="px-4 py-3.5 text-xs whitespace-nowrap text-neutral-text-muted">
                 {formatAge(report.createdAt)}
               </td>
@@ -179,7 +172,7 @@ function ReportTable({ reports }: { reports: Report[] }) {
           ))}
           {reports.length === 0 && (
             <tr className="border-t border-card-border">
-              <td colSpan={7} className="px-4 py-8 text-center text-neutral-text-muted">
+              <td colSpan={columns} className="px-4 py-8 text-center text-neutral-text-muted">
                 No hay reportes con estos filtros.
               </td>
             </tr>
@@ -219,23 +212,57 @@ function ScopePill({
 
 const desktopSelect = 'border-card-border bg-canvas py-2.5 text-sm'
 
+// The loaded pages: the first one from the loader and the ones "Ver más" adds (cursor
+// pagination, SDD 7.1). Starts over whenever the filters change.
+function usePages(first: Awaited<ReturnType<typeof reportListLoader>>['page'], filters: string) {
+  const fetcher = useFetcher<typeof reportListLoader>()
+  const [more, setMore] = useState<{ filters: string; reports: Report[]; nextCursor: string | null }>()
+  const [added, setAdded] = useState<typeof fetcher.data>()
+  const extra = more?.filters === filters ? more : undefined
+
+  // A page that just arrived is added once (derived during render, not in an effect).
+  if (fetcher.state === 'idle' && fetcher.data && fetcher.data !== added) {
+    setAdded(fetcher.data)
+    const page = fetcher.data.page
+    setMore({ filters, reports: [...(extra?.reports ?? []), ...page.reports], nextCursor: page.nextCursor })
+  }
+
+  const nextCursor = extra ? extra.nextCursor : first.nextCursor
+  return {
+    reports: [...first.reports, ...(extra?.reports ?? [])],
+    loading: fetcher.state !== 'idle',
+    loadMore: nextCursor
+      ? () => {
+          const params = new URLSearchParams(filters)
+          params.set('cursor', nextCursor)
+          fetcher.load(`/reportes?${params}`)
+        }
+      : undefined,
+  }
+}
+
 // /reportes — Figma frame A "Lista de reportes" (phone) and "Reportes · Encargado · Escritorio".
 export function ReportListPage() {
-  const { reports, catalog } = useLoaderData<typeof reportListLoader>()
+  const { campus, options, page } = useLoaderData<typeof reportListLoader>()
+  const session = useSession()
   const [params, setParams] = useSearchParams()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
-  const campus = catalog.campuses[0] ?? ''
+  const filters = new URLSearchParams([...params].filter(([key]) => key !== 'cursor')).toString()
+  const { reports, loading, loadMore } = usePages(page, filters)
 
   const building = params.get(FILTERS.building) ?? ''
   const category = params.get(FILTERS.category) ?? ''
   const status = params.get(FILTERS.status) ?? ''
   const mine = params.has(FILTERS.mine)
   const assigned = params.has(FILTERS.assigned)
+  // Only staff are assigned reports (RF-GESTION-06).
+  const canBeAssigned = campus ? sessionCan(session, 'report.resolveAssigned', campus.id) : false
 
   function setFilters(change: Record<string, string | boolean>) {
     setParams(
       (current) => {
         const next = new URLSearchParams(current)
+        next.delete('cursor')
         for (const [key, value] of Object.entries(change)) {
           if (value === '' || value === false) next.delete(key)
           else next.set(key, value === true ? '1' : value)
@@ -247,24 +274,16 @@ export function ReportListPage() {
   }
   const setFilter = (key: string, value: string | boolean) => setFilters({ [key]: value })
 
-  const visible = reports.filter(
-    (r) =>
-      (!building || r.building === building) &&
-      (!category || r.category === category) &&
-      matchesStatus(r, status) &&
-      (!assigned || r.assignee === CURRENT_USER) &&
-      (!mine || r.reportedByMe || r.confirmedByMe),
-  )
-  const open = visible.filter(isOpen)
-  const closed = visible.filter((r) => !isOpen(r))
-
   const campusSelect = (className?: string) => (
-    // Only one active campus for now; it becomes a real filter with the second one.
     <Select
       size="sm"
       aria-label="Campus"
-      options={catalog.campuses}
-      defaultValue={campus}
+      options={session.campuses.map((c) => ({ value: c.slug, label: c.name }))}
+      value={campus?.slug ?? ''}
+      // A new campus clears the building and category of the previous one (RF-GESTION-04).
+      onChange={(e) =>
+        setFilters({ [FILTERS.campus]: e.target.value, [FILTERS.building]: '', [FILTERS.category]: '' })
+      }
       className={className}
     />
   )
@@ -273,9 +292,9 @@ export function ReportListPage() {
       size="sm"
       aria-label="Estado"
       placeholder={isDesktop ? 'Estado' : 'Estado: todos'}
-      options={Object.values(STATUS_FILTER_LABEL)}
-      value={STATUS_FILTER_LABEL[status as StatusFilter] ?? ''}
-      onChange={(e) => setFilter(FILTERS.status, STATUS_BY_LABEL[e.target.value] ?? '')}
+      options={STATUS_OPTIONS}
+      value={status}
+      onChange={(e) => setFilter(FILTERS.status, e.target.value)}
       className={className}
     />
   )
@@ -284,7 +303,7 @@ export function ReportListPage() {
       size="sm"
       aria-label="Edificio"
       placeholder="Edificio"
-      options={catalog.buildings.map((b) => b.name)}
+      options={(options?.buildings ?? []).map((b) => ({ value: b.id, label: b.name }))}
       value={building}
       onChange={(e) => setFilter(FILTERS.building, e.target.value)}
       className={className}
@@ -295,16 +314,23 @@ export function ReportListPage() {
       size="sm"
       aria-label="Categoría"
       placeholder="Categoría"
-      options={catalog.categories.map((c) => c.name)}
+      options={(options?.categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
       value={category}
       onChange={(e) => setFilter(FILTERS.category, e.target.value)}
       className={className}
     />
   )
 
+  const more = loadMore && (
+    <Button variant="secondary" onClick={loadMore} disabled={loading} className="lg:w-auto lg:self-center lg:px-8">
+      {loading ? 'Cargando…' : 'Ver más reportes'}
+    </Button>
+  )
+  const title = campus ? `Reportes · ${campus.name}` : 'Reportes'
+
   if (isDesktop) {
     return (
-      <NavScreen title={`Reportes · ${campus}`} desktopTitle="Reportes" subtitle={`UABC ${campus}`}>
+      <NavScreen title={title} desktopTitle="Reportes" subtitle={campus?.name}>
         <div className="flex flex-col gap-4 px-10 py-8">
           <Card className="flex flex-wrap items-center justify-between gap-4 px-4 py-3.5">
             <div className="flex flex-wrap gap-2" role="group" aria-label="Mostrar">
@@ -314,12 +340,14 @@ export function ReportListPage() {
               >
                 Todos
               </ScopePill>
-              <ScopePill
-                pressed={assigned}
-                onClick={() => setFilters({ [FILTERS.assigned]: !assigned, [FILTERS.mine]: false })}
-              >
-                Asignados a mí
-              </ScopePill>
+              {canBeAssigned && (
+                <ScopePill
+                  pressed={assigned}
+                  onClick={() => setFilters({ [FILTERS.assigned]: !assigned, [FILTERS.mine]: false })}
+                >
+                  Asignados a mí
+                </ScopePill>
+              )}
               <ScopePill
                 pressed={mine}
                 onClick={() => setFilters({ [FILTERS.mine]: !mine, [FILTERS.assigned]: false })}
@@ -337,14 +365,18 @@ export function ReportListPage() {
           <p className="text-xs text-neutral-text-muted">
             Abiertos primero · mayor prioridad · más antiguos
           </p>
-          <ReportTable reports={visible} />
+          <ReportTable reports={reports} />
+          {more}
         </div>
       </NavScreen>
     )
   }
 
+  const open = reports.filter(isOpen)
+  const closed = reports.filter((r) => !isOpen(r))
+
   return (
-    <NavScreen title={`Reportes · ${campus}`}>
+    <NavScreen title={title}>
       <div className="flex flex-col gap-3 px-4 py-3.5">
         <div className="grid grid-cols-2 gap-2" role="group" aria-label="Filtros">
           {campusSelect()}
@@ -353,21 +385,24 @@ export function ReportListPage() {
           {categorySelect()}
         </div>
         <div className="flex flex-wrap gap-2">
-          <FilterTag pressed={assigned} onToggle={() => setFilter(FILTERS.assigned, !assigned)}>
-            Asignados a mí
-          </FilterTag>
+          {canBeAssigned && (
+            <FilterTag pressed={assigned} onToggle={() => setFilter(FILTERS.assigned, !assigned)}>
+              Asignados a mí
+            </FilterTag>
+          )}
           <FilterTag pressed={mine} onToggle={() => setFilter(FILTERS.mine, !mine)}>
-            Los que reporté o confirmé
+            Mis reportes
           </FilterTag>
         </div>
 
-        <Section title={`Abiertos · ${open.length}`} reports={open} />
+        <Section title="Abiertos" reports={open} />
         <Section title="Cerrados" reports={closed} />
-        {visible.length === 0 && (
+        {reports.length === 0 && (
           <p className="py-6 text-center text-body text-neutral-text-muted">
             No hay reportes con estos filtros.
           </p>
         )}
+        {more}
       </div>
     </NavScreen>
   )

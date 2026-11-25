@@ -1,6 +1,5 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { api } from '../../api'
-import { resolveSpaceCode } from '../../lib/demo-api'
 import { ApiError, read, safeNext, send, withSignIn } from '../../lib/api-errors'
 import { SPACE_UNAVAILABLE_PARAM } from '../../lib/routes'
 import { loadSession } from '../../lib/session'
@@ -44,12 +43,22 @@ export async function signOutAction() {
 
 // /e/:code — link of a space (SDD 10.9). Resolves the code and opens the form with what can
 // be preselected; without a session it goes through /ingresar first (RF-REPORTE-11).
+// GET /api/spaces/link/:code answers what to preselect and whether to show the notice (SDD
+// 10.9); a code that is not even well formed is just a space that is not available.
 export const spaceLinkLoader = withSignIn(async ({ request, params }: LoaderFunctionArgs) => {
-  await loadSession(request)
-  const link = await resolveSpaceCode(params.code ?? '')
+  const session = await loadSession(request)
+  let link: { preselect: { campusId?: string; buildingId?: string; spaceId?: string }; unavailable: boolean }
+  try {
+    link = await read(api.spaces.link[':code'].$get({ param: { code: params.code ?? '' } }))
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 400)) throw error
+    link = { preselect: {}, unavailable: true }
+  }
   const query = new URLSearchParams()
-  if (link.building) query.set('edificio', link.building)
-  if (link.space) query.set('espacio', link.space)
+  const campus = session.campuses.find((c) => c.id === link.preselect.campusId)
+  if (campus) query.set('campus', campus.slug)
+  if (link.preselect.buildingId) query.set('edificio', link.preselect.buildingId)
+  if (link.preselect.spaceId) query.set('espacio', link.preselect.spaceId)
   if (link.unavailable) query.set(SPACE_UNAVAILABLE_PARAM, '1')
   throw redirect(`/reportar?${query}`)
 })

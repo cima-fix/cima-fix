@@ -35,7 +35,7 @@ export function SubmittedStep({ report, onNewReport }: SubmittedStepProps) {
 
         <ReportCard
           report={report}
-          location={`${report.building}, ${report.campus}`}
+          location={`${report.building.name}, ${report.campus.name}`}
           href={`/reportes/${report.id}`}
         />
 

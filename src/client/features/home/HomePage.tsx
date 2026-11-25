@@ -10,10 +10,9 @@ import {
   MapPinIcon,
   UsersIcon,
 } from '../../components/ui/icons'
-import { CURRENT_USER } from '../../lib/demo-api'
 import { formatAge, plural } from '../../lib/format'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
-import { compareReports, isOpen, type Report } from '../../lib/reports'
+import type { Report } from '../../lib/reports'
 import { adminLinks } from '../../lib/routes'
 import { ROLE_LABEL, sessionRole, useSession } from '../../lib/session'
 import type { homeLoader } from './data'
@@ -47,13 +46,17 @@ function StatCard({
   )
 }
 
-function assigneeLabel(report: Report) {
-  if (!report.assignee) return 'Sin asignar'
-  return report.assignee === CURRENT_USER ? 'Tú' : report.assignee
+// RN-04: undefined when the account may not see the assignee.
+function assigneeLabel(report: Report, email: string) {
+  if (report.assigneeEmail === undefined) return undefined
+  if (report.assigneeEmail === null) return 'Sin asignar'
+  return report.assigneeEmail === email ? 'Tú' : report.assigneeEmail
 }
 
 // Report card of the desktop home ("Lo más urgente para ti").
 function UrgentCard({ report }: { report: Report }) {
+  const { email } = useSession()
+  const assignee = assigneeLabel(report, email)
   return (
     <Card as="article" className="relative flex flex-col gap-2 px-5 py-4 hover:border-green">
       <div className="flex flex-wrap items-center gap-2">
@@ -66,20 +69,22 @@ function UrgentCard({ report }: { report: Report }) {
           to={`/reportes/${report.id}`}
           className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-green"
         >
-          {report.category} · {report.space}
+          {report.category.name} · {report.space.name}
         </Link>
       </h3>
       <p className="text-xs text-neutral-text-muted">
-        {report.building} · {report.campus}
+        {report.building.name} · {report.campus.name}
       </p>
       <p className="text-body text-neutral-text-secondary">{report.description}</p>
       <p className="flex items-center gap-1.5 text-xs text-neutral-text-secondary">
         <UsersIcon className="size-4" />
-        {plural(report.confirmations, 'confirmación', 'confirmaciones')}
+        {plural(report.confirmationCount, 'confirmación', 'confirmaciones')}
       </p>
-      <p className="text-xs text-neutral-text-muted">
-        Asignado a: <span className="font-bold text-neutral-text">{assigneeLabel(report)}</span>
-      </p>
+      {assignee && (
+        <p className="text-xs text-neutral-text-muted">
+          Asignado a: <span className="font-bold text-neutral-text">{assignee}</span>
+        </p>
+      )}
     </Card>
   )
 }
@@ -116,27 +121,17 @@ function QuickLink({
 // Phone: intro and three buttons. Desktop (lg): Figma frame "Inicio · Encargado · Escritorio",
 // with what needs attention, the most urgent reports and the quick links.
 export function HomePage() {
-  const { reports } = useLoaderData<typeof homeLoader>()
+  const { dashboard } = useLoaderData<typeof homeLoader>()
   const session = useSession()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const revalidator = useRevalidator()
 
   // The loader skips the reports on a phone; load them if the window grows to desktop.
   useEffect(() => {
-    if (isDesktop && reports === null && revalidator.state === 'idle') {
+    if (isDesktop && dashboard === null && revalidator.state === 'idle') {
       void revalidator.revalidate()
     }
-  }, [isDesktop, reports, revalidator])
-
-  const open = reports?.filter(isOpen) ?? []
-  const unassigned = open.filter((r) => r.status === 'new' && !r.assignee).length
-  const mine = open.filter((r) => r.assignee === CURRENT_USER)
-  // Reports assigned to the account and the ones nobody has yet, most urgent first
-  // (RF-GESTION-14).
-  const urgent = open
-    .filter((r) => r.assignee === CURRENT_USER || !r.assignee)
-    .sort(compareReports)
-    .slice(0, 4)
+  }, [isDesktop, dashboard, revalidator])
 
   const management = adminLinks(session)
   const role = ROLE_LABEL[sessionRole(session)]
@@ -183,31 +178,35 @@ export function HomePage() {
       </div>
 
       {/* Desktop */}
-      {reports && (
+      {dashboard && (
         <div className="hidden px-10 py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
           <div className="flex flex-col gap-3">
-            <SectionLabel>Para atender</SectionLabel>
-            <div className="grid grid-cols-2 gap-4">
-              <StatCard
-                value={unassigned}
-                label="Nuevos sin asignar"
-                to="/reportes?estado=new"
-                tone="text-blue"
-              />
-              <StatCard
-                value={mine.length}
-                label="Asignados a mí"
-                to="/reportes?asignados=1"
-                tone="text-gold-dark"
-              />
-            </div>
+            {dashboard.counts && (
+              <>
+                <SectionLabel>Para atender</SectionLabel>
+                <div className="mb-5 grid grid-cols-2 gap-4">
+                  <StatCard
+                    value={dashboard.counts.unassigned}
+                    label="Nuevos sin asignar"
+                    to="/reportes?estado=new"
+                    tone="text-blue"
+                  />
+                  <StatCard
+                    value={dashboard.counts.assignedToMe}
+                    label="Asignados a mí"
+                    to="/reportes?asignados=1"
+                    tone="text-gold-dark"
+                  />
+                </div>
+              </>
+            )}
 
-            <SectionLabel className="mt-5">Lo más urgente para ti</SectionLabel>
-            {urgent.length === 0 ? (
+            <SectionLabel>{dashboard.counts ? 'Lo más urgente para ti' : 'Tus reportes abiertos'}</SectionLabel>
+            {dashboard.urgent.length === 0 ? (
               <p className="text-body text-neutral-text-muted">No hay reportes abiertos.</p>
             ) : (
               <div className="grid grid-cols-2 items-start gap-4">
-                {urgent.map((report) => (
+                {dashboard.urgent.map((report) => (
                   <UrgentCard key={report.id} report={report} />
                 ))}
               </div>

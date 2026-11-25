@@ -1,27 +1,12 @@
-// Report types and display rules shared by the report screens.
-// They move to src/shared/ once the API exists (SDD DD-13, DD-14).
+import type { InferResponseType } from 'hono/client'
+import { LEVELS } from '../../shared/types/common.ts'
+import { api } from '../api'
 
-export type ReportStatus = 'new' | 'in_review' | 'resolved' | 'cancelled'
-export type Priority = 'low' | 'medium' | 'high'
-
-export type Report = {
-  id: string
-  campus: string
-  building: string
-  space: string
-  category: string
-  description: string
-  status: ReportStatus
-  priority: Priority
-  confirmations: number
-  createdAt: string
-  resolvedAt?: string
-  reporterEmail: string
-  assignee?: string
-  photoCount: number
-  confirmedByMe?: boolean
-  reportedByMe?: boolean
-}
+// A report as the API sends it (SDD 7.3, ReportView): the only shape the screens use. The
+// reporter and assignee emails are absent when the account may not see them (RN-04).
+export type Report = InferResponseType<(typeof api.reports)[':id']['$get'], 200>
+export type ReportStatus = Report['status']
+export type Priority = Report['priority']
 
 export const STATUS_LABEL: Record<ReportStatus, string> = {
   new: 'Nuevo',
@@ -36,14 +21,12 @@ export const PRIORITY_LABEL: Record<Priority, string> = {
   high: 'Alta',
 }
 
-export function isOpen(report: Report) {
+export function isOpen(report: Pick<Report, 'status'>) {
   return report.status === 'new' || report.status === 'in_review'
 }
 
-const LEVELS: Priority[] = ['low', 'medium', 'high']
-
-// RF-GESTION-14 (SDD 10.5): open first, then higher priority, then oldest, then id.
-// Same order for the list, the possible duplicates (RF-DUPLICADO-07) and the map list (RF-MAPA-18).
+// RF-GESTION-14 (SDD 10.5): open first, then higher priority, then oldest, then id. The API
+// already sends every list in this order; the SPA uses it only to merge two lists (Inicio).
 export function compareReports(a: Report, b: Report) {
   return (
     Number(isOpen(b)) - Number(isOpen(a)) ||
@@ -58,10 +41,4 @@ export const MAX_DESCRIPTION = 1000
 // SDD 10.8: trimmed, counted as code points (`[...text].length`), like varchar(1000).
 export function descriptionLength(text: string) {
   return [...text.trim()].length
-}
-
-// RF-PRIORIDAD-02: category severity raised one level per 3 confirmations, capped at high.
-export function computePriority(severity: Priority, confirmations: number): Priority {
-  const level = LEVELS.indexOf(severity) + Math.floor(confirmations / 3)
-  return LEVELS[Math.min(level, LEVELS.length - 1)]
 }

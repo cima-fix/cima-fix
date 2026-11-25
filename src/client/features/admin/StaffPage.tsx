@@ -7,16 +7,18 @@ import { Card, SectionLabel } from '../../components/ui/Card'
 import { Field, Input, Select } from '../../components/ui/Field'
 import { Notice } from '../../components/ui/Notice'
 import { UserIcon } from '../../components/ui/icons'
-import { CURRENT_USER, type RoleAccount } from '../../lib/demo-api'
-import { ROLE_LABEL } from '../../lib/session'
+import { ROLE_LABEL, useSession } from '../../lib/session'
 import { ActionError, AdminScreen } from './AdminScreen'
 import type { ActionResult, staffLoader } from './data'
 
+type RoleAccount = Awaited<ReturnType<typeof staffLoader>>['roles'][number]
+
 function RoleChip({ account }: { account: RoleAccount }) {
+  const { email } = useSession()
   const label = ROLE_LABEL[account.role]
   return (
     <Chip tone={account.role === 'admin' ? 'blue' : 'green'}>
-      {account.email === CURRENT_USER ? `Tú · ${label}` : label}
+      {account.email === email ? `Tú · ${label}` : label}
     </Chip>
   )
 }
@@ -35,7 +37,7 @@ function Person({ account, canManage }: { account: RoleAccount; canManage: boole
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm font-medium text-neutral-text">{account.email}</span>
-          {!account.hasSignedIn && (
+          {!account.hasLoggedIn && (
             <span className="text-caption text-neutral-text-muted">Aún no ha iniciado sesión</span>
           )}
         </div>
@@ -44,6 +46,7 @@ function Person({ account, canManage }: { account: RoleAccount; canManage: boole
       {canManage && (
         <fetcher.Form method="post" className="flex flex-wrap justify-end gap-2 pl-12">
           <input type="hidden" name="email" value={account.email} />
+          <input type="hidden" name="accountId" value={account.accountId} />
           <input type="hidden" name="role" value={other} />
           <Button
             type="submit"

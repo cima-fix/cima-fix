@@ -200,7 +200,7 @@ Cada reporte tiene una prioridad **Baja**, **Media** o **Alta** que Cima Fix cal
 **Pasos.**
 
 1. Abre Cima Fix en tu navegador.
-2. Pulsa el botón de Google.
+2. Pulsa **Continuar con Google**.
 3. Elige tu cuenta `@uabc.edu.mx`.
 4. Espera a que Cima Fix te lleve a la pantalla de inicio.
 
@@ -223,8 +223,8 @@ Cada reporte tiene una prioridad **Baja**, **Media** o **Alta** que Cima Fix cal
 3. Comprueba que el campus, el edificio y el espacio que aparecen ya elegidos son los correctos.
 4. Elige la categoría del problema.
 5. Escribe la descripción del problema.
-6. Pulsa **Enviar**.
-7. Si Cima Fix muestra posibles duplicados y ninguno es tu problema, pulsa **Ninguno es mi problema, registrar**.
+6. Pulsa **Enviar reporte**.
+7. Si Cima Fix muestra posibles duplicados y ninguno es tu problema, pulsa **Ninguno es mi problema, continuar**.
 
 **Resultado.** Cima Fix muestra tu reporte con el estado **Nuevo**, su prioridad y la fecha y hora en que se registró.
 
@@ -256,12 +256,12 @@ Antes de empezar cualquiera de estas tareas, inicia sesión ([sección 3.1](#31-
 6. Escribe la descripción del problema.
 7. Si quieres, adjunta fotografías, como se explica en la [sección 4.3](#43-adjuntar-fotograf%C3%ADas).
 8. Lee el aviso que indica que tu correo será visible para el personal que atiende el reporte.
-9. Pulsa **Enviar**.
+9. Pulsa **Enviar reporte**.
 10. Si Cima Fix muestra posibles duplicados, decide como se explica en la [sección 4.4](#44-decidir-sobre-los-posibles-duplicados).
 
 **Resultado.** Cima Fix muestra tu reporte con el estado **Nuevo**, su prioridad y la fecha y hora en que se registró. El reporte ya aparece en la consulta de reportes.
 
-> **Importante:** No puedes modificar un reporte después de enviarlo. Revisa el lugar, la categoría, la descripción y las fotografías antes de pulsar **Enviar**.
+> **Importante:** No puedes modificar un reporte después de enviarlo. Revisa el lugar, la categoría, la descripción y las fotografías antes de pulsar **Enviar reporte**.
 
 > **Nota:** Las listas dependen unas de otras. Al elegir el campus, los edificios y las categorías se limitan a los de ese campus. Al elegir el edificio, los espacios se limitan a los de ese edificio. Elige en el orden de los pasos.
 
@@ -304,30 +304,30 @@ Antes de empezar cualquiera de estas tareas, inicia sesión ([sección 3.1](#31-
 2. Elige una fotografía de tu dispositivo.
 3. Repite el paso 2 si quieres adjuntar otra, hasta un máximo de 3.
 
-**Resultado.** Las fotografías se envían junto con tu reporte al pulsar **Enviar** y aparecen en el reporte.
+**Resultado.** Las fotografías se envían junto con tu reporte al pulsar **Enviar reporte** y aparecen en el reporte.
 
 > **Nota:** Si una fotografía no cumple los requisitos, Cima Fix te indica el motivo y no la adjunta.
 
-> **Nota:** Si una fotografía no se puede guardar al enviar, el reporte no se registra. Cima Fix te avisa y conserva los datos que escribiste; vuelve a pulsar **Enviar**. También puedes enviar el reporte sin fotografías.
+> **Nota:** Si una fotografía no se puede guardar al enviar, el reporte no se registra. Cima Fix te avisa y conserva los datos que escribiste; vuelve a pulsar **Enviar reporte**. También puedes enviar el reporte sin fotografías.
 
 ### 4.4 Decidir sobre los posibles duplicados
 
 **Objetivo.** Evitar reportar de nuevo un problema que ya está reportado.
 
-**Antes de empezar.** Llena el formulario y pulsa **Enviar** ([sección 4.1](#41-registrar-un-reporte)). Cima Fix muestra esta lista solo cuando existen reportes abiertos del mismo campus, categoría y edificio.
+**Antes de empezar.** Llena el formulario y pulsa **Enviar reporte** ([sección 4.1](#41-registrar-un-reporte)). Cima Fix muestra esta lista solo cuando existen reportes abiertos del mismo campus, categoría y edificio.
 
 **Pasos.**
 
 1. Lee el primer reporte de la lista: su descripción, sus fotografías, su estado y su prioridad.
 2. Lee los demás reportes de la lista.
 3. Elige una de estas opciones:
-   - Si alguno es tu mismo problema, pulsa **Es este mismo problema** en ese reporte.
-   - Si ninguno es tu problema, pulsa **Ninguno es mi problema, registrar**.
+   - Si alguno es tu mismo problema, pulsa **Es el mismo problema** en ese reporte.
+   - Si ninguno es tu problema, pulsa **Ninguno es mi problema, continuar**.
 
 **Resultado.**
 
-- Con **Es este mismo problema**, tu confirmación queda registrada en ese reporte y Cima Fix no registra un reporte nuevo. Cima Fix te muestra el reporte confirmado y su prioridad puede subir. Recibirás un correo cuando se resuelva o se cancele.
-- Con **Ninguno es mi problema, registrar**, Cima Fix registra tu reporte con el estado **Nuevo**.
+- Con **Es el mismo problema**, tu confirmación queda registrada en ese reporte y Cima Fix no registra un reporte nuevo. Cima Fix te muestra el reporte confirmado y su prioridad puede subir. Recibirás un correo cuando se resuelva o se cancele.
+- Con **Ninguno es mi problema, continuar**, Cima Fix registra tu reporte con el estado **Nuevo**.
 
 > **Importante:** Cima Fix no compara textos: la lista incluye todos los reportes abiertos del mismo campus, categoría y edificio, aunque traten de problemas distintos. Confirma solo si de verdad es el mismo problema.
 
@@ -396,8 +396,8 @@ Orden de la lista:
 **Pasos.**
 
 1. Abre el detalle del reporte ([sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)).
-2. Elige la opción para cancelar el reporte.
-3. Si Cima Fix te pide confirmar, confirma la cancelación.
+2. Elige **Cancelar reporte**.
+3. En el aviso de confirmación, elige **Sí, cancelar reporte**.
 
 **Resultado.** El reporte pasa al estado **Cancelado** y deja de aparecer para ti. Recibe un correo de cancelación quien lo confirmó como duplicado y la persona asignada, si la hay. Tú no recibes correo de una cancelación que hiciste.
 

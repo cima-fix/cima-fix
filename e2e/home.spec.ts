@@ -1,13 +1,15 @@
-import { expect, test, type Page } from '@playwright/test'
-import { expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
+import { expect, test } from '@playwright/test'
+import { expectNoA11yViolations, expectNoHorizontalScroll, isDesktop } from './helpers'
 
-// Desktop layout starts at Tailwind's lg breakpoint (1024px).
-const isDesktop = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024
+const URGENT = 'Lo más urgente para ti'
 
 test.describe('home (/)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Cima Fix' })).toBeVisible()
+    // Phone: "Cima Fix". Desktop: "Inicio" (Figma "Inicio · Encargado · Escritorio").
+    await expect(
+      page.getByRole('heading', { level: 1, name: isDesktop(page) ? 'Inicio' : 'Cima Fix' }),
+    ).toBeVisible()
   })
 
   test('is accessible and fits the screen', async ({ page }) => {
@@ -16,10 +18,12 @@ test.describe('home (/)', () => {
   })
 
   test('the dashboard is only on desktop', async ({ page }) => {
-    const urgent = page.getByRole('heading', { name: 'Reportes abiertos más urgentes' })
+    const urgent = page.getByRole('heading', { name: URGENT })
     if (isDesktop(page)) {
       await expect(urgent).toBeVisible()
+      // Open reports assigned to the account or to nobody: r-1, r-2, r-3, r-6.
       await expect(page.getByRole('article')).toHaveCount(4)
+      await expect(page.getByRole('link', { name: 'Ver nuevos sin asignar' })).toBeVisible()
     } else {
       // Not rendered at all: the loader skipped the reports on the phone.
       await expect(urgent).toHaveCount(0)
@@ -30,7 +34,14 @@ test.describe('home (/)', () => {
   test('growing the window to desktop loads the dashboard', async ({ page }) => {
     test.skip(isDesktop(page), 'starts on a phone-sized window')
     await page.setViewportSize({ width: 1280, height: 800 })
-    await expect(page.getByRole('heading', { name: 'Reportes abiertos más urgentes' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: URGENT })).toBeVisible()
     await expect(page.getByRole('article')).toHaveCount(4)
+  })
+
+  test('the Encargado sees Personal but not the Admin sections', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: isDesktop(page) ? 'Principal' : 'Administración' })
+    await expect(nav.getByRole('link', { name: 'Personal' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: 'Catálogo' })).toHaveCount(0)
+    await expect(nav.getByRole('link', { name: 'Configuración' })).toHaveCount(0)
   })
 })

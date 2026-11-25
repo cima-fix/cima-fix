@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useLoaderData } from 'react-router'
+import { useLoaderData, useSearchParams } from 'react-router'
 import { ScreenHeader } from '../../components/layout/ScreenHeader'
 import { Button } from '../../components/ui/Button'
 import { Field, Select, Textarea } from '../../components/ui/Field'
@@ -16,6 +16,7 @@ import { descriptionLength, MAX_DESCRIPTION, type Report } from '../../lib/repor
 import { DuplicatesStep } from './DuplicatesStep'
 import { PhotoPicker, type Photo } from './PhotoPicker'
 import { SubmittedStep } from './SubmittedStep'
+import { SPACE_UNAVAILABLE_PARAM } from '../../lib/routes'
 
 type Values = Omit<ReportDraft, 'photoCount'>
 type Errors = Partial<Record<keyof Values, string>>
@@ -38,20 +39,34 @@ type Step =
   | { name: 'duplicates'; draft: ReportDraft; similar: Report[] }
   | { name: 'submitted'; report: Report }
 
+// Preselection from the link of a space (/e/:code redirects here, SDD 10.9). Only values the
+// form offers are taken, so an edited address cannot preselect something unavailable.
+function preselection(catalog: Catalog, params: URLSearchParams) {
+  const building = catalog.buildings.find((b) => b.name === params.get('edificio'))
+  const space = building?.spaces.find((s) => s === params.get('espacio'))
+  return { building: building?.name ?? '', space: space ?? '' }
+}
+
+const SPACE_UNAVAILABLE_TEXT =
+  'El espacio de este enlace no está disponible. Elige uno de la lista para continuar.'
+
 // /reportar — Figma frames 1 (form), 2 (possible duplicates), 3 (errors) and 4 (sent).
 export function ReportFormPage() {
   const catalog = useLoaderData<Catalog>()
+  const [params] = useSearchParams()
   const initial: Values = {
     campus: catalog.campuses[0] ?? '',
-    building: '',
-    space: '',
     category: '',
     description: '',
+    ...preselection(catalog, params),
   }
   const [values, setValues] = useState(initial)
   const [photos, setPhotos] = useState<Photo[]>([])
   const [errors, setErrors] = useState<Errors>({})
-  const [banner, setBanner] = useState<{ tone: 'warning' | 'error'; text: string }>()
+  // RF-REPORTE-10: the link pointed at a space that is not offered.
+  const [banner, setBanner] = useState<{ tone: 'warning' | 'error'; text: string } | undefined>(
+    params.has(SPACE_UNAVAILABLE_PARAM) ? { tone: 'warning', text: SPACE_UNAVAILABLE_TEXT } : undefined,
+  )
   const [busy, setBusy] = useState(false)
   const [step, setStep] = useState<Step>({ name: 'form' })
 
@@ -138,7 +153,7 @@ export function ReportFormPage() {
   return (
     <>
       <ScreenHeader title="Nuevo reporte" backTo="/" />
-      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:grid lg:w-full lg:max-w-5xl lg:grid-cols-2 lg:items-start lg:gap-x-10 lg:gap-y-4 lg:rounded-card lg:border lg:border-neutral-border lg:p-8">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:grid lg:w-full lg:max-w-5xl lg:grid-cols-2 lg:items-start lg:gap-x-10 lg:gap-y-4 lg:rounded-xl lg:border lg:border-card-border lg:bg-neutral-white lg:p-8">
         {banner?.tone === 'warning' && (
           <Notice tone="warning" className="text-body lg:col-span-2">
             {banner.text}

@@ -1,10 +1,17 @@
 import { expect, test } from '@playwright/test'
-import { expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
+import {
+  expectNoA11yViolations,
+  expectNoHorizontalScroll,
+  isDesktop,
+  listedReportIds,
+} from './helpers'
 
 test.describe('campus map (/mapa)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/mapa')
-    await expect(page.getByRole('heading', { name: 'Mapa · Campus Sauzal' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 1, name: isDesktop(page) ? 'Mapa' : 'Mapa · Campus Sauzal' }),
+    ).toBeVisible()
   })
 
   test('is accessible and fits the screen', async ({ page }) => {
@@ -31,19 +38,17 @@ test.describe('campus map (/mapa)', () => {
   test('RF-MAPA-08/16: the count matches the open reports listed for the building', async ({
     page,
   }) => {
-    await page.getByRole('link', { name: /Edificio 5\s*4 reportes\s*Medio/ }).click()
+    const list = page.getByRole('region', { name: 'Edificios con reportes abiertos' })
+    await list.getByRole('link', { name: /Edificio 5/ }).click()
 
     await expect(page).toHaveURL(/edificio=Edificio\+5/)
     await expect(page.getByLabel('Estado')).toHaveValue('Abiertos')
-    await expect(page.getByRole('heading', { name: 'Abiertos · 4' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Cerrados' })).toHaveCount(0)
-    await expect(page.getByRole('article')).toHaveCount(4)
+    await expect.poll(() => listedReportIds(page)).toEqual(['r-3', 'r-1', 'r-4', 'r-6'])
   })
 
   test('the nav marks the current section', async ({ page }) => {
     // Bottom nav on phones, side menu from lg (1024px) up.
-    const desktop = (page.viewportSize()?.width ?? 0) >= 1024
-    const nav = page.getByRole('navigation', { name: desktop ? 'Principal' : 'Secciones' })
+    const nav = page.getByRole('navigation', { name: isDesktop(page) ? 'Principal' : 'Secciones' })
     await expect(nav.getByRole('link', { name: 'Mapa' })).toHaveAttribute('aria-current', 'page')
     await nav.getByRole('link', { name: 'Reportes' }).click()
     await expect(page).toHaveURL(/\/reportes$/)

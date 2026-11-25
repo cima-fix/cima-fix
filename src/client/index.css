@@ -37,6 +37,13 @@
   --color-status-review-bg: #FDF1D8; /* estado/revision-bg */
   --color-status-error: #B3261E; /* estado/error */
 
+  /* Desktop frames ("· Escritorio"). Read from the prototype, not from variables:
+     replace them with the Figma variables once the file can be inspected. */
+  --color-canvas: #F3F5F2; /* page background behind the cards */
+  --color-card-border: #E3E6E2; /* border of the white cards and pills */
+  --color-status-error-bg: #FCE4E4; /* "Prioridad alta" chip, conflict notice */
+  --color-gold-text: #7A5A00; /* text on the yellow chips (AA on estado/revision-bg) */
+
   /* Type scale (Figma sizes that Tailwind does not ship) */
   --text-caption: 11px;
   --text-caption--line-height: 1.25;
@@ -67,13 +74,9 @@
   }
 }
 
-/* Desktop (lg and up, 1024px+): everything one step bigger, so the screens are
-   proportional on a monitor. rem-based sizes and spacing follow the root font size;
-   the px text sizes of the theme are raised by hand. */
+/* Desktop (lg and up, 1024px+): the text sizes of the "· Escritorio" frames, one step
+   bigger than on the phone. Spacing stays in Figma px (1440 px wide frames). */
 @media (min-width: 1024px) {
-  html {
-    font-size: 112.5%;
-  }
   :root {
     --text-caption: 12px;
     --text-xs: 13px;

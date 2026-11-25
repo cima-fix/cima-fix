@@ -1,4 +1,10 @@
-import { useId, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import {
+  useId,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react'
 import { cn } from '../../lib/cn'
 import { ChevronDownIcon } from './icons'
 
@@ -114,6 +120,20 @@ export function Textarea({
         'min-h-18.5 resize-y py-2.75 placeholder:text-neutral-text-muted',
         className,
       )}
+      {...props}
+    />
+  )
+}
+
+export function Input({
+  invalid,
+  className,
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }) {
+  return (
+    <input
+      aria-invalid={invalid || undefined}
+      className={cn(control, borderFor(invalid), 'py-2.75 placeholder:text-neutral-text-muted', className)}
       {...props}
     />
   )

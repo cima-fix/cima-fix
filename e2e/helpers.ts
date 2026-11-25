@@ -19,3 +19,35 @@ export async function expectNoHorizontalScroll(page: Page) {
   )
   expect(overflow).toBeLessThanOrEqual(0)
 }
+
+// Desktop layout starts at Tailwind's lg breakpoint (1024px).
+export function isDesktop(page: Page) {
+  return (page.viewportSize()?.width ?? 0) >= 1024
+}
+
+// Report ids in the order the list shows them (cards on phones, table rows on desktop).
+export async function listedReportIds(page: Page) {
+  const hrefs = await page
+    .getByRole('main')
+    .locator('a[href^="/reportes/"]')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+  // Only the links that open a report, not its actions (/reportes/:id/asignar).
+  return hrefs.flatMap((href) => {
+    const id = href?.match(/^\/reportes\/([^/]+)$/)?.[1]
+    return id ? [id] : []
+  })
+}
+
+// The demo keeps its session in localStorage; "null" means signed out.
+export async function signOut(page: Page) {
+  await page.goto('/ingresar')
+  await page.evaluate(() => localStorage.setItem('cima-fix.demo-session', 'null'))
+}
+
+// Signs in through /ingresar with the demo role picker.
+export async function signInAs(page: Page, role: 'Encargado' | 'Admin', next = '/') {
+  await signOut(page)
+  await page.goto(`/ingresar?next=${encodeURIComponent(next)}`)
+  await page.getByText(role, { exact: true }).click()
+  await page.getByRole('button', { name: 'Continuar con Google' }).click()
+}

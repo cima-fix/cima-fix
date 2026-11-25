@@ -44,7 +44,7 @@ export function DuplicatesStep({ building, similar, busy, onBack, onContinue }: 
         backLabel="Volver al formulario"
       />
 
-      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:w-full lg:max-w-5xl lg:rounded-card lg:border lg:border-neutral-border lg:p-8">
+      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:my-8 lg:w-full lg:max-w-5xl lg:rounded-xl lg:border lg:border-card-border lg:bg-neutral-white lg:p-8">
         <p className="text-body text-neutral-text-secondary">
           Hay reportes abiertos parecidos en el {building}. Si es el tuyo, confírmalo en vez de
           crear otro.

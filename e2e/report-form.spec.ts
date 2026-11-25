@@ -159,8 +159,10 @@ test.describe('report form (/reportar)', () => {
     const first = page.getByRole('article').first()
     await first.getByRole('button', { name: 'Es el mismo problema' }).click()
 
-    // r-3 had 4 confirmations.
+    // r-3 had 4 confirmations. Desktop: "5 duplicados confirmados".
     await expect(page).toHaveURL(/\/reportes\/r-3$/)
-    await expect(page.getByRole('definition').filter({ hasText: /^5$/ })).toBeVisible()
+    await expect(
+      page.getByRole('definition').filter({ hasText: /^5( duplicados confirmados)?$/ }),
+    ).toBeVisible()
   })
 })

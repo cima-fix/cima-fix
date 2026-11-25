@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from 'react'
 import { Link, type LinkProps } from 'react-router'
 import { cn } from '../../lib/cn'
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'danger' | 'muted'
+type Variant = 'primary' | 'secondary' | 'outline' | 'danger' | 'destructive' | 'muted'
 type Size = 'md' | 'sm'
 
 const base =
@@ -19,6 +19,8 @@ const variants: Record<Variant, string> = {
   // Destructive action (cancel a report), uses the estado/error color.
   danger:
     'border-[1.5px] border-status-error bg-neutral-white text-status-error hover:bg-neutral-surface',
+  // Confirming the destructive action ("Sí, cancelar reporte" in the cancel modal).
+  destructive: 'bg-status-error text-neutral-white hover:bg-status-error/90',
   muted: 'border border-neutral-border bg-neutral-disabled text-neutral-text-muted',
 }
 

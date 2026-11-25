@@ -1,10 +1,15 @@
-import { useFetcher, useLoaderData, useSearchParams } from 'react-router'
+import { Link, useFetcher, useLoaderData, useSearchParams } from 'react-router'
 import { NavScreen } from '../../components/layout/NavScreen'
+import { PriorityBadge, StatusBadge } from '../../components/ui/Badge'
 import { Button, ButtonLink } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
 import { Select } from '../../components/ui/Field'
+import { ChevronRightIcon, UsersIcon } from '../../components/ui/icons'
 import { ReportCard } from '../../components/ui/ReportCard'
 import { cn } from '../../lib/cn'
 import { CURRENT_USER } from '../../lib/demo-api'
+import { formatAge, formatNumber } from '../../lib/format'
+import { DESKTOP_QUERY, useMediaQuery } from '../../lib/media'
 import { isOpen, STATUS_LABEL, type Report, type ReportStatus } from '../../lib/reports'
 import type { reportListLoader } from './data'
 
@@ -93,10 +98,132 @@ function Section({ title, reports }: { title: string; reports: Report[] }) {
   )
 }
 
-// /reportes — Figma frame A "Lista de reportes".
+// Desktop table of the Figma frame "Reportes · Encargado · Escritorio".
+function ReportTable({ reports }: { reports: Report[] }) {
+  const head = 'px-4 py-3 text-left text-caption font-semibold tracking-wide uppercase'
+  return (
+    <Card className="overflow-hidden">
+      <table className="w-full border-collapse text-body">
+        <thead className="bg-canvas text-neutral-text-muted">
+          <tr>
+            <th scope="col" className={head}>
+              Prioridad
+            </th>
+            <th scope="col" className={head}>
+              Estado
+            </th>
+            <th scope="col" className={head}>
+              Reporte
+            </th>
+            <th scope="col" className={head}>
+              <abbr title="Confirmaciones" className="no-underline">
+                Confirm.
+              </abbr>
+            </th>
+            <th scope="col" className={head}>
+              Asignado a
+            </th>
+            <th scope="col" className={head}>
+              Creado
+            </th>
+            <th scope="col" className="w-10">
+              <span className="sr-only">Abrir</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {reports.map((report) => (
+            <tr
+              key={report.id}
+              className="relative border-t border-card-border hover:bg-canvas/60 has-focus-visible:bg-canvas/60"
+            >
+              <td className="px-4 py-3.5">
+                <PriorityBadge priority={report.priority} />
+              </td>
+              <td className="px-4 py-3.5">
+                <StatusBadge status={report.status} />
+              </td>
+              <td className="px-4 py-3.5">
+                <Link
+                  to={`/reportes/${report.id}`}
+                  className="font-bold text-neutral-text after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-green focus-visible:after:ring-inset"
+                >
+                  {report.category} · {report.space}
+                </Link>
+                <p className="text-xs text-neutral-text-muted">
+                  {report.building} · {report.campus}
+                </p>
+              </td>
+              <td className="px-4 py-3.5 text-neutral-text-secondary">
+                <span className="flex items-center gap-1.5">
+                  <UsersIcon className="size-4" />
+                  {formatNumber(report.confirmations)}
+                </span>
+              </td>
+              <td className="max-w-56 truncate px-4 py-3.5 text-xs">
+                {!report.assignee ? (
+                  <span className="text-neutral-text-muted">Sin asignar</span>
+                ) : report.assignee === CURRENT_USER ? (
+                  <span className="font-bold text-neutral-text">Tú</span>
+                ) : (
+                  <span className="font-medium text-neutral-text">{report.assignee}</span>
+                )}
+              </td>
+              <td className="px-4 py-3.5 text-xs whitespace-nowrap text-neutral-text-muted">
+                {formatAge(report.createdAt)}
+              </td>
+              <td className="pr-4 text-neutral-text-secondary">
+                <ChevronRightIcon className="size-5" />
+              </td>
+            </tr>
+          ))}
+          {reports.length === 0 && (
+            <tr className="border-t border-card-border">
+              <td colSpan={7} className="px-4 py-8 text-center text-neutral-text-muted">
+                No hay reportes con estos filtros.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </Card>
+  )
+}
+
+// "Todos / Asignados a mí / Mis reportes" pills of the desktop filter bar.
+function ScopePill({
+  pressed,
+  onClick,
+  children,
+}: {
+  pressed: boolean
+  onClick: () => void
+  children: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        'rounded-pill border px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green',
+        pressed
+          ? 'border-green bg-green text-neutral-white'
+          : 'border-card-border bg-neutral-white text-neutral-text hover:border-green',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+const desktopSelect = 'border-card-border bg-canvas py-2.5 text-sm'
+
+// /reportes — Figma frame A "Lista de reportes" (phone) and "Reportes · Encargado · Escritorio".
 export function ReportListPage() {
   const { reports, catalog } = useLoaderData<typeof reportListLoader>()
   const [params, setParams] = useSearchParams()
+  const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const campus = catalog.campuses[0] ?? ''
 
   const building = params.get(FILTERS.building) ?? ''
@@ -105,17 +232,20 @@ export function ReportListPage() {
   const mine = params.has(FILTERS.mine)
   const assigned = params.has(FILTERS.assigned)
 
-  function setFilter(key: string, value: string | boolean) {
+  function setFilters(change: Record<string, string | boolean>) {
     setParams(
       (current) => {
         const next = new URLSearchParams(current)
-        if (value === '' || value === false) next.delete(key)
-        else next.set(key, value === true ? '1' : value)
+        for (const [key, value] of Object.entries(change)) {
+          if (value === '' || value === false) next.delete(key)
+          else next.set(key, value === true ? '1' : value)
+        }
         return next
       },
       { replace: true },
     )
   }
+  const setFilter = (key: string, value: string | boolean) => setFilters({ [key]: value })
 
   const visible = reports.filter(
     (r) =>
@@ -128,40 +258,99 @@ export function ReportListPage() {
   const open = visible.filter(isOpen)
   const closed = visible.filter((r) => !isOpen(r))
 
+  const campusSelect = (className?: string) => (
+    // Only one active campus for now; it becomes a real filter with the second one.
+    <Select
+      size="sm"
+      aria-label="Campus"
+      options={catalog.campuses}
+      defaultValue={campus}
+      className={className}
+    />
+  )
+  const statusSelect = (className?: string) => (
+    <Select
+      size="sm"
+      aria-label="Estado"
+      placeholder={isDesktop ? 'Estado' : 'Estado: todos'}
+      options={Object.values(STATUS_FILTER_LABEL)}
+      value={STATUS_FILTER_LABEL[status as StatusFilter] ?? ''}
+      onChange={(e) => setFilter(FILTERS.status, STATUS_BY_LABEL[e.target.value] ?? '')}
+      className={className}
+    />
+  )
+  const buildingSelect = (className?: string) => (
+    <Select
+      size="sm"
+      aria-label="Edificio"
+      placeholder="Edificio"
+      options={catalog.buildings.map((b) => b.name)}
+      value={building}
+      onChange={(e) => setFilter(FILTERS.building, e.target.value)}
+      className={className}
+    />
+  )
+  const categorySelect = (className?: string) => (
+    <Select
+      size="sm"
+      aria-label="Categoría"
+      placeholder="Categoría"
+      options={catalog.categories.map((c) => c.name)}
+      value={category}
+      onChange={(e) => setFilter(FILTERS.category, e.target.value)}
+      className={className}
+    />
+  )
+
+  if (isDesktop) {
+    return (
+      <NavScreen title={`Reportes · ${campus}`} desktopTitle="Reportes" subtitle={`UABC ${campus}`}>
+        <div className="flex flex-col gap-4 px-10 py-8">
+          <Card className="flex flex-wrap items-center justify-between gap-4 px-4 py-3.5">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Mostrar">
+              <ScopePill
+                pressed={!assigned && !mine}
+                onClick={() => setFilters({ [FILTERS.assigned]: false, [FILTERS.mine]: false })}
+              >
+                Todos
+              </ScopePill>
+              <ScopePill
+                pressed={assigned}
+                onClick={() => setFilters({ [FILTERS.assigned]: !assigned, [FILTERS.mine]: false })}
+              >
+                Asignados a mí
+              </ScopePill>
+              <ScopePill
+                pressed={mine}
+                onClick={() => setFilters({ [FILTERS.mine]: !mine, [FILTERS.assigned]: false })}
+              >
+                Mis reportes
+              </ScopePill>
+            </div>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filtros">
+              {campusSelect(desktopSelect)}
+              {statusSelect(desktopSelect)}
+              {categorySelect(desktopSelect)}
+              {buildingSelect(desktopSelect)}
+            </div>
+          </Card>
+          <p className="text-xs text-neutral-text-muted">
+            Abiertos primero · mayor prioridad · más antiguos
+          </p>
+          <ReportTable reports={visible} />
+        </div>
+      </NavScreen>
+    )
+  }
+
   return (
     <NavScreen title={`Reportes · ${campus}`}>
-      <div className="flex flex-col gap-3 px-4 py-3.5 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-8 lg:py-6">
-        <aside className="flex flex-col gap-3 lg:sticky lg:top-6 lg:rounded-card lg:border lg:border-neutral-border lg:p-4">
-        <h2 className="hidden text-caption font-medium tracking-wide text-neutral-text-secondary uppercase lg:block">
-          Filtros
-        </h2>
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1" role="group" aria-label="Filtros">
-          {/* Only one active campus for now; it becomes a real filter with the second one. */}
-          <Select size="sm" aria-label="Campus" options={catalog.campuses} defaultValue={campus} />
-          <Select
-            size="sm"
-            aria-label="Estado"
-            placeholder="Estado: todos"
-            options={Object.values(STATUS_FILTER_LABEL)}
-            value={STATUS_FILTER_LABEL[status as StatusFilter] ?? ''}
-            onChange={(e) => setFilter(FILTERS.status, STATUS_BY_LABEL[e.target.value] ?? '')}
-          />
-          <Select
-            size="sm"
-            aria-label="Edificio"
-            placeholder="Edificio"
-            options={catalog.buildings.map((b) => b.name)}
-            value={building}
-            onChange={(e) => setFilter(FILTERS.building, e.target.value)}
-          />
-          <Select
-            size="sm"
-            aria-label="Categoría"
-            placeholder="Categoría"
-            options={catalog.categories.map((c) => c.name)}
-            value={category}
-            onChange={(e) => setFilter(FILTERS.category, e.target.value)}
-          />
+      <div className="flex flex-col gap-3 px-4 py-3.5">
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="Filtros">
+          {campusSelect()}
+          {statusSelect()}
+          {buildingSelect()}
+          {categorySelect()}
         </div>
         <div className="flex flex-wrap gap-2">
           <FilterTag pressed={assigned} onToggle={() => setFilter(FILTERS.assigned, !assigned)}>
@@ -171,9 +360,7 @@ export function ReportListPage() {
             Los que reporté o confirmé
           </FilterTag>
         </div>
-        </aside>
 
-        <div className="flex flex-col gap-3 lg:gap-6">
         <Section title={`Abiertos · ${open.length}`} reports={open} />
         <Section title="Cerrados" reports={closed} />
         {visible.length === 0 && (
@@ -181,7 +368,6 @@ export function ReportListPage() {
             No hay reportes con estos filtros.
           </p>
         )}
-        </div>
       </div>
     </NavScreen>
   )

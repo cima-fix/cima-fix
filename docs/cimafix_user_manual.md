@@ -21,6 +21,7 @@
 | Borrador | 24 de noviembre de 2026 | Redacción de la sección 5: Encargado.                                                                                 |
 | Borrador | 24 de noviembre de 2026 | Redacción de la sección 6: Admin.                                                                                     |
 | Borrador | 25 de noviembre de 2026 | Redacción de las secciones 7 a 9: solución de problemas y contacto, referencia y glosario. |
+| Borrador | 26 de noviembre de 2026 | Retiro del contenido sobre correos y alertas por acumulación, funcionalidad aún no implementada. |
 
 ---
 
@@ -53,7 +54,6 @@
   - [4.6 Ver el detalle y el estado de un reporte](#46-ver-el-detalle-y-el-estado-de-un-reporte)
   - [4.7 Cancelar un reporte tuyo](#47-cancelar-un-reporte-tuyo)
   - [4.8 Consultar el mapa del campus](#48-consultar-el-mapa-del-campus)
-  - [4.9 Correos que recibes](#49-correos-que-recibes)
 - [5. Encargado](#5-encargado)
   - [5.1 Alcance del rol de Encargado](#51-alcance-del-rol-de-encargado)
   - [5.2 Encontrar los reportes que atender](#52-encontrar-los-reportes-que-atender)
@@ -61,8 +61,6 @@
   - [5.4 Resolver un reporte asignado a tu cuenta](#54-resolver-un-reporte-asignado-a-tu-cuenta)
   - [5.5 Cancelar un reporte del campus](#55-cancelar-un-reporte-del-campus)
   - [5.6 Consultar las cuentas con rol en el campus](#56-consultar-las-cuentas-con-rol-en-el-campus)
-  - [5.7 Correos que recibes como Encargado](#57-correos-que-recibes-como-encargado)
-  - [5.8 Alertas por acumulación de reportes](#58-alertas-por-acumulaci%C3%B3n-de-reportes)
 - [6. Admin](#6-admin)
   - [6.1 Alcance del rol de Admin](#61-alcance-del-rol-de-admin)
   - [6.2 Consultar el catálogo del campus](#62-consultar-el-cat%C3%A1logo-del-campus)
@@ -74,19 +72,16 @@
   - [6.8 Consultar y copiar el enlace de un espacio](#68-consultar-y-copiar-el-enlace-de-un-espacio)
   - [6.9 Asignar o cambiar el rol de una cuenta](#69-asignar-o-cambiar-el-rol-de-una-cuenta)
   - [6.10 Retirar el rol de una cuenta](#610-retirar-el-rol-de-una-cuenta)
-  - [6.11 Definir los umbrales de alerta](#611-definir-los-umbrales-de-alerta)
-  - [6.12 Definir los umbrales del mapa](#612-definir-los-umbrales-del-mapa)
-  - [6.13 Atender reportes como Admin](#613-atender-reportes-como-admin)
-  - [6.14 Correos que recibes como Admin](#614-correos-que-recibes-como-admin)
+  - [6.11 Definir los umbrales del mapa](#611-definir-los-umbrales-del-mapa)
+  - [6.12 Atender reportes como Admin](#612-atender-reportes-como-admin)
 - [7. Solución de problemas y contacto](#7-soluci%C3%B3n-de-problemas-y-contacto)
   - [7.1 Inicio de sesión](#71-inicio-de-sesi%C3%B3n)
   - [7.2 Registrar un reporte](#72-registrar-un-reporte)
   - [7.3 Consultar reportes y abrir enlaces](#73-consultar-reportes-y-abrir-enlaces)
-  - [7.4 Correos](#74-correos)
-  - [7.5 Mapa](#75-mapa)
-  - [7.6 Atender reportes (Encargado y Admin)](#76-atender-reportes-encargado-y-admin)
-  - [7.7 Configurar el campus (Admin)](#77-configurar-el-campus-admin)
-  - [7.8 Contacto](#78-contacto)
+  - [7.4 Mapa](#74-mapa)
+  - [7.5 Atender reportes (Encargado y Admin)](#75-atender-reportes-encargado-y-admin)
+  - [7.6 Configurar el campus (Admin)](#76-configurar-el-campus-admin)
+  - [7.7 Contacto](#77-contacto)
 - [8. Referencia](#8-referencia)
   - [8.1 Estados y transiciones](#81-estados-y-transiciones)
   - [8.2 Permisos por rol](#82-permisos-por-rol)
@@ -110,7 +105,6 @@ Hoy se usa en el Campus Sauzal de la Universidad Autónoma de Baja California (U
 - **Aviso de posibles duplicados.** Antes de registrar tu reporte, Cima Fix te muestra los reportes abiertos parecidos, para que no se repita un problema que ya fue reportado.
 - **Seguimiento del estado.** Cada reporte indica si está sin atender, en revisión, resuelto o cancelado.
 - **Un mapa del campus.** Muestra en qué edificios hay reportes abiertos.
-- **Correos.** Recibes un correo cuando se resuelve o se cancela un reporte tuyo.
 
 ### 1.2 A quién va dirigido
 
@@ -363,7 +357,7 @@ Antes de empezar cualquiera de estas tareas, inicia sesión ([sección 3.1](#31-
 
 **Resultado.**
 
-- Con **Es el mismo problema**, tu confirmación queda registrada en ese reporte y Cima Fix no registra un reporte nuevo. Cima Fix te muestra el reporte confirmado y su prioridad puede subir. Recibirás un correo cuando se resuelva o se cancele.
+- Con **Es el mismo problema**, tu confirmación queda registrada en ese reporte y Cima Fix no registra un reporte nuevo. Cima Fix te muestra el reporte confirmado y su prioridad puede subir.
 - Con **Ninguno es mi problema, continuar**, Cima Fix registra tu reporte con el estado **Nuevo**.
 
 > **Importante:** Cima Fix no compara textos: la lista incluye todos los reportes abiertos del mismo campus, categoría y edificio, aunque traten de problemas distintos. Confirma solo si de verdad es el mismo problema.
@@ -436,7 +430,7 @@ Orden de la lista:
 2. Elige **Cancelar reporte**.
 3. En el aviso de confirmación, elige **Sí, cancelar reporte**.
 
-**Resultado.** El reporte pasa al estado **Cancelado** y deja de aparecer para ti. Recibe un correo de cancelación quien lo confirmó como duplicado y la persona asignada, si la hay. Tú no recibes correo de una cancelación que hiciste.
+**Resultado.** El reporte pasa al estado **Cancelado** y deja de aparecer para ti.
 
 > **Importante:** Cancelar no se puede deshacer: un reporte Cancelado no se reabre. Si el problema sigue, tendrás que registrar un reporte nuevo.
 
@@ -464,23 +458,6 @@ Cómo leer el mapa:
 - Al seleccionar un edificio, ves la lista de sus reportes abiertos, con el mismo orden de la consulta. Puedes volver al mapa sin que se actualice.
 
 > **Importante:** El mapa no se actualiza solo. Muestra los reportes que existían cuando lo abriste. Para ver los cambios, recarga la página o elige otro campus.
-
-### 4.9 Correos que recibes
-
-Cima Fix te envía correos en estos casos:
-
-| Cuándo                                               | Qué incluye el correo                                                                                        |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Se resolvió un reporte que registraste o confirmaste | El campus, el edificio, el espacio y la categoría del reporte, y el enlace para abrirlo.                     |
-| Se canceló un reporte que registraste o confirmaste  | El campus, el edificio, el espacio y la categoría del reporte. No incluye el enlace, porque no puedes verlo. |
-
-Ten presente que:
-
-- Recibes un solo correo por cada acción, aunque cumplas más de una condición.
-- No recibes correo de una acción que hiciste tú.
-- Los correos no muestran el correo de otras personas.
-- Las fechas y horas están en hora local de Baja California.
-- El correo es un aviso, no la fuente oficial: si esperabas uno y no llega, consulta el reporte en Cima Fix.
 
 ---
 
@@ -536,8 +513,6 @@ Como Encargado atiendes los reportes del campus donde se te asignó ese rol. Fre
 
 **Resultado.** El reporte queda asignado a esa cuenta y el detalle lo muestra así. Si estaba **Nuevo**, pasa a **En revisión**; si ya estaba **En revisión**, sigue en ese estado.
 
-> **Nota:** Cima Fix envía un correo a la cuenta que recibe el reporte, salvo que sea la tuya. No avisa a la cuenta que lo tenía asignado antes de un cambio.
-
 > **Nota:** Si el reporte cambia de estado mientras lo asignas, por ejemplo porque otro Encargado lo asignó antes, Cima Fix rechaza la asignación. Abre el detalle para ver el estado actual.
 
 ### 5.4 Resolver un reporte asignado a tu cuenta
@@ -546,7 +521,7 @@ Como Encargado atiendes los reportes del campus donde se te asignó ese rol. Fre
 
 **Antes de empezar.** El reporte debe estar **En revisión** y asignado a tu cuenta. Si está asignado a otra cuenta, no puedes resolverlo: primero debe asignarse a la tuya ([sección 5.3](#53-asignar-o-reasignar-un-reporte)).
 
-> **Importante:** Resolver no se puede deshacer: un reporte Resuelto no se reabre. Si el problema vuelve a ocurrir, se debe registrar un reporte nuevo ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)). Al resolverlo, Cima Fix envía un correo a quien registró el reporte y a quienes lo confirmaron como duplicado.
+> **Importante:** Resolver no se puede deshacer: un reporte Resuelto no se reabre. Si el problema vuelve a ocurrir, se debe registrar un reporte nuevo ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)).
 
 **Pasos.**
 
@@ -570,7 +545,7 @@ Como Encargado atiendes los reportes del campus donde se te asignó ese rol. Fre
 2. Elige la opción para cancelar el reporte.
 3. Si Cima Fix te pide confirmar, confirma la cancelación.
 
-**Resultado.** El reporte pasa al estado **Cancelado**. Reciben un correo de cancelación quien lo registró, la persona asignada, si la hay, y quienes lo confirmaron como duplicado. Tú no recibes correo de una cancelación que hiciste.
+**Resultado.** El reporte pasa al estado **Cancelado**.
 
 > **Nota:** A diferencia de un Reportante, puedes cancelar un reporte aunque otras personas ya lo hayan confirmado como duplicado ([sección 4.7](#47-cancelar-un-reporte-tuyo)).
 
@@ -589,40 +564,6 @@ Como Encargado atiendes los reportes del campus donde se te asignó ese rol. Fre
 
 > **Nota:** Como Encargado solo consultas la lista. Un Admin del campus asigna y retira los roles ([sección 2.2](#22-los-tres-roles)).
 
-### 5.7 Correos que recibes como Encargado
-
-Además de los correos de la [sección 4.9](#49-correos-que-recibes), Cima Fix te envía estos:
-
-| Cuándo                                               | Qué incluye el correo                                                                    |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Otra persona te asigna o te reasigna un reporte      | El campus, el edificio, el espacio y la categoría del reporte, y el enlace para abrirlo. |
-| Otra persona cancela un reporte asignado a tu cuenta | El campus, el edificio, el espacio y la categoría del reporte, y el enlace para abrirlo. |
-| Un Admin te asigna un rol en un campus               | El campus y el rol asignado.                                                             |
-| El campus acumula reportes Nuevos o En revisión      | El campus, el estado de los reportes contados y cuántos reportes hay en ese estado.      |
-
-Ten presente que:
-
-- Una alerta por acumulación ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)) también la recibe la persona cuya acción provocó que se alcanzara el umbral. Es la excepción a la regla de no recibir correo de una acción propia.
-- Cima Fix no reintenta el envío de un correo que falla.
-- El correo es un aviso, no la fuente oficial: si esperabas uno y no llega, consulta el reporte en Cima Fix, o la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
-
-### 5.8 Alertas por acumulación de reportes
-
-Una alerta avisa a todo el personal de un campus de que se acumulan reportes sin atender. Cima Fix la envía por correo a todos los Encargados y Admins del campus.
-
-El Admin del campus define el **umbral** de cada estado vigilado: el número de reportes a partir del cual se envía la alerta. Hay un umbral para los reportes **Nuevos**, que siguen sin asignar, y otro para los **En revisión**, que siguen sin resolver. Como Encargado no puedes cambiarlos.
-
-Cuándo se envía una alerta:
-
-- Cuando el número de reportes de ese estado en el campus llega al umbral, es decir, pasa de ser menor a ser igual o mayor.
-- Cuando el Admin define o modifica el umbral y, con el nuevo valor, el número de reportes lo alcanza.
-- Una vez enviada, no se envía otra mientras el número siga igual o mayor que el umbral. Si baja del umbral y vuelve a alcanzarlo, se envía de nuevo.
-
-Ten presente que:
-
-- La alerta cuenta todos los reportes del campus en ese estado, no solo los tuyos.
-- Un campus sin umbral definido para un estado no envía alertas de ese estado.
-
 ## 6. Admin
 
 Esta sección sirve a las personas con rol de Admin en un campus. Los Admins también pueden reportar y consultar reportes, así que todo lo de la [sección 4](#4-reportante) sigue disponible.
@@ -635,8 +576,8 @@ Como Admin configuras el campus donde se te asignó ese rol. Frente a un Reporta
 
 - Mantienes el catálogo del campus: edificios, espacios y categorías ([secciones 6.2 a 6.6](#62-consultar-el-cat%C3%A1logo-del-campus)), la posición de los edificios en el plano ([sección 6.7](#67-indicar-la-posici%C3%B3n-de-un-edificio-en-el-plano)) y el enlace de cada espacio ([sección 6.8](#68-consultar-y-copiar-el-enlace-de-un-espacio)).
 - Asignas y retiras los roles de Encargado y de Admin ([sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta) y [sección 6.10](#610-retirar-el-rol-de-una-cuenta)).
-- Defines los umbrales de alerta y los umbrales del mapa ([sección 6.11](#611-definir-los-umbrales-de-alerta) y [sección 6.12](#612-definir-los-umbrales-del-mapa)).
-- Asignas y cancelas reportes del campus, pero no los resuelves, y no puedes recibir reportes asignados ([sección 6.13](#613-atender-reportes-como-admin)).
+- Defines los umbrales del mapa ([sección 6.11](#611-definir-los-umbrales-del-mapa)).
+- Asignas y cancelas reportes del campus, pero no los resuelves, y no puedes recibir reportes asignados ([sección 6.12](#612-atender-reportes-como-admin)).
 - Consultas los reportes Cancelados y los Resueltos sin límite de tiempo, y ves el correo de quien registró cada reporte y el de la persona asignada ([sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien)).
 - Estos permisos rigen solo en el campus donde tienes el rol. En los demás campus sigues siendo Reportante, a menos que también te asignen un rol ahí ([sección 2.2](#22-los-tres-roles)).
 
@@ -741,7 +682,7 @@ Lo que no se hace desde Cima Fix:
 **Antes de empezar.**
 
 - Ten el rol de Admin en el campus.
-- Para desactivar un edificio o una categoría, comprueba que no tenga reportes abiertos asociados. Si los tiene, espera a que se resuelvan o cancélalos ([sección 6.13](#613-atender-reportes-como-admin)). Los reportes Resueltos y Cancelados no lo impiden.
+- Para desactivar un edificio o una categoría, comprueba que no tenga reportes abiertos asociados. Si los tiene, espera a que se resuelvan o cancélalos ([sección 6.12](#612-atender-reportes-como-admin)). Los reportes Resueltos y Cancelados no lo impiden.
 - Un espacio sí se puede desactivar aunque tenga reportes abiertos.
 
 > **Importante:** Desactivar un edificio también deja de ofrecer todos sus espacios, y desactivar el último espacio activo de un edificio deja de ofrecer el edificio. Quien abra el enlace de un espacio que no se ofrece verá un aviso de que el espacio no está disponible ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)).
@@ -842,11 +783,9 @@ Lo que no se hace desde Cima Fix:
 4. Elige el rol: Encargado o Admin.
 5. Guarda la asignación.
 
-**Resultado.** La cuenta aparece en la lista con el rol que le asignaste. Ese rol reemplaza al que tenía en este campus y no cambia el que tenga en otros campus. Cima Fix envía a la cuenta un correo con el campus y el rol asignado, haya iniciado sesión antes o no.
+**Resultado.** La cuenta aparece en la lista con el rol que le asignaste. Ese rol reemplaza al que tenía en este campus y no cambia el que tenga en otros campus.
 
 > **Nota:** Para cambiar el rol de una cuenta que ya tiene uno, repite los pasos con el rol nuevo.
-
-> **Nota:** No recibes correo de una asignación de rol que hiciste a tu propia cuenta.
 
 Cima Fix rechaza la asignación y te muestra el motivo en estos casos:
 
@@ -873,39 +812,7 @@ Cima Fix rechaza la asignación y te muestra el motivo en estos casos:
 
 **Resultado.** La cuenta pasa a ser Reportante en este campus: puede reportar y consultar reportes, pero ya no atiende reportes ni configura el campus. Su rol en otros campus no cambia, y deja de aparecer en la lista de cuentas con rol.
 
-> **Nota:** Cima Fix no envía correo cuando se retira un rol. Si hace falta, avisa tú a la persona.
-
-### 6.11 Definir los umbrales de alerta
-
-**Objetivo.** Definir a partir de cuántos reportes Nuevos o En revisión se avisa por correo al personal del campus ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)).
-
-**Antes de empezar.**
-
-- Ten el rol de Admin en el campus.
-- Decide el número de cada estado. Debe ser un número entero de 1 o más.
-- Hay un umbral para los reportes **Nuevos** y otro para los **En revisión**. Puedes definir uno, el otro o los dos.
-
-> **Importante:** Si con el valor que guardas el campus ya tiene ese número de reportes en el estado vigilado, y antes no alcanzaba el umbral o no lo tenía, Cima Fix envía la alerta de inmediato a todos los Encargados y Admins del campus, incluido tú. Por ejemplo, si hay 8 reportes Nuevos y defines un umbral de 5, la alerta sale al guardar.
-
-**Pasos.**
-
-1. Elige la opción para configurar los umbrales de alerta del campus.
-2. Si eres Admin en más de un campus, elige el campus que quieres configurar.
-3. En el umbral de reportes **Nuevos**, escribe el número.
-4. En el umbral de reportes **En revisión**, escribe el número.
-5. Guarda los umbrales.
-
-**Para modificar o retirar un umbral.** Para modificarlo, repite los pasos con el nuevo número. Para retirarlo, usa la opción para quitarlo y guarda. Un campus sin umbral en un estado no envía alertas de ese estado.
-
-**Resultado.** Los umbrales se conservan y aplican solo a este campus. Desde ese momento, cuando el número de reportes de un estado llega a su umbral, todos los Encargados y Admins del campus reciben una alerta por correo.
-
-> **Nota:** Cima Fix rechaza el cero, los números negativos, los decimales y los valores que no son números. Te muestra un aviso con el motivo.
-
-> **Nota:** Si el campus ya había alcanzado el umbral y con el nuevo valor lo sigue alcanzando, no se envía otra alerta.
-
-> **Nota:** Cima Fix no reintenta el envío de un correo que falla. Una alerta que no llegó no se reenvía mientras el número de reportes siga igual o mayor que el umbral. Consulta la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
-
-### 6.12 Definir los umbrales del mapa
+### 6.11 Definir los umbrales del mapa
 
 **Objetivo.** Definir a partir de cuántos reportes abiertos el mapa marca un edificio con nivel Medio o Alto.
 
@@ -930,11 +837,11 @@ Cima Fix rechaza la asignación y te muestra el motivo en estos casos:
 
 > **Nota:** Cima Fix rechaza un umbral Medio menor que 2, un umbral Alto que no sea mayor que el Medio, los decimales y los valores que no son números. Te muestra un aviso con el motivo.
 
-> **Nota:** Los umbrales del mapa solo cambian cómo se ve el mapa. No envían correos y no tienen relación con los umbrales de alerta ([sección 6.11](#611-definir-los-umbrales-de-alerta)).
+> **Nota:** Los umbrales del mapa solo cambian cómo se ve el mapa.
 
 > **Nota:** Los umbrales de un campus no afectan a los de otro. El mapa no se actualiza solo: quien lo tenga abierto verá el cambio al recargarlo ([sección 4.8](#48-consultar-el-mapa-del-campus)).
 
-### 6.13 Atender reportes como Admin
+### 6.12 Atender reportes como Admin
 
 Como Admin también atiendes reportes del campus, con algunas diferencias respecto del Encargado. Los pasos de cada tarea están en la [sección 5](#5-encargado); aquí solo se indica qué cambia para ti.
 
@@ -950,25 +857,9 @@ Como Admin también atiendes reportes del campus, con algunas diferencias respec
 
 > **Nota:** Si el campus no tiene Encargados a quienes asignar, asigna primero el rol de Encargado a una cuenta ([sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta)).
 
-### 6.14 Correos que recibes como Admin
-
-Además de los correos de la [sección 4.9](#49-correos-que-recibes), Cima Fix te envía estos:
-
-| Cuándo                                          | Qué incluye el correo                                                               |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Otro Admin te asigna un rol en un campus        | El campus y el rol asignado.                                                        |
-| El campus acumula reportes Nuevos o En revisión | El campus, el estado de los reportes contados y cuántos reportes hay en ese estado. |
-
-Ten presente que:
-
-- Como no puedes tener reportes asignados, no recibes los correos de asignación de un reporte ni los de cancelación de un reporte asignado a tu cuenta ([sección 5.7](#57-correos-que-recibes-como-encargado)).
-- La alerta por acumulación ([sección 5.8](#58-alertas-por-acumulaci%C3%B3n-de-reportes)) también la recibes cuando tu propia acción provoca que se alcance el umbral. Es la excepción a la regla de no recibir correo de una acción propia.
-- Cima Fix no reintenta el envío de un correo que falla.
-- El correo es un aviso, no la fuente oficial: si esperabas uno y no llega, consulta la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)).
-
 ## 7. Solución de problemas y contacto
 
-Esta sección reúne los problemas más comunes y qué hacer en cada caso. Busca tu situación según lo que estabas haciendo. Si no la encuentras, o el problema sigue después de intentar lo indicado, escribe al equipo como se explica en la [sección 7.8](#78-contacto).
+Esta sección reúne los problemas más comunes y qué hacer en cada caso. Busca tu situación según lo que estabas haciendo. Si no la encuentras, o el problema sigue después de intentar lo indicado, escribe al equipo como se explica en la [sección 7.7](#77-contacto).
 
 ### 7.1 Inicio de sesión
 
@@ -984,8 +875,8 @@ Esta sección reúne los problemas más comunes y qué hacer en cada caso. Busca
 | Qué ocurre | Por qué ocurre | Qué hacer |
 | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cima Fix no te deja enviar el reporte y muestra un aviso con el motivo. | Falta el campus, el edificio, el espacio o la categoría, o la descripción está vacía, tiene solo espacios o pasa de 1,000 caracteres. | Corrige el dato que indica el aviso ([sección 4.1](#41-registrar-un-reporte)). |
-| No encuentras el edificio, el espacio o la categoría que buscas. | Las listas dependen unas de otras: los edificios y las categorías son los del campus elegido, y los espacios son los del edificio elegido. Además, no se ofrecen los elementos desactivados ni un edificio sin espacios activos. | Comprueba que elegiste primero el campus y luego el edificio. Si sigue sin aparecer, avisa a un Admin del campus e indica el lugar; si no sabes a quién acudir, escribe al equipo ([sección 7.8](#78-contacto)). |
-| Al abrir el código QR de un espacio, Cima Fix avisa que el espacio no está disponible. | El espacio ya no se ofrece, su edificio tampoco, el campus no está activo, o el enlace no corresponde a ningún espacio. | Elige tú los datos que falten ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)). Si el código QR sigue llevando a ese aviso, avisa a un Admin del campus e indica dónde está; si no sabes a quién acudir, escribe al equipo ([sección 7.8](#78-contacto)). | Elige tú los datos que falten ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)). Si el código QR sigue llevando a ese aviso, avisa al equipo e indica dónde está. |
+| No encuentras el edificio, el espacio o la categoría que buscas. | Las listas dependen unas de otras: los edificios y las categorías son los del campus elegido, y los espacios son los del edificio elegido. Además, no se ofrecen los elementos desactivados ni un edificio sin espacios activos. | Comprueba que elegiste primero el campus y luego el edificio. Si sigue sin aparecer, avisa a un Admin del campus e indica el lugar; si no sabes a quién acudir, escribe al equipo ([sección 7.7](#77-contacto)). |
+| Al abrir el código QR de un espacio, Cima Fix avisa que el espacio no está disponible. | El espacio ya no se ofrece, su edificio tampoco, el campus no está activo, o el enlace no corresponde a ningún espacio. | Elige tú los datos que falten ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)). Si el código QR sigue llevando a ese aviso, avisa a un Admin del campus e indica dónde está; si no sabes a quién acudir, escribe al equipo ([sección 7.7](#77-contacto)). | Elige tú los datos que falten ([sección 4.2](#42-registrar-un-reporte-desde-el-enlace-de-un-espacio)). Si el código QR sigue llevando a ese aviso, avisa al equipo e indica dónde está. |
 | No puedes adjuntar una fotografía. | La fotografía no cumple los requisitos: formato JPEG, PNG, WebP o HEIC, hasta 10 MB cada una y hasta 3 por reporte. | Lee el motivo que muestra Cima Fix y elige otra fotografía ([sección 4.3](#43-adjuntar-fotograf%C3%ADas)). |
 | Al enviar el reporte, Cima Fix avisa de una falla con las fotografías y el reporte no se registra. | Una fotografía no se pudo guardar. | Tus datos siguen en el formulario. Vuelve a pulsar **Enviar reporte**, o envía el reporte sin fotografías. |
 | Cima Fix rechaza tu reporte y avisa que llegaste al límite. | Cada cuenta puede registrar hasta 10 reportes por hora. Las confirmaciones de duplicado no cuentan para el límite. | Espera un poco: Cima Fix vuelve a aceptar reportes cuando la hora lo permite. Antes de volver a reportar, comprueba si el problema ya está reportado ([sección 4.4](#44-decidir-sobre-los-posibles-duplicados)). |
@@ -999,45 +890,26 @@ Esta sección reúne los problemas más comunes y qué hacer en cada caso. Busca
 | No aparecen los filtros **Categoría** y **Edificio**.                               | Se ofrecen solo después de elegir un campus.                                                                                                                                                                             | Elige primero el filtro **Campus**.                                                                                                            |
 | Las fotografías de un reporte no se muestran.                                       | Cima Fix no puede mostrarlas en este momento. El resto de los datos del reporte sí se muestra.                                                                                                                           | Inténtalo de nuevo más tarde.                                                                                                                  |
 
-### 7.4 Correos
-
-Si esperabas un correo y no llegó, o llegó distinto de lo esperado:
-
-1. Revisa la carpeta de correo no deseado.
-2. Comprueba si estás en alguno de los casos de la tabla siguiente, en los que Cima Fix no envía correo.
-3. Consulta el reporte en Cima Fix. El correo es un aviso, no la fuente oficial: el estado del reporte siempre está en el sistema.
-
-| Situación                                                                    | Qué ocurre                                                                                                                                                                           |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Registraste un reporte, o el reporte que registraste pasó a **En revisión**. | Cima Fix no envía correo por eso. A quien reporta le envía correo cuando el reporte se resuelve o se cancela.                                                                        |
-| Realizaste tú la acción (asignar, resolver, cancelar o asignar un rol).      | No recibes correo de una acción que hiciste tú. La única excepción es la alerta por acumulación de reportes.                                                                         |
-| Eras la persona asignada y el reporte se reasignó a otra cuenta.             | Solo recibe correo la cuenta que queda asignada.                                                                                                                                     |
-| Te retiraron un rol.                                                         | Cima Fix no envía correo cuando se retira un rol.                                                                                                                                    |
-| Esperabas otra alerta por acumulación de reportes.                           | La alerta se envía cuando el número de reportes llega al umbral. No se envía otra mientras el número siga igual o mayor que el umbral.                                               |
-| Recibiste un correo de cancelación sin enlace al reporte.                    | Es lo esperado: un Reportante no puede ver un reporte Cancelado, así que el correo no incluye el enlace.                                                                             |
-| El servicio de correo falló en el momento del envío.                         | Cima Fix no reintenta el envío de un correo que falla, así que ese correo se pierde sin aviso. Una alerta perdida no se reenvía mientras el número siga igual o mayor que el umbral. |
-
-### 7.5 Mapa
+### 7.4 Mapa
 
 | Qué ocurre                                                | Por qué ocurre                                                                                                            | Qué hacer                                                                                                                                                                                                |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | El mapa no muestra los cambios recientes.                 | El mapa no se actualiza solo: muestra los reportes que existían cuando lo abriste.                                        | Recarga la página o elige otro campus ([sección 4.8](#48-consultar-el-mapa-del-campus)).                                                                                                                 |
 | Un edificio no tiene indicador en el mapa.                | Un edificio muestra indicador solo si no está desactivado, tiene reportes abiertos y tiene posición indicada en el plano. | Comprueba si el edificio tiene reportes abiertos. Si los tiene, pide a un Admin del campus que indique su posición en el plano ([sección 6.7](#67-indicar-la-posici%C3%B3n-de-un-edificio-en-el-plano)). |
-| Todos los indicadores se ven igual y no hay leyenda.      | El Admin del campus no ha definido los umbrales del mapa. Sin ellos, los indicadores no tienen nivel.                     | Si necesitas que se distingan por nivel, pide a un Admin del campus que defina los umbrales ([sección 6.12](#612-definir-los-umbrales-del-mapa)).                                                        |
+| Todos los indicadores se ven igual y no hay leyenda.      | El Admin del campus no ha definido los umbrales del mapa. Sin ellos, los indicadores no tienen nivel.                     | Si necesitas que se distingan por nivel, pide a un Admin del campus que defina los umbrales ([sección 6.11](#611-definir-los-umbrales-del-mapa)).                                                        |
 | El mapa muestra el plano con un aviso y ningún indicador. | Ningún edificio del campus tiene posición indicada en el plano.                                                           | Pide a un Admin del campus que indique la posición de los edificios. Mientras tanto, consulta los reportes en la lista de reportes ([sección 4.5](#45-consultar-y-filtrar-reportes)).                    |
 
-### 7.6 Atender reportes (Encargado y Admin)
+### 7.5 Atender reportes (Encargado y Admin)
 
 | Qué ocurre                                                     | Por qué ocurre                                                                                                                                                                               | Qué hacer                                                                                                                                                                                                        |
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | No ves la acción que buscas en el detalle de un reporte.       | Cima Fix muestra solo las acciones que puedes hacer sobre ese reporte, según tu rol en el campus del reporte y su estado.                                                                    | Revisa tu rol en ese campus ([sección 2.2](#22-los-tres-roles)) y el estado del reporte ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)).                                                                        |
 | Cima Fix rechaza una asignación.                               | El reporte cambió de estado mientras lo asignabas, por ejemplo porque otro Encargado lo asignó antes.                                                                                        | Abre de nuevo el detalle para ver el estado actual ([sección 5.3](#53-asignar-o-reasignar-un-reporte)).                                                                                                          |
 | No encuentras a la persona a quien quieres asignar un reporte. | Solo se puede asignar a una cuenta con el rol de Encargado en el campus del reporte. Un Admin no puede recibir reportes.                                                                     | Consulta las cuentas con rol del campus ([sección 5.6](#56-consultar-las-cuentas-con-rol-en-el-campus)). Si la persona no es Encargado, pide a un Admin que le asigne ese rol.                                   |
-| No puedes resolver un reporte.                                 | Solo el Encargado a quien está asignado un reporte **En revisión** puede resolverlo. Un Admin no resuelve reportes.                                                                          | Si eres Encargado, asígnate el reporte y resuélvelo ([sección 5.4](#54-resolver-un-reporte-asignado-a-tu-cuenta)). Si eres Admin, asígnalo a un Encargado ([sección 6.13](#613-atender-reportes-como-admin)).    |
+| No puedes resolver un reporte.                                 | Solo el Encargado a quien está asignado un reporte **En revisión** puede resolverlo. Un Admin no resuelve reportes.                                                                          | Si eres Encargado, asígnate el reporte y resuélvelo ([sección 5.4](#54-resolver-un-reporte-asignado-a-tu-cuenta)). Si eres Admin, asígnalo a un Encargado ([sección 6.12](#612-atender-reportes-como-admin)).    |
 | Resolviste o cancelaste un reporte por error.                  | Un reporte Resuelto o Cancelado no se reabre.                                                                                                                                                | Si el problema sigue, registra un reporte nuevo ([sección 2.3](#23-ciclo-de-vida-de-un-reporte)).                                                                                                                |
-| No recibiste la alerta por acumulación de reportes.            | La alerta se envía solo cuando el número de reportes llega al umbral, y el campus debe tener un umbral definido para ese estado. También aplican los casos de la [sección 7.4](#74-correos). | Consulta la lista de reportes con el estado que corresponde ([sección 5.2](#52-encontrar-los-reportes-que-atender)) y, si eres Admin, revisa los umbrales ([sección 6.11](#611-definir-los-umbrales-de-alerta)). |
 
-### 7.7 Configurar el campus (Admin)
+### 7.6 Configurar el campus (Admin)
 
 | Qué ocurre                                                             | Por qué ocurre                                                                                                                                                                                               | Qué hacer                                                                                                                                                                |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1045,9 +917,9 @@ Si esperabas un correo y no llegó, o llegó distinto de lo esperado:
 | No puedes desactivar un edificio o una categoría.                      | Tiene reportes abiertos asociados.                                                                                                                                                                           | Espera a que se resuelvan o cancélalos, y vuelve a intentarlo ([sección 6.6](#66-desactivar-y-reactivar-un-edificio-un-espacio-o-una-categor%C3%ADa)).                   |
 | Un edificio nuevo no aparece en el formulario de reporte.              | Un edificio se ofrece solo si tiene al menos un espacio activo.                                                                                                                                              | Agrega al menos un espacio al edificio ([sección 6.3](#63-agregar-un-edificio-un-espacio-o-una-categor%C3%ADa)).                                                         |
 | Cima Fix rechaza asignar o retirar un rol y muestra el motivo.         | El correo no termina en `@uabc.edu.mx`; o la cuenta es Encargado y tiene reportes abiertos asignados en el campus; o el cambio dejaría al campus sin ningún Admin que haya iniciado sesión al menos una vez. | Sigue el motivo que muestra Cima Fix. Los detalles están en las secciones [6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta) y [6.10](#610-retirar-el-rol-de-una-cuenta). |
-| Necesitas dar de alta un campus nuevo.                                 | El alta de un campus y de su primer Admin se hace fuera de Cima Fix, por el equipo de desarrollo.                                                                                                            | Escribe al equipo ([sección 7.8](#78-contacto)).                                                                                                                         |
+| Necesitas dar de alta un campus nuevo.                                 | El alta de un campus y de su primer Admin se hace fuera de Cima Fix, por el equipo de desarrollo.                                                                                                            | Escribe al equipo ([sección 7.7](#77-contacto)).                                                                                                                         |
 
-### 7.8 Contacto
+### 7.7 Contacto
 
 Escribe al equipo de Cima Fix si tu problema no aparece en esta sección o si sigue después de intentar lo indicado:
 
@@ -1114,12 +986,11 @@ Lo que un Encargado o un Admin puede hacer, lo puede hacer solo en el campus don
 | Gestionar el catálogo del campus                                                   | No         | No        | Sí    | [Secciones 6.2 a 6.8](#62-consultar-el-cat%C3%A1logo-del-campus)                                              |
 | Consultar las cuentas con rol de Encargado o Admin del campus                      | No         | Sí        | Sí    | [Sección 5.6](#56-consultar-las-cuentas-con-rol-en-el-campus)                                                 |
 | Asignar y retirar roles dentro del campus                                          | No         | No        | Sí    | [Sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta) y [sección 6.10](#610-retirar-el-rol-de-una-cuenta) |
-| Definir los umbrales de alerta del campus                                          | No         | No        | Sí    | [Sección 6.11](#611-definir-los-umbrales-de-alerta)                                                           |
-| Definir los umbrales del mapa del campus                                           | No         | No        | Sí    | [Sección 6.12](#612-definir-los-umbrales-del-mapa)                                                            |
+| Definir los umbrales del mapa del campus                                           | No         | No        | Sí    | [Sección 6.11](#611-definir-los-umbrales-del-mapa)                                                            |
 
 Ten presente que:
 
-- Un reporte solo se asigna a una cuenta con el rol de Encargado en el campus del reporte. Un Admin puede asignar reportes, pero no recibirlos ([sección 6.13](#613-atender-reportes-como-admin)).
+- Un reporte solo se asigna a una cuenta con el rol de Encargado en el campus del reporte. Un Admin puede asignar reportes, pero no recibirlos ([sección 6.12](#612-atender-reportes-como-admin)).
 - Un Encargado resuelve únicamente los reportes asignados a su cuenta.
 - Nadie puede cambiar a mano la prioridad de un reporte, cualquiera que sea su rol ([sección 2.4](#24-prioridad)).
 
@@ -1151,10 +1022,8 @@ Ten presente que:
 | Posición de un edificio en el plano        | [Sección 6.7](#67-indicar-la-posici%C3%B3n-de-un-edificio-en-el-plano)                                                                                 | Opcional. Sin posición, el edificio no tiene indicador en el mapa.                                                                                                                                                                    |
 | Correo de la cuenta                        | [Sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta)                                                                                              | Debe terminar en `@uabc.edu.mx`. No se distinguen mayúsculas de minúsculas.                                                                                                                                                           |
 | Rol de la cuenta                           | [Sección 6.9](#69-asignar-o-cambiar-el-rol-de-una-cuenta)                                                                                              | Encargado o Admin.                                                                                                                                                                                                                    |
-| Umbral de alerta de reportes Nuevos        | [Sección 6.11](#611-definir-los-umbrales-de-alerta)                                                                                                    | Opcional. Número entero de 1 o más.                                                                                                                                                                                                   |
-| Umbral de alerta de reportes En revisión   | [Sección 6.11](#611-definir-los-umbrales-de-alerta)                                                                                                    | Opcional. Número entero de 1 o más.                                                                                                                                                                                                   |
-| Umbral del mapa de nivel Medio             | [Sección 6.12](#612-definir-los-umbrales-del-mapa)                                                                                                     | Número entero de 2 o más. Se define junto con el umbral de nivel Alto.                                                                                                                                                                |
-| Umbral del mapa de nivel Alto              | [Sección 6.12](#612-definir-los-umbrales-del-mapa)                                                                                                     | Número entero mayor que el umbral de nivel Medio.                                                                                                                                                                                     |
+| Umbral del mapa de nivel Medio             | [Sección 6.11](#611-definir-los-umbrales-del-mapa)                                                                                                     | Número entero de 2 o más. Se define junto con el umbral de nivel Alto.                                                                                                                                                                |
+| Umbral del mapa de nivel Alto              | [Sección 6.11](#611-definir-los-umbrales-del-mapa)                                                                                                     | Número entero mayor que el umbral de nivel Medio.                                                                                                                                                                                     |
 
 ### 8.4 Plazos y límites del sistema
 
@@ -1165,8 +1034,7 @@ Ten presente que:
 | Visibilidad de un reporte Resuelto para un Reportante | 7 días de 24 horas desde que se resolvió.                                                 | [Sección 2.5](#25-qu%C3%A9-reportes-ves-y-qu%C3%A9-datos-ve-cada-quien) |
 | Confirmaciones de duplicado                           | Una por cuenta en cada reporte. No puedes confirmar un reporte que registraste tú.        | [Sección 4.4](#44-decidir-sobre-los-posibles-duplicados)                |
 | Prioridad                                             | Sube un nivel por cada 3 confirmaciones de duplicado, sin pasar de Alta.                  | [Sección 2.4](#24-prioridad)                                            |
-| Fechas y horas                                        | Se muestran siempre en la hora local de Baja California, en la pantalla y en los correos. | [Sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)             |
-| Correos que fallan                                    | Cima Fix no reintenta el envío, así que un correo que falla se pierde sin aviso.          | [Sección 7.4](#74-correos)                                              |
+| Fechas y horas                                        | Se muestran siempre en la hora local de Baja California. | [Sección 4.6](#46-ver-el-detalle-y-el-estado-de-un-reporte)             |
 
 ## 9. Glosario
 
@@ -1175,7 +1043,6 @@ Estos son los términos que usan Cima Fix y este manual, en orden alfabético.
 | Término                   | Definición                                                                                                                                                                                      |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Admin                     | Rol de la persona responsable de configurar un campus: el catálogo, los roles y los umbrales. También asigna y cancela reportes, pero no los resuelve.                                          |
-| Alerta por acumulación    | Correo que Cima Fix envía a todos los Encargados y Admins de un campus cuando el número de reportes Nuevos o En revisión llega al umbral de alerta.                                             |
 | Asignación                | Acción de poner un reporte a cargo de un Encargado del campus. Al asignar un reporte Nuevo, pasa a En revisión. Reasignar es pasar un reporte En revisión a otro Encargado.                     |
 | Campus                    | Sede física de la universidad cuyas incidencias se gestionan en Cima Fix (por ejemplo, el Campus Sauzal).                                                                                       |
 | Campus activo             | Campus disponible para registrar reportes.                                                                                                                                                      |
@@ -1200,5 +1067,4 @@ Estos son los términos que usan Cima Fix y este manual, en orden alfabético.
 | Reporte abierto           | Reporte en estado Nuevo o En revisión.                                                                                                                                                          |
 | Rol                       | Conjunto de permisos de una cuenta en un campus: Reportante, Encargado o Admin. Una cuenta tiene un solo rol en cada campus.                                                                    |
 | Sesión                    | Periodo en el que tu cuenta permanece dentro de Cima Fix sin volver a iniciar sesión. Dura 30 días desde que la inicias, salvo que la cierres antes.                                            |
-| Umbral de alerta          | Número de reportes Nuevos o En revisión de un campus a partir del cual Cima Fix envía una alerta por acumulación. Lo define el Admin del campus; hay uno para cada estado.                      |
 | Umbral del mapa           | Número de reportes abiertos de un edificio a partir del cual su indicador pasa a nivel Medio o Alto. Lo define el Admin del campus, y los dos umbrales se definen juntos.                       |
